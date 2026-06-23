@@ -72,7 +72,7 @@ hermes -p forensics
 
 ## Architecture
 
-![Forensics System Architecture](architecture.svg)
+![Forensics System Architecture](architecture.png)
 
 **[→ Full interactive version](index.html)**
 
