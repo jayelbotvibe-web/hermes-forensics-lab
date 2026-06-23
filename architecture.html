@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes Forensics Agent — Post-Review Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    .container { max-width: 1300px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: #94a3b8; font-size: 0.875rem; margin-left: 1.75rem; }
+    .review-badge { 
+      background: rgba(251, 113, 133, 0.15); border: 1px solid #fb7185;
+      border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; color: #fb7185; margin-left: 0.5rem;
+    }
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    svg { width: 100%; min-width: 1100px; display: block; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .card { background: rgba(15, 23, 42, 0.5); border-radius: 0.75rem; border: 1px solid #1e293b; padding: 1.25rem; }
+    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.amber { background: #fbbf24; }
+    .card-dot.rose { background: #fb7185; }
+    .card-dot.orange { background: #fb923c; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; }
+    .card ul { list-style: none; color: #94a3b8; font-size: 0.75rem; }
+    .card li { margin-bottom: 0.375rem; }
+    .footer { text-align: center; margin-top: 1.5rem; color: #475569; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>Hermes Forensics Agent — System Architecture</h1>
+        <span class="review-badge">POST-REVIEW v2</span>
+      </div>
+      <p class="subtitle">Docker on Host • SIFT VM (VMware, 12GB) via SSH • Evidence on Host LUKS • terminal.backend: local</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1200 820">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <marker id="arrow-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+          </marker>
+          <marker id="arrow-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
+          </marker>
+          <marker id="arrow-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb7185" />
+          </marker>
+          <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb923c" />
+          </marker>
+          <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- HOST MACHINE -->
+        <rect x="20" y="20" width="1160" height="780" rx="10" fill="rgba(251, 191, 36, 0.03)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,3"/>
+        <text x="32" y="38" fill="#fbbf24" font-size="9" font-weight="600">Host Machine — niel@laptop (Ubuntu 24.04) — terminal.backend: local</text>
+
+        <!-- LUKS VOLUME -->
+        <rect x="35" y="370" width="1130" height="185" rx="8" fill="rgba(136, 19, 55, 0.03)" stroke="#fb7185" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="47" y="387" fill="#fb7185" font-size="9" font-weight="600">LUKS Encrypted Volume — ~/forensics/ (30GB) — Agent reads/writes directly</text>
+        <text x="47" y="400" fill="#64748b" font-size="7">No NFS layer. No VM boundary. Evidence lives here.</text>
+
+        <!-- HERMES PROFILES -->
+        <rect x="35" y="55" width="370" height="300" rx="8" fill="rgba(6, 78, 59, 0.04)" stroke="#34d399" stroke-width="1" stroke-dasharray="6,3"/>
+        <text x="47" y="72" fill="#34d399" font-size="9" font-weight="600">~/.hermes/profiles/</text>
+
+        <!-- Pentest Profile -->
+        <rect x="50" y="85" width="340" height="65" rx="6" fill="rgba(251, 146, 60, 0.15)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="220" y="106" fill="white" font-size="11" font-weight="600" text-anchor="middle">Hermes Pentest Profile</text>
+        <text x="220" y="122" fill="#fb923c" font-size="8" text-anchor="middle">default  |  operator persona  |  pentest-engage</text>
+        <text x="220" y="138" fill="#64748b" font-size="7" text-anchor="middle">~/.hermes/config.yaml  |  ~/.hermes/skills/</text>
+
+        <!-- Forensics Profile -->
+        <rect x="50" y="170" width="340" height="100" rx="6" fill="rgba(6, 78, 59, 0.25)" stroke="#34d399" stroke-width="2"/>
+        <text x="220" y="193" fill="white" font-size="12" font-weight="600" text-anchor="middle">Hermes Forensics Profile</text>
+        <text x="220" y="209" fill="#34d399" font-size="9" text-anchor="middle">forensics  |  terminal.backend: local</text>
+        <text x="220" y="227" fill="#94a3b8" font-size="8" text-anchor="middle">8 forensic skills • stability-first persona</text>
+        <text x="220" y="243" fill="#94a3b8" font-size="8" text-anchor="middle">session canary • cross-validation • chain-of-custody</text>
+        <text x="220" y="259" fill="#64748b" font-size="7" text-anchor="middle">Can see ~/forensics/ directly — no SSH schism</text>
+
+        <!-- Coordination arrows -->
+        <path d="M 220 270 L 220 258" fill="none" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrow-orange)"/>
+        <path d="M 100 150 L 100 173" fill="none" stroke="#fb923c" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="67" y="165" fill="#fb923c" font-size="7">evidence</text>
+
+        <!-- Kanban -->
+        <rect x="50" y="283" width="340" height="55" rx="5" fill="rgba(251, 146, 60, 0.1)" stroke="#fb923c" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="220" y="300" fill="#fb923c" font-size="9" font-weight="600" text-anchor="middle">Kanban Board — forensics-ops</text>
+        <text x="220" y="315" fill="#94a3b8" font-size="7" text-anchor="middle">task handoff • finding exchange • cross-profile coordination</text>
+        <text x="220" y="329" fill="#64748b" font-size="6" text-anchor="middle">Fallback: ~/forensics/cases/INC/handoff.json</text>
+
+        <!-- SSH CHANNEL (to SIFT VM) -->
+        <line x1="390" y1="210" x2="428" y2="210" stroke="#22d3ee" stroke-width="2.5" marker-end="url(#arrow-cyan)"/>
+        <text x="409" y="202" fill="#22d3ee" font-size="7" text-anchor="middle">SSH</text>
+        <text x="409" y="222" fill="#64748b" font-size="6" text-anchor="middle">:2222</text>
+
+        <!-- SIFT VM -->
+        <rect x="430" y="55" width="735" height="245" rx="10" fill="rgba(34, 211, 238, 0.03)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="442" y="73" fill="#22d3ee" font-size="10" font-weight="600">SIFT Workstation VM — VMware • 12GB RAM • 4 vCPU</text>
+        <text x="442" y="87" fill="#64748b" font-size="7">Ubuntu 22.04  |  SSH :2222  |  sansforensics@sift  |  NFS mount: /cases/ ← host:~/forensics/</text>
+
+        <!-- NATIVE TOOLS -->
+        <rect x="450" y="100" width="340" height="185" rx="6" fill="rgba(34, 211, 238, 0.04)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="460" y="115" fill="#22d3ee" font-size="8" font-weight="600">Native Tools (SIFT, version-pinned, NEVER 'sift update')</text>
+
+        <rect x="460" y="125" width="155" height="22" rx="3" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="0.5"/>
+        <text x="537" y="140" fill="#94a3b8" font-size="8" text-anchor="middle">sleuthkit 4.12.1</text>
+        <rect x="625" y="125" width="155" height="22" rx="3" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="0.5"/>
+        <text x="702" y="140" fill="#94a3b8" font-size="8" text-anchor="middle">foremost 1.5.7</text>
+
+        <rect x="460" y="152" width="155" height="22" rx="3" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="0.5"/>
+        <text x="537" y="167" fill="#94a3b8" font-size="8" text-anchor="middle">dc3dd 7.3.1</text>
+        <rect x="625" y="152" width="155" height="22" rx="3" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="0.5"/>
+        <text x="702" y="167" fill="#94a3b8" font-size="8" text-anchor="middle">RegRipper 3.0</text>
+
+        <rect x="460" y="179" width="155" height="22" rx="3" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="0.5"/>
+        <text x="537" y="194" fill="#94a3b8" font-size="8" text-anchor="middle">hashdeep 4.4</text>
+        <rect x="625" y="179" width="155" height="22" rx="3" fill="rgba(34, 211, 238, 0.1)" stroke="#22d3ee" stroke-width="0.5"/>
+        <text x="702" y="194" fill="#94a3b8" font-size="8" text-anchor="middle">tshark 4.0</text>
+
+        <rect x="460" y="210" width="320" height="22" rx="3" fill="rgba(251, 191, 36, 0.08)" stroke="#fbbf24" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <text x="620" y="225" fill="#fbbf24" font-size="7" text-anchor="middle">Accessed via: bash ~/forensics/scripts/sift-exec.sh "command"</text>
+
+        <rect x="460" y="240" width="320" height="22" rx="3" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="0.5"/>
+        <text x="620" y="255" fill="#fb7185" font-size="7" text-anchor="middle">⚠  /cases/ is NFS-mounted read-only from host</text>
+
+        <!-- SSH wrapper callout on host side -->
+        <rect x="800" y="240" width="200" height="50" rx="5" fill="rgba(22, 211, 238, 0.08)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="900" y="258" fill="#22d3ee" font-size="8" font-weight="600" text-anchor="middle">~/forensics/scripts/</text>
+        <text x="900" y="274" fill="#94a3b8" font-size="7" text-anchor="middle">sift-exec.sh → SSH :2222</text>
+        <text x="900" y="286" fill="#64748b" font-size="6" text-anchor="middle">stateless, one-shot only</text>
+
+        <!-- DOCKER ON HOST -->
+        <rect x="820" y="100" width="330" height="130" rx="6" fill="rgba(76, 29, 149, 0.04)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="832" y="115" fill="#a78bfa" font-size="8" font-weight="600">Docker Containers (on Host — not in VM)</text>
+        <text x="832" y="128" fill="#64748b" font-size="6">Evidence bind-mounted directly: -v ~/forensics:/forensics:ro</text>
+
+        <rect x="832" y="138" width="95" height="40" rx="5" fill="rgba(76, 29, 149, 0.25)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="879" y="154" fill="white" font-size="9" font-weight="600" text-anchor="middle">volatility3</text>
+        <text x="879" y="168" fill="#94a3b8" font-size="6" text-anchor="middle">v2.7.0 • 16GB limit</text>
+
+        <rect x="935" y="138" width="95" height="40" rx="5" fill="rgba(76, 29, 149, 0.25)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="982" y="154" fill="white" font-size="9" font-weight="600" text-anchor="middle">plaso</text>
+        <text x="982" y="168" fill="#94a3b8" font-size="6" text-anchor="middle">20240512</text>
+
+        <rect x="1038" y="138" width="100" height="40" rx="5" fill="rgba(76, 29, 149, 0.25)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="1088" y="154" fill="white" font-size="9" font-weight="600" text-anchor="middle">mft-tools</text>
+        <text x="1088" y="168" fill="#94a3b8" font-size="6" text-anchor="middle">MFTECmd+analyzeMFT</text>
+
+        <rect x="832" y="186" width="300" height="18" rx="2" fill="rgba(136, 19, 55, 0.08)"/>
+        <text x="982" y="199" fill="#fb7185" font-size="6" text-anchor="middle">⚠  Session canary validates on EVERY start — degraded = triage-only</text>
+
+        <!-- SESSION CANARY + CROSS-VAL -->
+        <rect x="430" y="310" width="200" height="50" rx="5" fill="rgba(251, 191, 36, 0.1)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="530" y="328" fill="#fbbf24" font-size="9" font-weight="600" text-anchor="middle">Session Canary</text>
+        <text x="530" y="344" fill="#94a3b8" font-size="7" text-anchor="middle">~forensics/scripts/</text>
+        <text x="530" y="356" fill="#64748b" font-size="6" text-anchor="middle">validates ALL tools</text>
+
+        <rect x="645" y="310" width="280" height="50" rx="5" fill="rgba(251, 191, 36, 0.1)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="785" y="328" fill="#fbbf24" font-size="9" font-weight="600" text-anchor="middle">Cross-Validation Engine</text>
+        <text x="785" y="344" fill="#94a3b8" font-size="7" text-anchor="middle">dual-tool • delta &lt;5% • critical artifacts</text>
+        <text x="785" y="356" fill="#64748b" font-size="6" text-anchor="middle">MFTECmd↔analyzeMFT • RegRipper↔py-reg</text>
+
+        <!-- CASE DIRECTORIES -->
+        <rect x="50" y="415" width="350" height="125" rx="6" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="225" y="435" fill="white" font-size="11" font-weight="600" text-anchor="middle">Case Directories</text>
+        <text x="225" y="450" fill="#94a3b8" font-size="8" text-anchor="middle">/cases/INC-YYYY-MMDD-NNNN/</text>
+        <line x1="70" y1="456" x2="380" y2="456" stroke="#1e293b" stroke-width="0.5"/>
+        <text x="70" y="470" fill="#94a3b8" font-size="7">├── evidence/          (chmod 444)</text>
+        <text x="70" y="484" fill="#94a3b8" font-size="7">├── raw/               (stdout/stderr)</text>
+        <text x="70" y="498" fill="#94a3b8" font-size="7">├── reports/           (dark-theme HTML)</text>
+        <text x="70" y="512" fill="#94a3b8" font-size="7">├── audit/             (JSONL per backend)</text>
+        <text x="70" y="526" fill="#94a3b8" font-size="7">├── findings.json      (DRAFT→APPROVED)</text>
+        <text x="70" y="540" fill="#64748b" font-size="7">└── handoff.json       (pentest↔forensics)</text>
+
+        <!-- FIXTURES -->
+        <rect x="420" y="415" width="280" height="125" rx="6" fill="rgba(251, 191, 36, 0.08)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="560" y="435" fill="white" font-size="11" font-weight="600" text-anchor="middle">Validation Fixtures</text>
+        <text x="560" y="450" fill="#94a3b8" font-size="8" text-anchor="middle">~/forensics/fixtures/ (on host)</text>
+        <line x1="440" y1="456" x2="680" y2="456" stroke="#1e293b" stroke-width="0.5"/>
+        <text x="440" y="470" fill="#94a3b8" font-size="7">├── win10-22h2.mem      (128MB)</text>
+        <text x="440" y="484" fill="#94a3b8" font-size="7">├── test-disk.E01       (100MB)</text>
+        <text x="440" y="498" fill="#94a3b8" font-size="7">├── test-mft.bin        (256KB)</text>
+        <text x="440" y="512" fill="#94a3b8" font-size="7">├── test-ntuser.dat     (1MB)</text>
+        <text x="440" y="526" fill="#94a3b8" font-size="7">├── test-security.evtx  (2MB)</text>
+        <text x="440" y="540" fill="#64748b" font-size="7">└── expected_outputs/   (diff targets)</text>
+
+        <!-- EXTERNAL EVIDENCE -->
+        <rect x="720" y="415" width="200" height="125" rx="6" fill="rgba(30, 41, 59, 0.3)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="820" y="435" fill="white" font-size="11" font-weight="600" text-anchor="middle">Evidence Sources</text>
+        <text x="820" y="450" fill="#94a3b8" font-size="8" text-anchor="middle">Public Fixture Repos</text>
+        <line x1="740" y1="456" x2="900" y2="456" stroke="#1e293b" stroke-width="0.5"/>
+        <text x="740" y="470" fill="#94a3b8" font-size="7">• The Evidence Locker</text>
+        <text x="740" y="486" fill="#64748b" font-size="6">  github.com/theevidencelocker</text>
+        <text x="740" y="504" fill="#94a3b8" font-size="7">• NIST CFReDS</text>
+        <text x="740" y="520" fill="#94a3b8" font-size="7">• Forensic Focus</text>
+        <text x="740" y="536" fill="#64748b" font-size="6">  forensicfocus.com/challenges</text>
+
+        <!-- HUMAN EXAMINER -->
+        <rect x="940" y="415" width="200" height="125" rx="6" fill="rgba(136, 19, 55, 0.15)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="1040" y="435" fill="white" font-size="11" font-weight="600" text-anchor="middle">Human Examiner</text>
+        <text x="1040" y="450" fill="#94a3b8" font-size="8" text-anchor="middle">You — niel</text>
+        <line x1="960" y1="456" x2="1120" y2="456" stroke="#1e293b" stroke-width="0.5"/>
+        <text x="960" y="474" fill="#fb7185" font-size="8" font-weight="600">DRAFT → APPROVED gate</text>
+        <text x="960" y="490" fill="#94a3b8" font-size="7">• Review all findings</text>
+        <text x="960" y="506" fill="#94a3b8" font-size="7">• HMAC-signed approval</text>
+        <text x="960" y="522" fill="#94a3b8" font-size="7">• AI CANNOT self-approve</text>
+        <text x="960" y="538" fill="#64748b" font-size="6">structural invariant — L1-L9 defense</text>
+
+        <!-- FLOW ARROWS -->
+        <path d="M 420 507 L 938 507" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="5,4" marker-end="url(#arrow-rose)"/>
+        <text x="670" y="500" fill="#fb7185" font-size="7">findings for human review</text>
+
+        <path d="M 560 370 L 560 413" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-amber)"/>
+
+        <!-- SEQUENCE NUMBERS -->
+        <circle cx="520" cy="235" r="10" fill="#34d399" opacity="0.8"/>
+        <text x="520" y="239" fill="#020617" font-size="9" font-weight="700" text-anchor="middle">1</text>
+        <text x="537" y="239" fill="#34d399" font-size="7">hermes -p forensics</text>
+
+        <circle cx="530" cy="335" r="10" fill="#fbbf24" opacity="0.8"/>
+        <text x="530" y="339" fill="#020617" font-size="9" font-weight="700" text-anchor="middle">2</text>
+        <text x="547" y="339" fill="#fbbf24" font-size="7">session canary</text>
+
+        <circle cx="300" cy="440" r="10" fill="#fbbf24" opacity="0.8"/>
+        <text x="300" y="444" fill="#020617" font-size="9" font-weight="700" text-anchor="middle">3</text>
+        <text x="317" y="444" fill="#fbbf24" font-size="7">register evidence</text>
+
+        <circle cx="560" cy="440" r="10" fill="#a78bfa" opacity="0.8"/>
+        <text x="560" y="444" fill="#020617" font-size="9" font-weight="700" text-anchor="middle">4</text>
+        <text x="577" y="444" fill="#a78bfa" font-size="7">execute tools</text>
+
+        <circle cx="850" cy="507" r="10" fill="#fb7185" opacity="0.8"/>
+        <text x="850" y="511" fill="#020617" font-size="9" font-weight="700" text-anchor="middle">5</text>
+        <text x="867" y="511" fill="#fb7185" font-size="7">human review + approve</text>
+
+        <!-- STABILITY TIERS -->
+        <rect x="35" y="590" width="400" height="100" rx="6" fill="rgba(15, 23, 42, 0.6)" stroke="#1e293b" stroke-width="1"/>
+        <text x="50" y="608" fill="white" font-size="9" font-weight="600">Finding Confidence Tiers</text>
+        <rect x="50" y="618" width="14" height="9" rx="2" fill="rgba(6, 78, 59, 0.5)" stroke="#34d399" stroke-width="1"/>
+        <text x="70" y="626" fill="#94a3b8" font-size="8">HIGH — canary validated + cross-validated + known OS</text>
+        <rect x="50" y="634" width="14" height="9" rx="2" fill="rgba(251, 191, 36, 0.3)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="70" y="642" fill="#94a3b8" font-size="8">MEDIUM — validated, single tool, known OS</text>
+        <rect x="50" y="650" width="14" height="9" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="70" y="658" fill="#94a3b8" font-size="8">LOW — canary passed, evidence OS unknown</text>
+        <rect x="50" y="666" width="14" height="9" rx="2" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="70" y="674" fill="#94a3b8" font-size="8">TENTATIVE — canary failed, triage only</text>
+        <rect x="50" y="682" width="14" height="9" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#475569" stroke-width="1" stroke-dasharray="2,2"/>
+        <text x="70" y="689" fill="#94a3b8" font-size="8">DEGRADED — do not use for evidentiary work</text>
+
+        <!-- PITFALLS QUICK REF -->
+        <rect x="455" y="590" width="690" height="100" rx="6" fill="rgba(136, 19, 55, 0.05)" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="470" y="608" fill="#fb7185" font-size="9" font-weight="600">⚠  Reviewed Pitfalls & Mitigations</text>
+        <text x="470" y="624" fill="#94a3b8" font-size="7">1. SSH schism: Fixed — terminal.backend: local, Docker on host, SSH wrapper for native tools only</text>
+        <text x="470" y="640" fill="#94a3b8" font-size="7">2. Memory OOM: volatility3 runs on host (all RAM), Docker --memory=16g flag for large dumps</text>
+        <text x="470" y="656" fill="#94a3b8" font-size="7">3. VM lifecycle: Human starts SIFT VM before session. Canary checks connectivity.</text>
+        <text x="470" y="672" fill="#94a3b8" font-size="7">4. Tool drift: NEVER 'sift update'. Canary checks native tool versions on every start.</text>
+
+        <!-- LEGEND -->
+        <text x="820" y="730" fill="white" font-size="9" font-weight="600">Legend</text>
+        <rect x="800" y="740" width="14" height="9" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="820" y="748" fill="#94a3b8" font-size="7">Hermes Profile</text>
+        <rect x="910" y="740" width="14" height="9" rx="2" fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="930" y="748" fill="#94a3b8" font-size="7">SIFT VM / Native Tool</text>
+        <rect x="1050" y="740" width="14" height="9" rx="2" fill="rgba(76, 29, 149, 0.3)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="1070" y="748" fill="#94a3b8" font-size="7">Docker Container</text>
+
+        <rect x="800" y="756" width="14" height="9" rx="2" fill="rgba(136, 19, 55, 0.3)" stroke="#fb7185" stroke-width="1"/>
+        <text x="820" y="764" fill="#94a3b8" font-size="7">Evidence / Security</text>
+        <rect x="910" y="756" width="14" height="9" rx="2" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="930" y="764" fill="#94a3b8" font-size="7">Validation</text>
+        <rect x="1050" y="756" width="14" height="9" rx="2" fill="rgba(251, 146, 60, 0.2)" stroke="#fb923c" stroke-width="1"/>
+        <text x="1070" y="764" fill="#94a3b8" font-size="7">Coordination</text>
+
+        <rect x="800" y="772" width="14" height="9" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="820" y="780" fill="#94a3b8" font-size="7">External</text>
+        <line x1="910" y1="776" x2="924" y2="776" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
+        <text x="930" y="780" fill="#94a3b8" font-size="7">tool exec</text>
+        <line x1="1050" y1="776" x2="1064" y2="776" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-rose)"/>
+        <text x="1070" y="780" fill="#94a3b8" font-size="7">finding review</text>
+      </svg>
+    </div>
+
+    <!-- Info Cards -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>Architecture Decision: Docker on Host</h3>
+        </div>
+        <ul>
+          <li>• Evidence lives on host LUKS — agent sees it directly</li>
+          <li>• No NFS layer for Docker tools = faster I/O</li>
+          <li>• Volatility3 gets all host RAM (16GB limit)</li>
+          <li>• SIFT VM used only for native Linux tools</li>
+          <li>• terminal.backend: local — no SSH schism</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot amber"></div>
+          <h3>Stability Guarantees</h3>
+        </div>
+        <ul>
+          <li>• Docker images immutable & version-pinned</li>
+          <li>• validate.sh runs on every session start</li>
+          <li>• Failed tools marked DEGRADED (triage-only)</li>
+          <li>• Dual-tool cross-val for critical artifacts</li>
+          <li>• Native tool versions checked by canary</li>
+          <li>• NEVER 'sift update' — pinned VM state</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>Reviewed Pitfalls (Mitigated)</h3>
+        </div>
+        <ul>
+          <li>• Filesystem schism → local backend + host Docker</li>
+          <li>• Session statelessness → documented constraint</li>
+          <li>• Memory OOM → host Docker + 16GB limit</li>
+          <li>• VM lifecycle → human starts, canary checks</li>
+          <li>• Tool version drift → pinned + canary verified</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Documents</h3>
+        </div>
+        <ul>
+          <li>• Plan: .hermes/plans/2026-06-23_forensics-*.md</li>
+          <li>• Runbook: ~/forensics/FORENSICS-BUILD-RUNBOOK.md</li>
+          <li>• Diagram: ~/forensics-architecture.html</li>
+          <li>• 4 phases • 20 tasks • ~13 hours</li>
+          <li>• Phase 1 ready to execute</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      Hermes Forensics Agent • Architecture v2.0 (Post-Review) • June 2026 • Runbook: ~/forensics/FORENSICS-BUILD-RUNBOOK.md
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Evidence and case data
+cases/
+evidence/
+*.mem
+*.raw
+*.E01
+*.dd
+*.dmp
+
+# LUKS
+*.img
+
+# Temp
+*.tmp
+/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db

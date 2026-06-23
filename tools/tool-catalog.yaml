@@ -1,0 +1,157 @@
+# Forensic Tool Catalog — single source of truth
+# All paths ABSOLUTE — profile sandboxes $HOME
+# Agent reads this before ANY tool execution
+
+tools:
+  # ═══ Memory Forensics Primary (FUSE-based, agent-friendly) ═══
+
+  memprocfs:
+    runtime: host_fuse
+    binary: /home/niel/memprocfs/memprocfs
+    version: "5.17.8"
+    stability: HIGH
+    fallback: volatility3
+    note: "Mounts memory dump as virtual filesystem — agent browses like a directory"
+    run: >
+      /home/niel/memprocfs/memprocfs -device MEMORY_DUMP -mount /mnt/mem -forensic 1
+    unmount: fusermount -u /mnt/mem
+    key_paths:
+      processes: /mnt/mem/sys/proc/
+      network: /mnt/mem/sys/net/
+      registry: /mnt/mem/sys/registry/
+      files: /mnt/mem/sys/files/
+      findevil: /mnt/mem/forensic/findevil.txt
+    known_issues:
+      - "Windows memory dumps only — Linux/macOS dumps use volatility3 fallback"
+      - "Needs FUSE — libfuse2 installed"
+
+  # ═══ Docker-based (run on host) ═══
+
+  volatility3:
+    runtime: docker
+    image: forensics-volatility3:2.7.0
+    version: "2.7.0"
+    stability: HIGH
+    fallback: volatility2
+    memory_limit_mb: 16384
+    validation_fixture: /home/niel/forensics/fixtures/win10-22h2.mem
+    run: >
+      docker run --rm --memory=16g
+      -v /home/niel/forensics/fixtures:/fixtures:ro
+      -v /home/niel/forensics/cases:/output
+      forensics-volatility3:2.7.0
+      -f /fixtures/FIXTURE_FILE -o /output/CASE_ID/raw/
+    known_issues:
+      - "Linux 6.8+ dumps: profile auto-detection may fail — try banners.Banners first"
+      - "Windows 11 24H2: some plugins need updated symbols"
+
+  volatility2:
+    runtime: docker
+    image: forensics-volatility2:2.6.1
+    version: "2.6.1"
+    stability: MEDIUM
+    fallback: null
+    known_issues:
+      - "Python 2.7 EOL — security risk. Use only when vol3 can't handle the profile."
+
+  plaso:
+    runtime: docker
+    image: forensics-plaso:20240512
+    version: "20240512"
+    stability: MEDIUM
+    fallback: sift_exec mactime
+    validation_fixture: /home/niel/forensics/fixtures/test-disk.E01
+    run: >
+      docker run --rm
+      -v /home/niel/forensics/fixtures:/fixtures:ro
+      -v /home/niel/forensics/cases:/output
+      forensics-plaso:20240512
+      log2timeline.py --storage-file /output/CASE_ID/raw/timeline.plaso /fixtures/FIXTURE_FILE
+    known_issues:
+      - "Dependency conflicts with volatility3 — MUST run in Docker (handled)"
+      - "Python library version sensitivity — pin exact versions in Dockerfile"
+
+  mft-tools:
+    runtime: docker
+    image: forensics-mft-tools:1.2.0.0
+    version: "1.2.0.0"
+    stability: MEDIUM
+    fallback: null
+    note: "analyzeMFT primary; MFTECmd pending — Zimmerman CDN URL changed"
+    validation_fixture: /home/niel/forensics/fixtures/test-mft.bin
+    run_mftecmd: >
+      docker run --rm
+      -v /home/niel/forensics/cases:/output
+      -v EVIDENCE_DIR:/evidence:ro
+      forensics-mft-tools:1.2.0.0
+      mono /opt/mftecmd/MFTECmd.dll -f /evidence/EVIDENCE_FILE --csv /output/CASE_ID/raw --csvf mftecmd.csv
+    run_analyzemft: >
+      docker run --rm
+      -v /home/niel/forensics/cases:/output
+      -v EVIDENCE_DIR:/evidence:ro
+      forensics-mft-tools:1.2.0.0
+      python3 -m analyzemft -f /evidence/EVIDENCE_FILE -o /output/CASE_ID/raw/analyzemft.csv
+    known_issues:
+      - "Windows 11 24H2 MFT: new $STANDARD_INFORMATION flags — cross-validate with analyzeMFT"
+
+  # ═══ SIFT VM native (via SSH wrapper) ═══
+
+  sleuthkit:
+    runtime: sift_vm
+    version: "4.12.1"
+    stability: HIGH
+    fallback: null
+    run: /home/niel/forensics/scripts/sift-exec.sh
+    pin_command: "fls -V 2>&1 | head -1"
+
+  foremost:
+    runtime: sift_vm
+    version: "1.5.7"
+    stability: HIGH
+    fallback: photorec
+    run: /home/niel/forensics/scripts/sift-exec.sh
+
+  photorec:
+    runtime: sift_vm
+    version: "7.1"
+    stability: HIGH
+    fallback: foremost
+    run: /home/niel/forensics/scripts/sift-exec.sh
+
+  dc3dd:
+    runtime: sift_vm
+    version: "7.3.1"
+    stability: HIGH
+    fallback: ddrescue
+    run: /home/niel/forensics/scripts/sift-exec.sh sudo
+    known_issues:
+      - "Kernel I/O scheduler: block size may drift on 6.x+ kernels. Verify hash post-image."
+
+  regripper:
+    runtime: sift_vm
+    version: "3.0"
+    stability: HIGH
+    fallback: python-registry
+    run: /home/niel/forensics/scripts/sift-exec.sh
+
+  hashdeep:
+    runtime: sift_vm
+    version: "4.4"
+    stability: HIGH
+    fallback: sha256sum
+    run: /home/niel/forensics/scripts/sift-exec.sh
+
+  tshark:
+    runtime: sift_vm
+    version: "4.0"
+    stability: HIGH
+    fallback: tcpdump
+    run: /home/niel/forensics/scripts/sift-exec.sh
+
+# ═══ Fallback chains ═══
+fallbacks:
+  memory_analysis: [volatility3, volatility2]
+  mft_parsing: [mft-tools, mft-tools]  # MFTECmd → analyzeMFT (same container)
+  timeline: [plaso, sleuthkit]  # plaso → mactime via TSK
+  carving: [foremost, photorec]
+  imaging: [dc3dd, ddrescue]
