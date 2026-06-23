@@ -6,7 +6,67 @@
 
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
-[![Canary](https://img.shields.io/badge/canary-9/9-brightgreen)](scripts/session-canary.sh)
+[![Canary](https://img.shields.io/badge/canary-12/12-brightgreen)](scripts/session-canary.sh)
+
+---
+
+## What It Looks Like
+
+```text
+$ hermes -p forensics
+
+=== Forensics Session Canary ===
+[docker:volatility3] PASS   [docker:plaso] PASS   [docker:mft-tools] PASS
+[sift:sleuthkit] PASS       [sift:foremost] PASS   [sift:dc3dd] PASS
+[sift:photorec] PASS        [sift:ddrescue] PASS   [sift:regripper] PASS
+[sift:hashdeep] PASS        [sift:tshark] PASS
+12/12 tools operational ✓
+
+Agent: Mounting memory dump...
+/mnt/mem/sys/proc/  → 97 processes
+/mnt/mem/forensic/findevil.txt → 3 suspicious modules
+
+Agent: Cross-validating with volatility3 malfind...
+✓ 2 of 3 modules confirmed malicious
+
+[DRAFT] F-niel-001  |  Cobalt Strike Beacon detected in lsass.exe
+Confidence: HIGH  |  Tool: MemProcFS 5.17.8 + volatility3 2.7.0
+Evidence: EVID-003  |  Cross-validated: dual-tool corroborated
+
+Awaiting examiner approval. All findings held as DRAFT.
+```
+
+---
+
+## Quick Start
+
+### 1. Clone
+```bash
+git clone https://github.com/jayelbotvibe-web/hermes-forensics-lab.git
+cd hermes-forensics-lab
+```
+
+### 2. Build Docker images
+```bash
+docker build -t forensics-volatility3:2.7.0 tools/volatility/
+docker build -t forensics-plaso:20240512 tools/plaso/
+docker build -t forensics-mft-tools:1.2.0.0 tools/mft-tools/
+```
+
+### 3. Install MemProcFS
+```bash
+wget https://github.com/ufrisk/MemProcFS/releases/latest -O memprocfs.tar.gz
+tar xzf memprocfs.tar.gz
+sudo apt install -y libfuse2t64 lz4
+```
+
+### 4. Set up SIFT VM
+See [SETUP.md](SETUP.md) for full provisioning instructions.
+
+### 5. Start the agent
+```bash
+hermes -p forensics
+```
 
 ---
 
@@ -21,43 +81,21 @@
 ## Tool Inventory
 
 | # | Tool | Runtime | Version | Primary Use |
-|---|------|---------|---------|------------|
-| 1 | **MemProcFS** | Host FUSE | 5.17.8 | Memory analysis (filesystem mount) |
-| 2 | volatility3 | Docker | 2.7.0 | Memory analysis (Linux dumps, cross-val) |
-| 3 | plaso | Docker | 20240512 | Super timeline generation |
-| 4 | mft-tools | Docker | 1.2.0.0 | MFT parsing (analyzeMFT) |
-| 5 | sleuthkit | SIFT VM | 4.11.1 | Filesystem forensics |
-| 6 | foremost | SIFT VM | 1.5.7 | File carving |
-| 7 | photorec | SIFT VM | 7.1 | File carving (different sig DB) |
-| 8 | dc3dd | SIFT VM | 7.3.1 | Forensic imaging |
-| 9 | ddrescue | SIFT VM | 1.27 | Damaged media imaging |
-| 10 | regripper | SIFT VM | 3.0 | Registry analysis |
-| 11 | hashdeep | SIFT VM | 4.4 | Evidence hashing |
-| 12 | tshark | SIFT VM | 4.0 | Network capture analysis |
+|---|------|---------|---------|-------------|
+| 1 | **MemProcFS** | 💻 Host | 5.17.8 | Memory analysis (filesystem mount) |
+| 2 | volatility3 | 🐳 Docker | 2.7.0 | Memory analysis (Linux dumps, cross-val) |
+| 3 | plaso | 🐳 Docker | 20240512 | Super timeline generation |
+| 4 | mft-tools | 🐳 Docker | 1.2.0.0 | MFT parsing (analyzeMFT) |
+| 5 | sleuthkit | 🖥️ SIFT | 4.11.1 | Filesystem forensics |
+| 6 | foremost | 🖥️ SIFT | 1.5.7 | File carving |
+| 7 | photorec | 🖥️ SIFT | 7.1 | File carving (different sig DB) |
+| 8 | dc3dd | 🖥️ SIFT | 7.3.1 | Forensic imaging |
+| 9 | ddrescue | 🖥️ SIFT | 1.27 | Damaged media imaging |
+| 10 | regripper | 🖥️ SIFT | 3.0 | Registry analysis |
+| 11 | hashdeep | 🖥️ SIFT | 4.4 | Evidence hashing |
+| 12 | tshark | 🖥️ SIFT | 4.0 | Network capture analysis |
 
----
-
-## Quick Start
-
-```bash
-# 1. Clone this repo
-git clone https://github.com/jayelbotvibe-web/hermes-forensics-lab.git
-cd hermes-forensics-lab
-
-# 2. Build Docker images
-docker build -t forensics-volatility3:2.7.0 tools/volatility/
-docker build -t forensics-plaso:20240512 tools/plaso/
-docker build -t forensics-mft-tools:1.2.0.0 tools/mft-tools/
-
-# 3. Install MemProcFS (Linux x64)
-wget https://github.com/ufrisk/MemProcFS/releases/latest -O memprocfs.tar.gz
-tar xzf memprocfs.tar.gz
-sudo apt install -y libfuse2t64 lz4
-
-# 4. Set up SIFT VM (see SETUP.md below)
-# 5. Start the forensics agent
-hermes -p forensics
-```
+💻 = Host FUSE &nbsp; 🐳 = Docker &nbsp; 🖥️ = SIFT VM
 
 ---
 
@@ -73,17 +111,19 @@ This system runs as a **Hermes Agent profile** (`forensics`). The profile includ
 
 ### Skills
 
-| Skill | Description |
-|-------|------------|
-| [system-context](skills/system-context/SKILL.md) | Full architecture map, tool locations, operational procedures |
-| [evidence-handling](skills/evidence-handling/SKILL.md) | Chain of custody, case creation, evidence registration |
-| [memory-forensics](skills/memory-forensics/SKILL.md) | MemProcFS-first memory analysis + volatility3 fallback |
-| [filesystem-forensics](skills/filesystem-forensics/SKILL.md) | Sleuth Kit — file listing, inode extraction, mactime |
-| [mft-analysis](skills/mft-analysis/SKILL.md) | MFT parsing with analyzeMFT, timestomping detection |
-| [registry-analysis](skills/registry-analysis/SKILL.md) | Registry hive analysis, persistence detection |
-| [timeline-analysis](skills/timeline-analysis/SKILL.md) | Super timeline with plaso, fallback to mactime |
-| [file-carving](skills/file-carving/SKILL.md) | foremost + photorec dual-tool carving |
-| [disk-imaging](skills/disk-imaging/SKILL.md) | dc3dd/ddrescue imaging with hash verification |
+| Skill | Loads | Description |
+|-------|-------|-------------|
+| [system-context](skills/system-context/SKILL.md) | ⚡ Always | Full architecture map, tool locations, operational procedures |
+| [evidence-handling](skills/evidence-handling/SKILL.md) | 📋 Per-case | Chain of custody, case creation, evidence registration |
+| [memory-forensics](skills/memory-forensics/SKILL.md) | 🔍 Per-task | MemProcFS-first memory analysis + volatility3 fallback |
+| [filesystem-forensics](skills/filesystem-forensics/SKILL.md) | 🔍 Per-task | Sleuth Kit — file listing, inode extraction, mactime |
+| [mft-analysis](skills/mft-analysis/SKILL.md) | 🔍 Per-task | MFT parsing with analyzeMFT, timestomping detection |
+| [registry-analysis](skills/registry-analysis/SKILL.md) | 🔍 Per-task | Registry hive analysis, persistence detection |
+| [timeline-analysis](skills/timeline-analysis/SKILL.md) | 🔍 Per-task | Super timeline with plaso, fallback to mactime |
+| [file-carving](skills/file-carving/SKILL.md) | 🔍 Per-task | foremost + photorec dual-tool carving |
+| [disk-imaging](skills/disk-imaging/SKILL.md) | 🔍 Per-task | dc3dd/ddrescue imaging with hash verification |
+
+⚡ Always = loaded every session &nbsp; 📋 Per-case = loaded on case open/close &nbsp; 🔍 Per-task = loaded on demand
 
 ### Coordination with Pentest Agent
 
@@ -132,20 +172,18 @@ Failed tools are marked **DEGRADED** — triage-only, not for evidentiary analys
 
 ## Design Principles
 
-### Stability-First
-- Docker images are **immutable and version-pinned** — no `latest` tags
-- `validate.sh` per tool image — catches silent breakage
-- **Never install tools mid-investigation** — if missing, flag it
-- **Dual-tool cross-validation** for critical artifacts — MFT, registry, event logs
-- Delta >5% between tools → flagged for human review
-
-### Evidence Sovereignty
-- Evidence is read-only after registration (`chmod 444`)
-- Every finding includes: tool + version + image hash + exact command
-- Chain of custody logged to JSONL audit trail
-- **Human-in-the-loop**: AI presents findings as DRAFT; examiner approves
+| Principle | How |
+|-----------|-----|
+| Immutable tools | Docker images version-pinned, no `latest` tags |
+| Session canary | All 12 tools validated before every investigation |
+| Dual-tool cross-validation | Critical artifacts checked with 2 tools, delta >5% flagged |
+| Evidence read-only | `chmod 444` after registration, chain of custody logged |
+| Human-in-the-loop | All findings DRAFT until examiner approves |
+| Never install mid-case | Missing tools flagged, not installed — no surprises |
+| MemProcFS-first | Browse memory like a filesystem, volatility3 for fallback |
 
 ### MemProcFS-First Memory Analysis
+
 Instead of memorizing 200+ volatility3 plugin names, the agent mounts the memory dump as a virtual filesystem and browses it:
 
 ```bash
