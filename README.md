@@ -197,6 +197,124 @@ volatility3 remains as fallback for Linux dumps and cross-validation.
 
 ---
 
+## 📁 Repo Structure
+
+```
+hermes-forensics-lab/
+├── README.md                          ← you are here
+├── SETUP.md                           ← SIFT VM provisioning guide
+├── architecture.png                   ← system diagram
+├── index.html                         ← interactive GitHub Pages
+├── hermes-forensics.profile/          ← Hermes agent profile (config.yaml, persona)
+├── scripts/
+│   ├── session-canary.sh              ← validates all 12 tools on startup
+│   ├── cross-validate.sh              ← dual-tool MFT verification
+│   ├── sift-exec.sh                   ← SSH wrapper for SIFT VM tools
+│   └── handoff.sh                     ← pentest → forensics evidence transfer
+├── skills/
+│   ├── system-context/SKILL.md        ← full architecture map (loaded always)
+│   ├── evidence-handling/SKILL.md     ← chain of custody, case creation
+│   ├── memory-forensics/SKILL.md      ← MemProcFS + volatility3 workflow
+│   ├── filesystem-forensics/SKILL.md  ← Sleuth Kit analysis
+│   ├── mft-analysis/SKILL.md          ← MFT parsing, timestomping detection
+│   ├── registry-analysis/SKILL.md     ← registry hive analysis
+│   ├── timeline-analysis/SKILL.md     ← super timeline with plaso
+│   ├── file-carving/SKILL.md          ← foremost + photorec recovery
+│   └── disk-imaging/SKILL.md          ← dc3dd/ddrescue acquisition
+├── tools/
+│   ├── tool-catalog.yaml              ← version pins, fallback chains, known issues
+│   ├── volatility/
+│   │   ├── Dockerfile                 ← volatility3 2.7.0
+│   │   └── validate.sh
+│   ├── plaso/
+│   │   ├── Dockerfile                 ← plaso 20240512
+│   │   └── validate.sh
+│   └── mft-tools/
+│       ├── Dockerfile                 ← analyzemft 2.1.0
+│       └── validate.sh
+└── fixtures/                          ← validation test images
+```
+
+---
+
+## 📊 Finding Pipeline
+
+```
+Evidence Registration → Tool Execution → Cross-Validation → DRAFT Finding → Examiner Approval
+       ↓                    ↓                  ↓                ↓                ↓
+   hash + chmod         tool + version    delta check      F-niel-NNN     status → approved
+   evidence.json        exact command      >5% flagged     confidence     audit trail
+```
+
+### What every finding includes:
+
+| Field | Example | Why |
+|-------|---------|-----|
+| Finding ID | `F-niel-001` | Traceable reference |
+| Tool + version | `volatility3 2.7.0` | Reproducible |
+| Exact command | `vol -f dump.mem windows.pslist` | Verifiable |
+| Evidence ref | `EVID-003` | Chain of custody |
+| Confidence | `HIGH` (dual-tool) / `MEDIUM` / `LOW` / `TENTATIVE` | Reliability signal |
+| Cross-validation | `analyzeMFT ↔ MFTECmd, delta 2.1%` | Corroboration |
+| MITRE ATT&CK | `T1055.001` (if applicable) | Threat context |
+
+### Finding statuses:
+- **DRAFT** — AI-generated, awaiting examiner review
+- **APPROVED** — Human examiner confirmed
+- **REJECTED** — False positive or insufficient evidence
+- **SUPERSEDED** — Replaced by a newer finding
+
+All findings remain DRAFT until a human examiner approves them.
+Every status change is logged to the case audit trail.
+
+---
+
+## 🆚 Traditional DFIR vs Hermes Forensics
+
+| Aspect | Traditional DFIR | Hermes Forensics |
+|--------|-----------------|------------------|
+| Tool validation | Manual — hope tools still work | Session canary — auto-validates all 12 tools |
+| Memory analysis | Memorize 200+ volatility3 plugin names | Mount dump as filesystem, browse like a directory |
+| Cross-validation | Manual — copy-paste between tools | `cross-validate.sh` — dual-tool, delta >5% flagged |
+| Findings | Word doc, copy-paste screenshots | Structured DRAFT → APPROVED pipeline |
+| Chain of custody | Separate log, often forgotten | Auto-logged to JSONL audit trail |
+| Version tracking | "I think I used volatility3 2.something" | Tool + version + image hash on every finding |
+| Pentest handoff | "Here's a USB stick I guess" | `handoff.sh` → auto-detected on session start |
+
+---
+
+## 🎓 Learning Path
+
+1. **13Cubed** — https://www.youtube.com/@13Cubed (Windows forensics deep dives)
+2. **SANS DFIR Posters** — https://www.sans.org/posters/ (cheat sheets for every artifact)
+3. **Blue Team Labs Online** — https://blueteamlabs.online/ (hands-on DFIR challenges)
+4. **Practice with MemProcFS** — mount a Windows memory dump and browse the filesystem
+5. **Practice with SIFT VM** — run sleuthkit, foremost, and plaso on test disk images
+6. **Build a sample case** — create `INC-YYYY-MMDD-NNNN/`, register evidence, produce DRAFT findings
+7. **Get certified** — GCFA (GIAC), CHFI (EC-Council), or BTL1 (Blue Team Level 1)
+
+---
+
+## ⚠️ Legal
+
+This toolkit is for **authorized forensic analysis only**. Evidence must be
+acquired with proper legal authority (consent, warrant, court order, or
+organizational policy). The authors assume no liability for improper use.
+
+- **Chain of custody** must be maintained from acquisition to courtroom
+- **Evidence sovereignty** — evidence is read-only after registration
+- **Write-blocking** — always use hardware write-blockers for evidentiary imaging
+- **Tool validation** — canary must pass before any tool output is considered evidentiary
+- **Finding approval** — AI-generated findings are DRAFT; only the human examiner can approve
+- **Local laws** — some jurisdictions require specific certifications or licenses for forensic analysis
+- **Data retention** — follow your organization's evidence retention and destruction policies
+
+Every case includes an audit trail. Every finding records the tool, version,
+exact command, and examiner who approved it. If you cannot reproduce a finding,
+you cannot present it.
+
+---
+
 ## Requirements
 
 - **Hermes Agent** (https://github.com/NousResearch/hermes-agent)
