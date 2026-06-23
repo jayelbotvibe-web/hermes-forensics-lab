@@ -43,7 +43,7 @@
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-**[→ Full architecture diagram (interactive HTML)](architecture.html)**
+**[→ Full architecture diagram (interactive HTML)](index.html)**
 
 ---
 
