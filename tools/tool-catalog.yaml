@@ -7,7 +7,7 @@ tools:
 
   memprocfs:
     runtime: host_fuse
-    binary: /home/niel/memprocfs/memprocfs
+    binary: /home/niel/memprocfs/memprocfs  # or install to /usr/local/bin/memprocfs
     version: "5.17.8"
     stability: HIGH
     fallback: volatility3
@@ -45,14 +45,15 @@ tools:
       - "Linux 6.8+ dumps: profile auto-detection may fail — try banners.Banners first"
       - "Windows 11 24H2: some plugins need updated symbols"
 
-  volatility2:
-    runtime: docker
-    image: forensics-volatility2:2.6.1
-    version: "2.6.1"
-    stability: MEDIUM
-    fallback: null
-    known_issues:
-      - "Python 2.7 EOL — security risk. Use only when vol3 can't handle the profile."
+  # PENDING: volatility2 Dockerfile not yet built — image tagged but container not created
+  # volatility2:
+  #   runtime: docker
+  #   image: forensics-volatility2:2.6.1
+  #   version: "2.6.1"
+  #   stability: MEDIUM
+  #   fallback: null
+  #   known_issues:
+  #     - "Python 2.7 EOL — security risk. Use only when vol3 can't handle the profile."
 
   plaso:
     runtime: docker
@@ -98,7 +99,7 @@ tools:
 
   sleuthkit:
     runtime: sift_vm
-    version: "4.12.1"
+    version: "4.11.1"
     stability: HIGH
     fallback: null
     run: /home/niel/forensics/scripts/sift-exec.sh

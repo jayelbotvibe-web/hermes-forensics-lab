@@ -4,6 +4,8 @@
 #        cross-validate.sh registry /path/to/hive CASE_DIR
 set -uo pipefail
 
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 ARTIFACT_TYPE="$1"
 EVIDENCE_PATH="$2"
 CASE_DIR="$3"
@@ -22,20 +24,11 @@ case "$ARTIFACT_TYPE" in
         COUNT_A=$(wc -l < "$CASE_DIR/raw/crossval_analyzemft.csv" 2>/dev/null || echo 0)
         echo "analyzeMFT entries: $COUNT_A"
 
-        # Tool 2: MFTECmd if available, else skip dual
-        if docker run --rm forensics-mft-tools:1.2.0.0 which mono 2>/dev/null; then
-            docker run --rm \
-                -v "$EVIDENCE_PATH:/evidence/MFT_FILE:ro" \
-                -v "$CASE_DIR/raw:/output" \
-                forensics-mft-tools:1.2.0.0 \
-                mono /opt/mftecmd/MFTECmd.dll -f /evidence/MFT_FILE --csv /output --csvf crossval_mftecmd.csv 2>/dev/null
-            COUNT_B=$(wc -l < "$CASE_DIR/raw/crossval_mftecmd.csv" 2>/dev/null || echo 0)
-            echo "MFTECmd entries: $COUNT_B"
-        else
-            echo "MFTECmd not available — single-tool analysis only"
-            echo "✓ Single-tool result recorded (no cross-validation possible)"
-            exit 0
-        fi
+        # MFTECmd not yet installed in Docker image — see Dockerfile
+        # PENDING: add mono + MFTECmd to tools/mft-tools/Dockerfile
+        echo "MFTECmd not available — single-tool analysis only"
+        echo "✓ Single-tool result recorded (no cross-validation possible)"
+        exit 0
         ;;
 
     *)

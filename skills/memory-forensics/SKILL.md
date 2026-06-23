@@ -106,4 +106,4 @@ For critical findings:
 - /mnt/mem must be empty before mounting
 - Always unmount with fusermount -u after analysis
 - Large dumps (>8GB): MemProcFS loads into RAM, monitor memory usage
-- volatility3 Docker image entrypoint is already 'volatility' — start commands with flags directly, no 'vol' prefix
+- volatility3 Docker image entrypoint is already 'vol' — start commands with flags directly, no 'vol' prefix

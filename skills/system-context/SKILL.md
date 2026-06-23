@@ -40,7 +40,7 @@ HOST (terminal.backend: local, HOME=/home/niel/.hermes/profiles/forensics/home)
 | plaso | forensics-plaso:20240512 | 20240512 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-plaso:20240512 log2timeline.py --storage-file /output/timeline.plaso /evidence/FILE` |
 | mft-tools | forensics-mft-tools:1.2.0.0 | 1.2.0.0 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-mft-tools:1.2.0.0 python3 -m analyzemft -f /evidence/FILE -o /output/analyzemft.csv` |
 
-**IMPORTANT:** volatility3 Docker entrypoint is already `volatility`. Do NOT prefix commands with `vol`. Start directly with flags: `-f /evidence/dump.mem windows.info.Info`.
+5. **IMPORTANT:** volatility3 Docker entrypoint is already `vol` — the binary inside the container is called `vol` (not `volatility`). Never prefix commands with `vol`. Start directly with flags: `-f /evidence/dump.mem windows.info.Info`.
 
 ### Runtime 2: Host FUSE — MemProcFS
 | Tool | Binary | Version | Command Pattern |

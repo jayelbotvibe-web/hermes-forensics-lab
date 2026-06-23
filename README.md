@@ -145,10 +145,13 @@ Output:
 [sift:connectivity] PASS
 [sift:sleuthkit] PASS
 [sift:foremost] PASS
+[sift:photorec] PASS
 [sift:dc3dd] PASS
+[sift:ddrescue] PASS
 [sift:regripper] PASS
 [sift:hashdeep] PASS
-=== Results: 9 passed, 0 failed ===
+[sift:tshark] PASS
+=== Results: 12 passed, 0 failed ===
 ✓ All tools operational
 ```
 

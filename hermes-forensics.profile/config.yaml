@@ -1,0 +1,25 @@
+agent:
+  max_turns: 120
+  tool_use_enforcement: true
+
+terminal:
+  backend: local
+  cwd: ${FORENSICS_HOME:-$HOME/forensics}
+  timeout: 600
+
+model:
+  default: deepseek-v4-pro
+  provider: deepseek
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+
+approvals:
+  mode: manual
+
+security:
+  redact_secrets: true
+
+delegation:
+  max_concurrent_children: 3
