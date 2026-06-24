@@ -124,6 +124,100 @@ bash forensics-down.sh --help
 
 ---
 
+## Analysis Scripts (New in v2.1)
+
+### `forensics-register.sh` — Evidence Registration (6 steps → 1)
+
+**What it does:**
+1. Hashes the evidence (SHA-256)
+2. Verifies against expected hash (if provided)
+3. Copies file into case/evidence/
+4. Sets read-only (chmod 444)
+5. Updates evidence.json with auto-incremented evidence ID
+6. Logs to audit/actions.jsonl
+
+**Usage:**
+```bash
+bash forensics-register.sh INC-2026-0624-0001 ~/Downloads/dump.mem \
+    "https://ctf.example.com/dump.zip" \
+    "3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35"
+```
+
+### `forensics-vol3.sh` — Volatility3 Wrapper
+
+No more 200-character docker commands. Auto-discovers the memory dump in the case directory.
+
+**Usage:**
+```bash
+bash forensics-vol3.sh INC-2026-0624-0001 windows.pslist.PsList
+bash forensics-vol3.sh INC-2026-0624-0001 windows.netscan.NetScan
+bash forensics-vol3.sh INC-2026-0624-0001 windows.malfind.Malfind
+bash forensics-vol3.sh INC-2026-0624-0001 windows.dumpfiles --virtaddr 0xe6892af1f1f0
+```
+
+Output auto-saved to `case/raw/vol3_PLUGIN.csv`.
+
+### `forensics-mount.sh` — MemProcFS Mount
+
+Mounts the case memory dump via MemProcFS with automatic stale-mount cleanup.
+
+**Usage:**
+```bash
+bash forensics-mount.sh INC-2026-0624-0001     # Mount
+bash forensics-mount.sh --unmount              # Unmount
+```
+
+After mounting, browse at `/home/niel/forensics/mounts/mem/`:
+- `sys/proc/proc.txt` — Process list
+- `sys/net/tcp.txt` — Network connections
+- `forensic/findevil.txt` — Auto-detected malware
+
+### `forensics-find.sh` — Findings Recorder
+
+Records a structured finding to findings.json. No more writing JSON by hand.
+
+**Usage:**
+```bash
+bash forensics-find.sh INC-2026-0624-0001 \
+    "Malicious Process: epxlorer.exe" \
+    HIGH \
+    "volatility3 2.7.0" \
+    "windows.pslist.PsList" \
+    "EVID-001" \
+    "raw/vol3_pslist.csv" \
+    "Process epxlorer.exe (PID 9920) spawned by explorer.exe — malware masquerading as explorer.exe" \
+    "MemProcFS proc.txt confirmed same process tree"
+```
+
+### `forensics-report.sh` — Report Generator
+
+Generates a complete markdown forensic report from `findings.json`, `timeline.json`, `tool_versions.json`, `evidence.json`, and `CASE.yaml`.
+
+**Usage:**
+```bash
+bash forensics-report.sh INC-2026-0624-0001
+# Output: case/reports/forensic-report.md
+```
+
+Auto-generates: executive summary, evidence registry, tools table, findings register, timeline, footer.
+
+### `forensics-pipeline.sh` — End-to-End Pipeline
+
+Downloads evidence, extracts, registers, runs baseline vol3 analysis, and generates report skeleton — all in one command.
+
+**Usage:**
+```bash
+bash forensics-pipeline.sh \
+    "https://dl.ctf.do/dump.zip" \
+    "3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35" \
+    "BelkaCTF 7 — Memory Dump Analysis" \
+    "qr9TGBXCGiVoydmccyCq"
+```
+
+Runs all 5 phases: Case Init → Download → Extract+Register → Baseline Vol3 → Report.
+
+---
+
 ## Troubleshooting
 
 ### SIFT VM Not Reachable
@@ -236,8 +330,14 @@ Override the path: `FORENSICS_KEYFILE=/path/to/keyfile bash forensics-up.sh`
 | Script | Path |
 |--------|------|
 | System bring-up | `/home/niel/forensics/scripts/forensics-up.sh` |
-| Case initialization | `/home/niel/forensics/scripts/forensics-case.sh` |
 | System shutdown | `/home/niel/forensics/scripts/forensics-down.sh` |
+| Case initialization | `/home/niel/forensics/scripts/forensics-case.sh` |
+| Evidence registration | `/home/niel/forensics/scripts/forensics-register.sh` |
+| Volatility3 wrapper | `/home/niel/forensics/scripts/forensics-vol3.sh` |
+| MemProcFS mount | `/home/niel/forensics/scripts/forensics-mount.sh` |
+| Findings recorder | `/home/niel/forensics/scripts/forensics-find.sh` |
+| Report generator | `/home/niel/forensics/scripts/forensics-report.sh` |
+| End-to-end pipeline | `/home/niel/forensics/scripts/forensics-pipeline.sh` |
 | Session canary | `/home/niel/forensics/scripts/session-canary.sh` |
 | SIFT SSH wrapper | `/home/niel/forensics/scripts/sift-exec.sh` |
 | Cross-validation | `/home/niel/forensics/scripts/cross-validate.sh` |
