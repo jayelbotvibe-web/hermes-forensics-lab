@@ -199,7 +199,30 @@ bash forensics-report.sh INC-2026-0624-0001
 # Output: case/reports/forensic-report.md
 ```
 
-Auto-generates: executive summary, evidence registry, tools table, findings register, timeline, footer.
+Auto-generates: executive summary, evidence registry, tools table, findings register, timeline, footer, appendix.
+
+### `forensics-screenshots.py` — Evidence Screenshots (Integrity)
+
+Captures terminal-style PNG screenshots of all raw tool output. Essential for evidentiary integrity — proves tool output is unmodified.
+
+**Usage:**
+```bash
+python3 forensics-screenshots.py /home/niel/forensics/cases/INC-2026-0624-0001
+# → case/raw/screenshots/artifact-01.png ... artifact-NN.png
+# → case/raw/screenshots/index.html (gallery viewer)
+```
+
+Dark terminal theme with color-coded malware/C2 lines. Report appendix auto-references these screenshots.
+
+### `forensics-artifacts.py` — Artifacts Appendix Generator
+
+Generates a standalone HTML appendix page with all raw tool output formatted as tables.
+
+**Usage:**
+```bash
+python3 forensics-artifacts.py /home/niel/forensics/cases/INC-2026-0624-0001
+# → case/raw/artifacts.html
+```
 
 ### `forensics-pipeline.sh` — End-to-End Pipeline
 
@@ -337,6 +360,8 @@ Override the path: `FORENSICS_KEYFILE=/path/to/keyfile bash forensics-up.sh`
 | MemProcFS mount | `/home/niel/forensics/scripts/forensics-mount.sh` |
 | Findings recorder | `/home/niel/forensics/scripts/forensics-find.sh` |
 | Report generator | `/home/niel/forensics/scripts/forensics-report.sh` |
+| Evidence screenshots | `/home/niel/forensics/scripts/forensics-screenshots.py` |
+| Artifacts appendix | `/home/niel/forensics/scripts/forensics-artifacts.py` |
 | End-to-end pipeline | `/home/niel/forensics/scripts/forensics-pipeline.sh` |
 | Session canary | `/home/niel/forensics/scripts/session-canary.sh` |
 | SIFT SSH wrapper | `/home/niel/forensics/scripts/sift-exec.sh` |
