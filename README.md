@@ -50,6 +50,8 @@ A complete forensic analysis report generated from structured case data — **Be
 | MITRE ATT&CK | 5 techniques (T1036, T1102, T1573, T1566, T1204) |
 | Timeline | 7 events reconstructed from memory forensics |
 
+![Report Preview](reports/samples/report-preview.png)
+
 **Design:** Data-first · labeled sections 01–09 · sidebar navigation · finding cards · data-table timeline · executive callout · A4 portrait print-native
 
 [**→ View HTML Report**](reports/samples/belkactf7-data-report.html) &nbsp;·&nbsp; [**Download PDF (69KB)**](reports/samples/belkactf7-data-report.pdf)
