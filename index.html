@@ -420,6 +420,82 @@
         </div>
       </div>
 
+
+    <!-- ═══════════════════════════════════════════════════════
+         REPORT PREVIEWS
+         ═══════════════════════════════════════════════════════ -->
+    <div style="margin-top:24px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:12px">Report Preview</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        
+        <!-- EXEC SUMMARY PREVIEW -->
+        <div style="background:#ffffff;border:1px solid #dde1e6;border-radius:8px;overflow:hidden">
+          <div style="background:#f8f9fb;border-bottom:1px solid #dde1e6;padding:8px 12px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px">01.0 Executive Summary</div>
+          <div style="padding:14px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
+              <div style="background:#f1f5f9;border-radius:4px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#dc2626">3</div><div style="font-size:7px;color:#64748b;text-transform:uppercase">Critical</div></div>
+              <div style="background:#f1f5f9;border-radius:4px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#1a1a2e">YES</div><div style="font-size:7px;color:#64748b;text-transform:uppercase">Compromised</div></div>
+            </div>
+            <div style="background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-left:3px solid #2563eb;border-radius:4px;padding:10px">
+              <div style="font-size:8px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Key Findings</div>
+              <div style="font-size:9px;color:#4a4a5e;line-height:1.5">ATC workstation compromised via phishing-delivered trojan within 3 min of login. C2 established to Telegram Bot API. Active radar ops coexisted with malware.</div>
+              <div style="margin-top:6px;padding-top:6px;border-top:1px solid #dde1e6;font-size:7px;color:#64748b"><strong style="color:#1a1a2e">Action:</strong> Isolate host · Escalate to aviation safety</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIMELINE PREVIEW -->
+        <div style="background:#ffffff;border:1px solid #dde1e6;border-radius:8px;overflow:hidden">
+          <div style="background:#f8f9fb;border-bottom:1px solid #dde1e6;padding:8px 12px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px">02.0 Incident Timeline</div>
+          <div style="padding:10px">
+            <table style="width:100%;border-collapse:collapse;font-size:8px">
+              <tr style="border-bottom:2px solid #c4c9d0;background:#f8f9fb"><th style="text-align:left;padding:4px 6px;color:#6b7280">Time</th><th style="text-align:left;padding:4px 6px;color:#6b7280">Event</th><th style="text-align:left;padding:4px 6px;color:#6b7280">Type</th></tr>
+              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px">18:50:50</td><td style="padding:4px 6px;font-size:7px">User login</td><td style="padding:4px 6px;font-size:7px">USER</td></tr>
+              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px;color:#dc2626">18:53:11</td><td style="padding:4px 6px;font-size:7px;color:#dc2626">epxlorer.exe executed</td><td style="padding:4px 6px;font-size:7px;color:#dc2626">MALWARE</td></tr>
+              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px;color:#2563eb">19:12:33</td><td style="padding:4px 6px;font-size:7px;color:#2563eb">C2 to 104.21.1.247:443</td><td style="padding:4px 6px;font-size:7px;color:#2563eb">C2</td></tr>
+              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px">19:15:05</td><td style="padding:4px 6px;font-size:7px">ATC_RADAR active</td><td style="padding:4px 6px;font-size:7px">PROCESS</td></tr>
+              <tr><td style="padding:4px 6px;font-family:monospace;font-size:7px">19:18:53</td><td style="padding:4px 6px;font-size:7px">Dump captured</td><td style="padding:4px 6px;font-size:7px">SYSTEM</td></tr>
+            </table>
+            <div style="font-size:7px;color:#6b7280;margin-top:6px">
+              <span style="display:inline-block;width:6px;height:6px;background:#dc2626;border-radius:1px;vertical-align:middle;margin-right:2px"></span> Malware 
+              <span style="display:inline-block;width:6px;height:6px;background:#2563eb;border-radius:1px;vertical-align:middle;margin:0 2px 0 6px"></span> C2 
+              <span style="display:inline-block;width:6px;height:6px;background:#6b7280;border-radius:1px;vertical-align:middle;margin:0 2px 0 6px"></span> System
+            </div>
+          </div>
+        </div>
+
+        <!-- FINDINGS PREVIEW -->
+        <div style="background:#ffffff;border:1px solid #dde1e6;border-radius:8px;overflow:hidden">
+          <div style="background:#f8f9fb;border-bottom:1px solid #dde1e6;padding:8px 12px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px">03.0 Findings</div>
+          <div style="padding:10px">
+            <div style="border:1px solid #dde1e6;border-radius:6px;padding:10px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <span style="font-size:7px;color:#6b7280">F-NIEL-001</span>
+                <span style="font-size:7px;font-weight:700;color:#dc2626;background:#fef2f2;padding:1px 5px;border-radius:2px">CRITICAL</span>
+              </div>
+              <div style="font-size:9px;font-weight:600;color:#1a1a2e;margin-bottom:3px">epxlorer.exe Masquerading as explorer.exe</div>
+              <div style="font-size:7px;color:#4a4a5e;line-height:1.4">Spawned 2m21s after login. File at C:\Users\award\Downloads\.</div>
+              <div style="margin-top:6px;display:flex;gap:6px;font-size:7px;color:#6b7280">
+                <span>MITRE: T1036.005</span><span>Tool: vol3 2.7.0</span>
+              </div>
+            </div>
+            <div style="border:1px solid #dde1e6;border-radius:6px;padding:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                <span style="font-size:7px;color:#6b7280">F-NIEL-002</span>
+                <span style="font-size:7px;font-weight:700;color:#dc2626;background:#fef2f2;padding:1px 5px;border-radius:2px">CRITICAL</span>
+              </div>
+              <div style="font-size:9px;font-weight:600;color:#1a1a2e;margin-bottom:3px">C2 via Fraudulent Telegram Bot API</div>
+              <div style="font-size:7px;color:#4a4a5e;line-height:1.4">HTTPS to 104.21.1.247:443, 19 min after execution.</div>
+              <div style="margin-top:6px;display:flex;gap:6px;font-size:7px;color:#6b7280">
+                <span>MITRE: T1102.002</span><span>Tool: vol3 2.7.0</span>
+              </div>
+            </div>
+            <div style="text-align:center;font-size:7px;color:#6b7280;margin-top:6px">+ 2 more findings · 9 IOCs extracted</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
       <div style="padding-top:14px;border-top:1px solid rgba(37,99,235,0.15);font-size:10px;color:#64748b">
         <code style="color:#93c5fd">forensics-report.sh INC-2026-0624-0001 --html</code> — generates this report from findings.json, timeline.json, evidence.json
       </div>
