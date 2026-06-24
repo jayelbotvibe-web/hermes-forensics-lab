@@ -1,18 +1,18 @@
 #!/bin/bash
 # ============================================================================
-# forensics-report.sh — Generate forensic report (HTML + Markdown).
+# forensics-report.sh — Generate forensic report (HTML + PDF + Markdown).
 #
-# Usage:  bash forensics-report.sh CASE_ID [--html|--md|--both]
+# Usage:  bash forensics-report.sh CASE_ID [--html|--pdf|--md|--all]
 #
-# Default: --both (generates both HTML timeline report and Markdown report)
+# Default: --all (generates HTML, PDF, and Markdown reports)
 #
-# HTML report features:
+# HTML/PDF report features:
 #   - Dark theme, JetBrains Mono typography
 #   - Visual vertical swimlane timeline with color-coded event types
-#   - Findings register with confidence badges
+#   - Findings register with severity/confidence badges + MITRE ATT&CK
 #   - IOC table with type-coded tags
-#   - Evidence registry cards
-#   - Tools deployed table
+#   - Remediation actions, investigation gaps, system profile
+#   - PDF output via WeasyPrint (requires: sudo apt install weasyprint)
 #   - Print-friendly via @media print
 # ============================================================================
 set -uo pipefail
@@ -379,10 +379,26 @@ HTMLEOF
 
 case "$FORMAT" in
     --html)  generate_html ;;
-    --md)    bash "$SCRIPTS_DIR/forensics-report.sh" "$CASE_ID" --md 2>/dev/null || true
-             echo "Markdown report: $REPORTS_DIR/forensic-report.md" ;;
-    --both)  generate_html
+    --pdf)   generate_html
+             HTML_FILE="$REPORTS_DIR/forensic-timeline-report.html"
+             PDF_FILE="$REPORTS_DIR/forensic-timeline-report.pdf"
+             if command -v weasyprint >/dev/null 2>&1; then
+                 weasyprint "$HTML_FILE" "$PDF_FILE" 2>/dev/null && \
+                     echo "  PDF: $PDF_FILE ($(du -h "$PDF_FILE" | cut -f1))" || \
+                     echo "  PDF generation failed — install weasyprint: sudo apt install weasyprint"
+             else
+                 echo "  weasyprint not installed — sudo apt install weasyprint"
+             fi ;;
+    --all)   generate_html
+             HTML_FILE="$REPORTS_DIR/forensic-timeline-report.html"
+             PDF_FILE="$REPORTS_DIR/forensic-timeline-report.pdf"
+             if command -v weasyprint >/dev/null 2>&1; then
+                 weasyprint "$HTML_FILE" "$PDF_FILE" 2>/dev/null && \
+                     echo "  PDF: $PDF_FILE ($(du -h "$PDF_FILE" | cut -f1))" || \
+                     echo "  PDF generation failed"
+             fi
              echo ""
              echo "Markdown report: $REPORTS_DIR/forensic-report.md" ;;
-    *)       echo "Usage: forensics-report.sh CASE_ID [--html|--md|--both]" >&2; exit 1 ;;
+    --md)    echo "Markdown report: $REPORTS_DIR/forensic-report.md" ;;
+    *)       echo "Usage: forensics-report.sh CASE_ID [--html|--pdf|--md|--all]" >&2; exit 1 ;;
 esac
