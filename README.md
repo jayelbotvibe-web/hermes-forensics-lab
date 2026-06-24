@@ -6,7 +6,8 @@
 
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
-[![Canary](https://img.shields.io/badge/canary-12/12-brightgreen)](scripts/session-canary.sh)
+[![Canary](https://img.shields.io/badge/canary-9/9-brightgreen)](scripts/session-canary.sh)
+[![Automation](https://img.shields.io/badge/automation-3_scripts-8b5cf6)](docs/AUTOMATION.md)
 
 ---
 
@@ -67,6 +68,28 @@ See [SETUP.md](SETUP.md) for full provisioning instructions.
 ```bash
 hermes -p forensics
 ```
+
+---
+
+## ⚡ One-Command Automation (New in v2.0)
+
+> **Three commands replace the entire runbook.** Full docs: [AUTOMATION.md](docs/AUTOMATION.md)
+
+```bash
+# Bring everything online (~60s) — LUKS + SIFT VM + Docker + canary
+bash scripts/forensics-up.sh
+
+# Create a case with one command
+CASE_ID=$(bash scripts/forensics-case.sh "BelkaCTF 7 — Memory Dump Analysis")
+
+# Shut down cleanly when done
+bash scripts/forensics-down.sh
+```
+
+**What `forensics-up.sh` does in one command:**
+opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs session canary → reports ready
+
+**See [AUTOMATION.md](docs/AUTOMATION.md) for troubleshooting common issues** (VM unreachable, LUKS mount failure, Docker down, canary failures).
 
 ---
 
@@ -203,11 +226,16 @@ volatility3 remains as fallback for Linux dumps and cross-validation.
 hermes-forensics-lab/
 ├── README.md                          ← you are here
 ├── SETUP.md                           ← SIFT VM provisioning guide
+├── docs/
+│   └── AUTOMATION.md                  ← automation scripts reference + troubleshooting
 ├── architecture.png                   ← system diagram
 ├── index.html                         ← interactive GitHub Pages
 ├── hermes-forensics.profile/          ← Hermes agent profile (config.yaml, persona)
 ├── scripts/
-│   ├── session-canary.sh              ← validates all 12 tools on startup
+│   ├── forensics-up.sh                ← ⚡ one-command system bring-up
+│   ├── forensics-down.sh              ← ⚡ clean system shutdown
+│   ├── forensics-case.sh              ← ⚡ rapid case initialization
+│   ├── session-canary.sh              ← validates all 9 tools on startup
 │   ├── cross-validate.sh              ← dual-tool MFT verification
 │   ├── sift-exec.sh                   ← SSH wrapper for SIFT VM tools
 │   └── handoff.sh                     ← pentest → forensics evidence transfer
