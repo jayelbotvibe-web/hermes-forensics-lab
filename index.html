@@ -358,51 +358,76 @@
       </div>
     </div>
 
-    <!-- 🏆 Sample Reports — Two Designs -->
-    <div style="background:linear-gradient(135deg, rgba(37,99,235,0.06), rgba(220,38,38,0.04));border:1px solid rgba(37,99,235,0.25);border-radius:0.75rem;padding:1.5rem;margin-top:1.5rem">
-      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
-        <div style="width:8px;height:8px;border-radius:50%;background:#2563eb"></div>
-        <h3 style="font-size:1rem;font-weight:600">📊 Sample Report — BelkaCTF #7: Compromised ATC Workstation</h3>
-        <span style="font-size:9px;background:rgba(37,99,235,0.15);color:#2563eb;padding:2px 8px;border-radius:3px;margin-left:8px">v3.0</span>
+    <!-- ═══════════════════════════════════════════════════════
+         SAMPLE REPORT — PRIMARY SHOWCASE
+         ═══════════════════════════════════════════════════════ -->
+    <div style="background:linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);border:1px solid #2563eb;border-radius:1rem;padding:2rem;margin-top:1.5rem">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div style="width:10px;height:10px;border-radius:2px;background:#2563eb"></div>
+        <h3 style="font-size:1.1rem;font-weight:700;color:white">Forensic Analysis Report — BelkaCTF #7</h3>
+        <span style="font-size:9px;background:rgba(37,99,235,0.2);color:#60a5fa;padding:3px 10px;border-radius:3px;font-weight:600;letter-spacing:1px">DATA-FIRST v3.0</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem">
-        <div style="background:rgba(15,23,42,0.5);border-radius:6px;padding:12px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#2563eb">4</div>
-          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:2px">Findings</div>
-          <div style="font-size:9px;color:#dc2626;margin-top:2px">3 CRITICAL</div>
+      
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:#dc2626;line-height:1">3</div>
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Critical</div>
         </div>
-        <div style="background:rgba(15,23,42,0.5);border-radius:6px;padding:12px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#2563eb">9</div>
-          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:2px">IOCs</div>
-          <div style="font-size:9px;color:#7c3aed;margin-top:2px">SHA-256 · MD5 · IP · Domain</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">4</div>
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Findings</div>
         </div>
-        <div style="background:rgba(15,23,42,0.5);border-radius:6px;padding:12px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#2563eb">5</div>
-          <div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:2px">MITRE ATT&amp;CK</div>
-          <div style="font-size:9px;color:#059669;margin-top:2px">T1036 · T1102 · T1573 · T1566</div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">9</div>
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">IOCs</div>
         </div>
-      </div>
-      <p style="color:#94a3b8;font-size:11px;margin-bottom:12px">
-        <strong style="color:#2563eb">Two report designs</strong> — same data, different presentation:
-      </p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div style="background:rgba(15,23,42,0.5);border:1px solid rgba(37,99,235,0.3);border-radius:6px;padding:14px">
-          <div style="font-size:12px;font-weight:700;color:white;margin-bottom:6px">Data-First Design <span style="font-size:9px;background:rgba(37,99,235,0.2);color:#2563eb;padding:1px 6px;border-radius:2px;margin-left:4px">NEW</span></div>
-          <div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Labeled sections 01–09 · sidebar nav · finding cards · data tables · A4 portrait</div>
-          <a href="reports/samples/belkactf7-data-report.html" style="display:inline-block;background:rgba(37,99,235,0.2);border:1px solid rgba(37,99,235,0.4);color:#2563eb;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:600;margin-right:6px">View HTML →</a>
-          <a href="reports/samples/belkactf7-data-report.pdf" style="display:inline-block;background:rgba(37,99,235,0.1);border:1px solid rgba(37,99,235,0.3);color:#93c5fd;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:11px">PDF (62KB)</a>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">5</div>
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">MITRE ATT&amp;CK</div>
         </div>
-        <div style="background:rgba(15,23,42,0.5);border:1px solid rgba(251,191,36,0.2);border-radius:6px;padding:14px">
-          <div style="font-size:12px;font-weight:700;color:white;margin-bottom:6px">Timeline Design <span style="font-size:9px;color:#64748b;margin-left:4px">v2.x</span></div>
-          <div style="font-size:10px;color:#94a3b8;margin-bottom:8px">Dark theme · visual swimlane timeline · color-coded events · A4 landscape</div>
-          <a href="reports/samples/belkactf7-timeline-report.html" style="display:inline-block;background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);color:#fbbf24;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:600;margin-right:6px">View HTML →</a>
-          <a href="reports/samples/belkactf7-timeline-report.pdf" style="display:inline-block;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);color:#fde68a;padding:6px 14px;border-radius:4px;text-decoration:none;font-size:11px">PDF (74KB)</a>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
+          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">7</div>
+          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Timeline Evts</div>
         </div>
       </div>
-      <div style="padding-top:10px;border-top:1px solid rgba(37,99,235,0.1);font-size:10px;color:#64748b">
-        Generated by <code style="color:#c4b5fd">forensics-report.sh</code> from structured case data — same findings.json, two visual outputs
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:8px">Report Features</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:#94a3b8">
+            <div>▸ Labeled sections 01–09</div>
+            <div>▸ MITRE ATT&amp;CK mapping</div>
+            <div>▸ Sticky sidebar navigation</div>
+            <div>▸ Remediation per finding</div>
+            <div>▸ Data-table timeline</div>
+            <div>▸ Investigation gaps</div>
+            <div>▸ Finding cards (Obs+Impact)</div>
+            <div>▸ IOC table with tags</div>
+            <div>▸ Executive callout box</div>
+            <div>▸ A4 portrait · print-native</div>
+            <div>▸ Evidence chain of custody</div>
+            <div>▸ System fonts · no deps</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;justify-content:center">
+          <a href="reports/samples/belkactf7-data-report.html" style="display:block;text-align:center;background:#2563eb;color:white;padding:14px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:0.5px">
+            View HTML Report →
+          </a>
+          <a href="reports/samples/belkactf7-data-report.pdf" style="display:block;text-align:center;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.4);color:#60a5fa;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:600">
+            Download PDF (63KB)
+          </a>
+          <p style="font-size:10px;color:#64748b;text-align:center;margin-top:4px">
+            Also available: <a href="reports/samples/belkactf7-timeline-report.html" style="color:#fbbf24;text-decoration:none">Timeline Design</a> · <a href="reports/samples/belkactf7-timeline-report.pdf" style="color:#fbbf24;text-decoration:none">PDF</a>
+          </p>
+        </div>
+      </div>
+
+      <div style="padding-top:14px;border-top:1px solid rgba(37,99,235,0.15);font-size:10px;color:#64748b">
+        <code style="color:#93c5fd">forensics-report.sh INC-2026-0624-0001 --html</code> — generates this report from findings.json, timeline.json, evidence.json
       </div>
     </div>
+
+    <!-- Info Cards -->
 
 
     <!-- Info Cards -->
