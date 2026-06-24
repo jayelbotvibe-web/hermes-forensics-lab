@@ -533,6 +533,7 @@
     <a href="#s07">07.0 &nbsp;Remediation Actions</a>
     <a href="#s08">08.0 &nbsp;Investigation Gaps</a>
     <a href="#s09">09.0 &nbsp;Tools & Methodology</a>
+    <a href="#s10">10.0 &nbsp;Appendix — Raw Artifacts</a>
 
     <h4>Quick Stats</h4>
     <span class="quick-stat">{{TARGET_HOST}}</span>
@@ -692,6 +693,16 @@
         <thead><tr><th>Tool</th><th>Version</th><th>Runtime</th><th>Validation Status</th></tr></thead>
         <tbody>{{TOOLS_ROWS}}</tbody>
       </table>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         10.0 APPENDIX
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s10">
+      <div class="section-label">Appendix</div>
+      <div class="section-title">Evidence Artifacts — Raw Tool Output</div>
+      <div class="section-desc">Unmodified tool output captured during analysis. Each artifact is traceable to the findings register and provides the raw data behind every conclusion in this report.</div>
+      {{ARTIFACTS_APPENDIX}}
     </div>
 
   </main>

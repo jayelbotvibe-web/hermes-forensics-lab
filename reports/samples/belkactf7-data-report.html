@@ -509,7 +509,7 @@
     <div class="classification">CONFIDENTIAL</div>
     <h1>Compromised Air Traffic Control Workstation</h1>
     <p class="ref">Case Reference: INC-2026-0624-0001</p>
-    <p class="ref">Examiner: niel &nbsp;·&nbsp; 2026-06-24 22:11 UTC</p>
+    <p class="ref">Examiner: niel &nbsp;·&nbsp; 2026-06-24 22:25 UTC</p>
   </div>
   <div class="cover-stats">
     <div class="cover-stat critical"><span class="num">3</span><span class="lbl">Critical</span></div>
@@ -533,6 +533,7 @@
     <a href="#s07">07.0 &nbsp;Remediation Actions</a>
     <a href="#s08">08.0 &nbsp;Investigation Gaps</a>
     <a href="#s09">09.0 &nbsp;Tools & Methodology</a>
+    <a href="#s10">10.0 &nbsp;Appendix — Raw Artifacts</a>
 
     <h4>Quick Stats</h4>
     <span class="quick-stat">TSO-ATC-CT412</span>
@@ -564,7 +565,7 @@
 
       <div class="exec-callout">
         <div class="exec-header">Key Findings</div>
-        <div class="exec-text">On 2025-07-22, an air traffic control workstation (TSO-ATC-CT412, user 'award') was compromised within 3 minutes of user login via a phishing-delivered trojan (epxlorer.exe) masquerading as explorer.exe. The malware established command-and-control to an attacker-operated Telegram Bot API behind Cloudflare infrastructure 19 minutes after execution. At the time of compromise, ATC_RADAR.exe was actively processing aviation radar data, meaning unauthorized code coexisted with live air traffic operations.</div>
+        <div class="exec-text">On 2025-07-22, an air traffic control workstation (TSO-ATC-CT412, user 'award') was compromised within 3 minutes of user login via a phishing-delivered trojan (epxlorer.exe) masquerading as explorer.exe. The malware established command-and-control to an attacker-operated Telegram Bot API behind Cloudflare infrastructure 19 minutes after execution. At the time of compromise, ATC_RADAR.exe was actively processing aviation radar data.</div>
         <div class="exec-footer">
           <strong>Required Action:</strong> Immediate network isolation of TSO-ATC-CT412 · Escalate to aviation safety officer · Potential ICAO Annex 17 reporting obligation
         </div>
@@ -620,22 +621,10 @@
       <div class="section-title">Detailed Investigation Findings</div>
       <div class="section-desc">Each finding includes the observation, interpretation, impact assessment, MITRE ATT&CK mapping, tool traceability, and remediation guidance.</div>
 
-      <div class="finding-card">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-001</div><h3>Malware Execution: epxlorer.exe Masquerading as explorer.exe</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
-      <div class="finding-card-body"><p><strong>Observation:</strong> Process epxlorer.exe (PID 9920) was spawned by explorer.exe (PID 5116) at 2025-07-22 18:53:11 UTC, just 2 minutes 21 seconds after user login. The binary was executed from C:\Users\award\Downloads\epxlorer.exe.</p><p><strong>Impact:</strong> The malware achieved code execution on an air traffic control workstation within 3 minutes of user login. The filename explicitly targets the Windows shell process (explorer.exe → epxlorer.exe, substituting 'l' with '1') to evade casual observation in Task Manager. This is a targeted attack against an aviation-critical system.</p></div>
-      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1036.005, T1204.002</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">MemProcFS proc.txt confirmed identical process tree</div></div></div></div>
-<div class="finding-card">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-002</div><h3>Command and Control via Fraudulent Telegram Bot API</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
-      <div class="finding-card-body"><p><strong>Observation:</strong> epxlorer.exe established an outbound HTTPS connection to 104.21.1.247:443 at 2025-07-22 19:12:33 UTC — 19 minutes after execution. The destination IP is a Cloudflare edge node fronting the attacker-controlled domain api-telegram-org.ctf.do. The malware uses Telegram Bot API (token: 8169267144:AAFwkhmXh71SMVcvFLantjTlwlRbT9HdJdU) as its C2 channel, abusing legitimate cloud infrastructure to blend with normal HTTPS traffic.</p><p><strong>Impact:</strong> Active C2 channel established. Attacker has bidirectional communication with the compromised host. Telegram API provides file upload/download capabilities — data exfiltration or secondary payload delivery is highly probable. Cloudflare proxying makes IP-based blocking ineffective.</p></div>
-      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1102.002, T1573</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_netscan.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None — network capture unavailable for encrypted traffic analysis</div></div></div></div>
-<div class="finding-card">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-003</div><h3>Phishing Delivery Vector: Browser Download of Malicious Executable</h3></div><div style="text-align:right"><span class="badge badge-high">HIGH</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
-      <div class="finding-card-body"><p><strong>Observation:</strong> epxlorer.exe was discovered at three virtual addresses in the memory filescan, including a partial browser download artifact (epxlorer.exe435568.crdownload). The .crdownload extension is specific to Chromium-based browsers (Microsoft Edge in this environment — confirmed by extensive Edge artifacts throughout the filescan). Per CTF intelligence, the phishing email originated from ktso.sec@mailforce.net.</p><p><strong>Impact:</strong> User 'award' received a phishing email, clicked a link, and downloaded the malware via Microsoft Edge. The .crdownload artifact proves this was a browser-initiated download, not a drive-by or automated deployment. User awareness training gap identified. The phishing sender domain (mailforce.net) should be investigated for additional campaigns targeting the organization.</p></div>
-      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1566.001, T1204.002</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_filescan.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None</div></div></div></div>
-<div class="finding-card">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-004</div><h3>Critical Asset Compromised: Air Traffic Control Workstation</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
-      <div class="finding-card-body"><p><strong>Observation:</strong> The compromised host (TSO-ATC-CT412, user 'award') runs ATC_RADAR.exe — an air traffic control radar application with multiple active processes and network connections to 8.8.8.8 (Google DNS-over-HTTPS). The workstation name (ATC-CT412) and application context confirm this is not a standard enterprise endpoint — it is an aviation operations system. Multiple ATC_RADAR.exe instances ran concurrently with epxlorer.exe, meaning the malware coexisted with active ATC operations.</p><p><strong>Impact:</strong> This is a worst-case compromise scenario. An attacker gained code execution on a safety-critical aviation system while it was actively processing radar data. Even if the malware's primary purpose was reconnaissance or C2 relay, the mere presence of unauthorized code on an ATC workstation constitutes a potential aviation safety incident. Regulatory reporting obligations may apply (ICAO Annex 17, national aviation authority).</p></div>
-      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1003.001</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">Dual-tool corroboration</div></div></div></div>
+      <div class="finding-card"><div class="finding-card-header"><div><div class="f-id">F-niel-001</div><h3>Malware Execution: epxlorer.exe Masquerading as explorer.exe</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH</span></div></div><div class="finding-card-body"><p><strong>Observation:</strong> Process epxlorer.exe (PID 9920) was spawned by explorer.exe (PID 5116) at 2025-07-22 18:53:11 UTC, just 2 minutes 21 seconds after user login. The binary was executed from C:\Users\award\Downloads\epxlorer.exe.</p><p><strong>Impact:</strong> The malware achieved code execution on an air traffic control workstation within 3 minutes of user login. The filename explicitly targets the Windows shell process (explorer.exe → epxlorer.exe, substituting 'l' with '1') to evade casual observation in Task Manager. This is a targeted attack against an aviation-critical system.</p></div><div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&amp;CK</div><div class="meta-value">T1036.005, T1204.002</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">MemProcFS proc.txt confirmed identical process tree</div></div></div></div>
+<div class="finding-card"><div class="finding-card-header"><div><div class="f-id">F-niel-002</div><h3>Command and Control via Fraudulent Telegram Bot API</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH</span></div></div><div class="finding-card-body"><p><strong>Observation:</strong> epxlorer.exe established an outbound HTTPS connection to 104.21.1.247:443 at 2025-07-22 19:12:33 UTC — 19 minutes after execution. The destination IP is a Cloudflare edge node fronting the attacker-controlled domain api-telegram-org.ctf.do. The malware uses Telegram Bot API (token: 8169267144:AAFwkhmXh71SMVcvFLantjTlwlRbT9HdJdU) as its C2 channel, abusing legitimate cloud infrastructure to blend with normal HTTPS traffic.</p><p><strong>Impact:</strong> Active C2 channel established. Attacker has bidirectional communication with the compromised host. Telegram API provides file upload/download capabilities — data exfiltration or secondary payload delivery is highly probable. Cloudflare proxying makes IP-based blocking ineffective.</p></div><div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&amp;CK</div><div class="meta-value">T1102.002, T1573</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_netscan.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None — network capture unavailable for encrypted traffic analysis</div></div></div></div>
+<div class="finding-card"><div class="finding-card-header"><div><div class="f-id">F-niel-003</div><h3>Phishing Delivery Vector: Browser Download of Malicious Executable</h3></div><div style="text-align:right"><span class="badge badge-high">HIGH</span><span class="badge badge-high" style="margin-left:4px">HIGH</span></div></div><div class="finding-card-body"><p><strong>Observation:</strong> epxlorer.exe was discovered at three virtual addresses in the memory filescan, including a partial browser download artifact (epxlorer.exe435568.crdownload). The .crdownload extension is specific to Chromium-based browsers (Microsoft Edge in this environment — confirmed by extensive Edge artifacts throughout the filescan). Per CTF intelligence, the phishing email originated from ktso.sec@mailforce.net.</p><p><strong>Impact:</strong> User 'award' received a phishing email, clicked a link, and downloaded the malware via Microsoft Edge. The .crdownload artifact proves this was a browser-initiated download, not a drive-by or automated deployment. User awareness training gap identified. The phishing sender domain (mailforce.net) should be investigated for additional campaigns targeting the organization.</p></div><div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&amp;CK</div><div class="meta-value">T1566.001, T1204.002</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_filescan.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None</div></div></div></div>
+<div class="finding-card"><div class="finding-card-header"><div><div class="f-id">F-niel-004</div><h3>Critical Asset Compromised: Air Traffic Control Workstation</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH</span></div></div><div class="finding-card-body"><p><strong>Observation:</strong> The compromised host (TSO-ATC-CT412, user 'award') runs ATC_RADAR.exe — an air traffic control radar application with multiple active processes and network connections to 8.8.8.8 (Google DNS-over-HTTPS). The workstation name (ATC-CT412) and application context confirm this is not a standard enterprise endpoint — it is an aviation operations system. Multiple ATC_RADAR.exe instances ran concurrently with epxlorer.exe, meaning the malware coexisted with active ATC operations.</p><p><strong>Impact:</strong> This is a worst-case compromise scenario. An attacker gained code execution on a safety-critical aviation system while it was actively processing radar data. Even if the malware's primary purpose was reconnaissance or C2 relay, the mere presence of unauthorized code on an ATC workstation constitutes a potential aviation safety incident. Regulatory reporting obligations may apply (ICAO Annex 17, national aviation authority).</p></div><div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&amp;CK</div><div class="meta-value">T1003.001</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">Dual-tool corroboration</div></div></div></div>
 
     </div>
 
@@ -653,10 +642,10 @@
         </thead>
         <tbody><tr><td><span class="ioc-tag ioc-hash">SHA-256</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35</td><td style="font-size:11px">Evidence archive</td><td><span class="tl-finding-ref">EVID-001</span></td></tr>
 <tr><td><span class="ioc-tag ioc-hash">SHA-256</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">7b45e797acabaf592784bf7efceb979e3f036d5b9dd47f52280c17e38864c2dd</td><td style="font-size:11px">Memory dump</td><td><span class="tl-finding-ref">EVID-001</span></td></tr>
-<tr><td><span class="ioc-tag ioc-hash">MD5</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">75ea94b54420c39dcd3d8ce574ba9d34</td><td style="font-size:11px">epxlorer.exe malware hash</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
+<tr><td><span class="ioc-tag ioc-hash">MD5</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">75ea94b54420c39dcd3d8ce574ba9d34</td><td style="font-size:11px">epxlorer.exe hash</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
 <tr><td><span class="ioc-tag ioc-file">Filename</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">epxlorer.exe</td><td style="font-size:11px">Malware binary</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
-<tr><td><span class="ioc-tag ioc-file">File Path</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">C:\Users\award\Downloads\epxlorer.exe</td><td style="font-size:11px">Execution location</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
-<tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">104.21.1.247</td><td style="font-size:11px">C2 server (Cloudflare)</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
+<tr><td><span class="ioc-tag ioc-file">File Path</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">C:\Users\award\Downloads\epxlorer.exe</td><td style="font-size:11px">Execution path</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
+<tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">104.21.1.247</td><td style="font-size:11px">C2 server</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
 <tr><td><span class="ioc-tag ioc-domain">Domain</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">api-telegram-org.ctf.do</td><td style="font-size:11px">C2 domain</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
 <tr><td><span class="ioc-tag ioc-email">Email</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">ktso.sec@mailforce.net</td><td style="font-size:11px">Phishing sender</td><td><span class="tl-finding-ref">F-niel-003</span></td></tr>
 <tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">172.17.4.12</td><td style="font-size:11px">Compromised host</td><td><span class="tl-finding-ref">F-niel-004</span></td></tr>
@@ -724,12 +713,12 @@
       <div class="section-title">Limitations & Unresolved Questions</div>
       <div class="section-desc">Areas not yet examined. Each gap represents uncertainty that should be addressed before final conclusions.</div>
 
-      <div class="gap-card"><div class="gap-label">GAP 01 — Disk Image Not Analyzed</div><div class="gap-text">Without filesystem forensics, persistence mechanisms, additional dropped files, and full file-system timeline cannot be confirmed.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 02 — Network Capture Unavailable</div><div class="gap-text">Encrypted C2 traffic cannot be analyzed for data exfiltration volume. Lateral movement within the subnet cannot be assessed.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 03 — Registry Hives Not Examined</div><div class="gap-text">User activity artifacts and malware persistence locations (Run keys, scheduled tasks, services) remain unexamined.</div></div>
+      <div class="gap-card"><div class="gap-label">GAP 01 — Disk Image Not Analyzed</div><div class="gap-text">Without filesystem forensics, persistence mechanisms and file-system timeline cannot be confirmed.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 02 — Network Capture Unavailable</div><div class="gap-text">Encrypted C2 traffic cannot be analyzed for exfiltration volume.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 03 — Registry Hives Not Examined</div><div class="gap-text">User activity artifacts and persistence locations remain unexamined.</div></div>
 <div class="gap-card"><div class="gap-label">GAP 04 — Malware Not Reverse-Engineered</div><div class="gap-text">Full capability assessment of epxlorer.exe is pending.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 05 — Supplementary Evidence Not Analyzed</div><div class="gap-text">The 5.6 GB supplementary file containing Android artifacts was not analyzed.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 06 — Single Host Analysis Only</div><div class="gap-text">Compromise of additional systems on the network cannot be ruled out.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 05 — Supplementary Evidence Not Analyzed</div><div class="gap-text">The 5.6 GB supplementary file was not analyzed.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 06 — Single Host Analysis Only</div><div class="gap-text">Compromise of additional systems cannot be ruled out.</div></div>
 
     </div>
 
@@ -753,6 +742,637 @@
       </table>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+         10.0 APPENDIX
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s10">
+      <div class="section-label">Appendix</div>
+      <div class="section-title">Evidence Artifacts — Raw Tool Output</div>
+      <div class="section-desc">Unmodified tool output captured during analysis. Each artifact is traceable to the findings register and provides the raw data behind every conclusion in this report.</div>
+      <div class="section-label">APPENDIX A</div>
+<h1>Evidence Artifacts — Raw Tool Output</h1>
+<p style="font-size:12px;color:#6b7280;margin-bottom:24px">Case: INC-2026-0624-0001 · 7 artifacts · 2026-06-24T22:24:48.372570</p>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A1. filescan</span><span class="meta">vol3_filescan.csv · 8,699 lines · 612 KB</span></div>
+<div class="artifact-body">
+<table>
+<tr><th>Volatility 3 Framework 2.7.0</th></tr>
+<tr><td></td></tr>
+<tr><td>Offset</td><td>Name</td><td>Size</td></tr>
+<tr><td></td></tr>
+<tr><td>0x9f00000f5900</td><td>祘⬹￿祘⬹￿</td><td>0</td></tr>
+<tr><td>0x9f00000f8510</td><td>\Windows\servicing\InboxFodMetadataCache\metadata\Language.Basic~bg-bg~1.0.mum</td><td>216</td></tr>
+<tr><td>0x9f00000f86a0</td><td>\ProgramData\Microsoft\Windows\AppRepository\StateRepository-Machine.srd-wal</td><td>216</td></tr>
+<tr><td>0x9f00000f8830</td><td>\Windows\System32\msdtc.exe</td><td>216</td></tr>
+<tr><td>0x9f00000f89c0</td><td>\Windows\System32\CatRoot\{F750E6C3-38EE-11D1-85E5-00C04FC295EE}\Microsoft-Windows-Client-Desktop-Required-Package05113~31bf3856ad364e35~amd64~~10.0.19041.6093.cat</td><td>216</td></tr>
+<tr><td>0x9f00000f8b50</td><td>\Windows\System32\Tasks\Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance</td><td>216</td></tr>
+<tr><td>0x9f00000f8ce0</td><td>\Windows\System32\CatRoot\{F750E6C3-38EE-11D1-85E5-00C04FC295EE}\Microsoft-Windows-Client-Desktop-Required-Package051020~31bf3856ad364e35~amd64~~10.0.19041.6093.cat</td><td>216</td></tr>
+<tr><td>0x9f00000f8e70</td><td>\Windows\servicing\InboxFodMetadataCache\metadata\Language.Basic~hu-hu~1.0.mum</td><td>216</td></tr>
+<tr><td>0x9f00000f9190</td><td>\Program Files (x86)\Windows Live\Contacts\abssm.dll</td><td>216</td></tr>
+<tr><td>0x9f00000f9320</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f00000f9640</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f00000f97d0</td><td>\Windows\System32\DdcComImplementationsDesktop.dll</td><td>216</td></tr>
+<tr><td>0x9f00000f9960</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f00000f9af0</td><td>\Program Files\WindowsApps\Microsoft.XboxIdentityProvider_12.50.6001.0_x64__8wekyb3d8bbwe\XboxIdp.exe</td><td>216</td></tr>
+<tr><td>0x9f00000f9e10</td><td>\Program Files (x86)\Microsoft\EdgeUpdate\1.3.195.61\psmachine.dll</td><td>216</td></tr>
+<tr><td>0x9f00001628f0</td><td>쥈Ⱖ￿쥈Ⱖ￿</td><td>0</td></tr>
+<tr><td>0x9f00001758e0</td><td>褸Ⱖ￿褸Ⱖ￿</td><td>0</td></tr>
+<tr><td>0x9f00001811b0</td><td>\Windows\System32\CatRoot\{F750E6C3-38EE-11D1-85E5-00C04FC295EE}\Microsoft-Windows-NetFx-Windows-Built-Package~31bf3856ad364e35~amd64~~10.0.19041.1.cat</td><td>216</td></tr>
+<tr><td>0x9f0000181340</td><td>\Windows\SysWOW64\vm3dum-stats.dll</td><td>216</td></tr>
+<tr><td>0x9f00001814d0</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f0000181660</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f00001817f0</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f0000181980</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f0000181b10</td><td>\Windows\SysWOW64\vm3dum_10-stats.dll</td><td>216</td></tr>
+<tr><td>0x9f0000181ca0</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0x9f0000181e30</td><td>\Windows\SysWOW64\vmhgfs.dll</td><td>216</td></tr>
+<tr><td>0xe689224b10c0</td><td>\Windows\System32\dxgiadaptercache.exe</td><td>216</td></tr>
+<tr><td>0xe68922afb0a0</td><td>\Device\HarddiskVolume3\$Extend\$RmMetadata\$TxfLog\$TxfLog</td><td>216</td></tr>
+<tr><td>0xe68922afb380</td><td>\Windows\System32\drivers\hidparse.sys</td><td>216</td></tr>
+<tr><td>0xe68922afb4f0</td><td>\$Secure:$SDS:$DATA</td><td>216</td></tr>
+<tr><td>0xe68922afb660</td><td>\$Mft</td><td>216</td></tr>
+<tr><td>0xe68922afb7d0</td><td>\$Extend\$RmMetadata\$Repair:$Verify:$DATA</td><td>216</td></tr>
+<tr><td>0xe68922afbab0</td><td>\$MftMirr</td><td>216</td></tr>
+<tr><td>0xe68922afbd90</td><td>\$Extend:$I30:$INDEX_ALLOCATION</td><td>216</td></tr>
+<tr><td>0xe68922afc070</td><td>\Windows\System32\smss.exe</td><td>216</td></tr>
+<tr><td>0xe68922afc1e0</td><td>\$LogFile</td><td>216</td></tr>
+<tr><td>0xe68922afc350</td><td>\$BitMap</td><td>216</td></tr>
+<tr><td>0xe68922afc630</td><td>\$Mft::$BITMAP</td><td>216</td></tr>
+<tr><td>0xe68922afc7a0</td><td>\:$I30:$INDEX_ALLOCATION</td><td>216</td></tr>
+<tr><td>0xe68922afc910</td><td>\$Secure:$SII:$INDEX_ALLOCATION</td><td>216</td></tr>
+<tr><td>0xe68922afca80</td><td>\$Extend\$RmMetadata\$Repair</td><td>216</td></tr>
+<tr><td>0xe68922afcbf0</td><td>\$Extend\$Deleted:$I30:$INDEX_ALLOCATION</td><td>216</td></tr>
+<tr><td>0xe68922afcd60</td><td>\$Extend\$UsnJrnl:$J:$DATA</td><td>216</td></tr>
+<tr><td>0xe68922afced0</td><td>\$Extend\$RmMetadata\$Repair:$Corrupt:$DATA</td><td>216</td></tr>
+<tr><td>0xe68922b28210</td><td>\$Extend\$RmMetadata\$TxfLog\$TxfLogContainer00000000000000000001</td><td>216</td></tr>
+<tr><td>0xe68922b28940</td><td>\$Directory</td><td>216</td></tr>
+<tr><td>0xe68922b28c20</td><td>\$Extend\$RmMetadata\$TxfLog\$TxfLogContainer00000000000000000002</td><td>216</td></tr>
+</table>
+<p style="font-size:10px;color:#6b7280;margin-top:8px">Showing 50 of 8,698 rows</p>
+</div></div>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A2. hivelist</span><span class="meta">vol3_hivelist.csv · 33 lines · 3 KB</span></div>
+<div class="artifact-body">
+<table>
+<tr><th>Volatility 3 Framework 2.7.0</th></tr>
+<tr><td></td></tr>
+<tr><td>Offset</td><td>FileFullPath</td><td>File output</td></tr>
+<tr><td></td></tr>
+<tr><td>0xaa8e0729a000</td><td></td><td>Disabled</td></tr>
+<tr><td>0xaa8e07287000</td><td>\REGISTRY\MACHINE\SYSTEM</td><td>Disabled</td></tr>
+<tr><td>0xaa8e07309000</td><td>\REGISTRY\MACHINE\HARDWARE</td><td>Disabled</td></tr>
+<tr><td>0xaa8e087fa000</td><td>\Device\HarddiskVolume1\EFI\Microsoft\Boot\BCD</td><td>Disabled</td></tr>
+<tr><td>0xaa8e087f8000</td><td>\SystemRoot\System32\Config\SOFTWARE</td><td>Disabled</td></tr>
+<tr><td>0xaa8e08991000</td><td>\SystemRoot\System32\Config\DEFAULT</td><td>Disabled</td></tr>
+<tr><td>0xaa8e08e20000</td><td>\SystemRoot\System32\Config\SECURITY</td><td>Disabled</td></tr>
+<tr><td>0xaa8e08e70000</td><td>\SystemRoot\System32\Config\SAM</td><td>Disabled</td></tr>
+<tr><td>0xaa8e08f89000</td><td>\??\C:\Windows\ServiceProfiles\NetworkService\NTUSER.DAT</td><td>Disabled</td></tr>
+<tr><td>0xaa8e08d5f000</td><td>\SystemRoot\System32\Config\BBI</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0b185000</td><td>\??\C:\Windows\ServiceProfiles\LocalService\NTUSER.DAT</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0c17d000</td><td>\??\C:\Users\award\ntuser.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0c1d8000</td><td>\??\C:\Users\award\AppData\Local\Microsoft\Windows\UsrClass.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0ce4e000</td><td>\??\C:\Windows\AppCompat\Programs\Amcache.hve</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0d3a6000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\Microsoft.Windows.StartMenuExperienceHost_10.0.19041.5438_neutral_neutral_cw5n1h2txyewy\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0d4bd000</td><td>\??\C:\Users\award\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\Settings\settings.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0d6c4000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\Microsoft.Windows.Search_1.14.18.19041_neutral_neutral_cw5n1h2txyewy\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0d6ed000</td><td>\??\C:\Users\award\AppData\Local\Packages\Microsoft.Windows.Search_cw5n1h2txyewy\Settings\settings.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0dd2d000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\MicrosoftWindows.Client.CBS_1000.19062.1000.0_x64__cw5n1h2txyewy\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0d684000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\Microsoft.SkypeApp_14.53.77.0_x64__kzf8qxf38zg5c\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0dfbb000</td><td>\??\C:\Users\award\AppData\Local\Packages\Microsoft.SkypeApp_kzf8qxf38zg5c\Settings\settings.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e0ede5000</td><td>\??\C:\Users\award\AppData\Local\Packages\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\Settings\settings.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e185ce000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\Microsoft.WindowsStore_11910.1002.5.0_x64__8wekyb3d8bbwe\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e184e4000</td><td>\??\C:\Users\award\AppData\Local\Packages\Microsoft.WindowsStore_8wekyb3d8bbwe\Settings\settings.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e197b4000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\windows.immersivecontrolpanel_10.0.2.1000_neutral_neutral_cw5n1h2txyewy\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e1988b000</td><td>\??\C:\ProgramData\Microsoft\Windows\AppRepository\Packages\Microsoft.Windows.ShellExperienceHost_10.0.19041.5072_neutral_neutral_cw5n1h2txyewy\ActivationStore.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e19c28000</td><td>\??\C:\Users\award\AppData\Local\Packages\Microsoft.Windows.ShellExperienceHost_cw5n1h2txyewy\Settings\settings.dat</td><td>Disabled</td></tr>
+<tr><td>0xaa8e1b5d4000</td><td>\SystemRoot\System32\config\DRIVERS</td><td>Disabled</td></tr>
+</table>
+</div></div>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A3. info</span><span class="meta">vol3_info.txt · 139,720 lines · 9271 KB</span></div>
+<div class="artifact-body">
+<pre>
+Progress:    0.00		Updating caches for 66 files...
+
+Progress:    1.52		Updating caches for 66 files...
+
+Progress:    3.03		Updating caches for 66 files...
+
+Progress:    4.55		Updating caches for 66 files...
+
+Progress:    6.06		Updating caches for 66 files...
+
+Progress:    7.58		Updating caches for 66 files...
+
+Progress:    9.09		Updating caches for 66 files...
+
+Progress:   10.61		Updating caches for 66 files...
+
+Progress:   12.12		Updating caches for 66 files...
+
+Progress:   13.64		Updating caches for 66 files...
+
+Progress:   15.15		Updating caches for 66 files...
+
+Progress:   16.67		Updating caches for 66 files...
+
+Progress:   18.18		Updating caches for 66 files...
+
+Progress:   19.70		Updating caches for 66 files...
+
+Progress:   21.21		Updating caches for 66 files...
+
+Progress:   22.73		Updating caches for 66 files...
+
+Progress:   24.24		Updating caches for 66 files...
+
+Progress:   25.76		Updating caches for 66 files...
+
+Progress:   27.27		Updating caches for 66 files...
+
+Progress:   28.79		Updating caches for 66 files...
+
+Progress:   30.30		Updating caches for 66 files...
+
+Progress:   31.82		Updating caches for 66 files...
+
+Progress:   33.33		Updating caches for 66 files...
+
+Progress:   34.85		Updating caches for 66 files...
+
+Progress:   36.36		Updating caches for 66 files...
+
+Progress:   37.88		Updating caches for 66 files...
+
+Progress:   39.39		Updating caches for 66 files...
+
+Progress:   40.91		Updating caches for 66 files...
+
+Progress:   42.42		Updating caches for 66 files...
+
+Progress:   43.94		Updating caches for 66 files...
+
+Progress:   45.45		Updating caches for 66 files...
+
+Progress:   46.97		Updating caches for 66 files...
+
+Progress:   48.48		Updating caches for 66 files...
+
+Progress:   50.00		Updating caches for 66 files...
+
+Progress:   51.52		Updating caches for 66 files...
+
+Progress:   53.03		Updating caches for 66 files...
+
+Progress:   54.55		Updating caches for 66 files...
+
+Progress:   56.06		Updating caches for 66 files...
+
+Progress:   57.58		Updating caches for 66 files...
+
+Progress:   59.09		Updating caches for 66 files...
+
+Progress:   60.61		Updating caches for 66 files...
+
+Progress:   62.12		Updating caches for 66 files...
+
+Progress:   63.64		Updating caches for 66 files...
+
+Progress:   65.15		Updating caches for 66 files...
+
+Progress:   66.67		Updating caches for 66 files...
+
+Progress:   68.18		Updating caches for 66 files...
+
+Progress:   69.70		Updating caches for 66 files...
+
+Progress:   71.21		Updating caches for 66 files...
+
+Progress:   72.73		Updating caches for 66 files...
+
+Progress:   74.24		Updating caches for 66 files...
+
+Progress:   75.76		Updating caches for 66 files...
+
+Progress:   77.27		Updating caches for 66 files...
+
+Progress:   78.79		Updating caches for 66 files...
+
+Progress:   80.30		Updating caches for 66 files...
+
+Progress:   81.82		Updating caches for 66 files...
+
+Progress:   83.33		Updating caches for 66 files...
+
+Progress:   84.85		Updating caches for 66 files...
+
+Progress:   86.36		Updating caches for 66 files...
+
+Progress:   87.88		Updating caches for 66 files...
+
+Progress:   89.39		Updating caches for 66 files...
+
+Progress:   90.91		Updating caches for 66 files...
+
+Progress:   92.42		Updating caches for 66 files...
+
+Progress:   93.94		Updating caches for 66 files...
+
+Progress:   95.45		Updating caches for 66 files...
+
+Progress:   96.97		Updating caches for 66 files...
+
+Progress:   98.48		Updating caches for 66 files...
+
+Progress:    0.00		Scanning FileLayer using PageMapScanner
+
+Progress:   23.33		Scanning FileLayer using PageMapScanner
+
+Progress:  100.00		Stacking attempts finished             
+
+Progress:    0.00		Scanning memory_layer using BytesScanner
+
+Progress:    0.31		Scanning memory_layer using BytesScanner
+
+Progress:    0.63		Scanning memory_layer using BytesScanner
+
+Progress:    0.00		Scanning layer_name using PdbSignatureScanner
+
+Progress:    0.00		Scanning layer_name using PdbSignatureScanner
+
+Progress:    0.10		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.19		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.29		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.38		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.48		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.58		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.67		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.77		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.86		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    0.96		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.06		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.15		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.25		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.34		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.44		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.54		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.63		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.73		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.82		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    1.92		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.02		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.11		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.21		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.30		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.40		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.50		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.59		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.69		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.78		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnlmp.pdb
+
+Progress:    2.88		Reading file http://msdl.microsoft.com/download/symbols/ntkrnlmp.pdb/495E39042A6983378CBD822FEB4E91ED1/ntkrnl</pre>
+<p style="font-size:10px;color:#6b7280;margin-top:4px">Output truncated — full data in raw file</p>
+</div></div>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A4. malfind</span><span class="meta">vol3_malfind.json · 275 lines · 16 KB</span></div>
+<div class="artifact-body">
+<pre>Volatility 3 Framework 2.7.0
+
+PID	Process	Start VPN	End VPN	Tag	Protection	CommitCharge	PrivateMemory	File output	Notes	Hexdump	Disasm
+
+3068	MsMpEng.exe	0x24b08a70000	0x24b08a70fff	VadS	PAGE_EXECUTE_READWRITE	1	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08a60000	0x24b08a60fff	VadS	PAGE_EXECUTE_READWRITE	1	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08ab0000	0x24b08ab1fff	VadS	PAGE_EXECUTE_READWRITE	2	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08b50000	0x24b08b50fff	VadS	PAGE_EXECUTE_READWRITE	1	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08b40000	0x24b08b42fff	VadS	PAGE_EXECUTE_READWRITE	3	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08c40000	0x24b08c41fff	VadS	PAGE_EXECUTE_READWRITE	2	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08ce0000	0x24b08ce0fff	VadS	PAGE_EXECUTE_READWRITE	1	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b08d20000	0x24b08d2bfff	VadS	PAGE_EXECUTE_READWRITE	12	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b0bb80000	0x24b0bc8cfff	VadS	PAGE_EXECUTE_READWRITE	269	1	Disabled	Function prologue	
+56 57 53 55 41 54 41 55	VWSUATAU
+41 56 41 57 48 83 ec 28	AVAWH..(
+4c 8d 3c 24 48 8b e9 48	L.&lt;$H..H
+8d b1 98 38 00 00 ff e2	...8....
+49 8d 67 28 41 5f 41 5e	I.g(A_A^
+41 5d 41 5c 5d 5b 5f 5e	A]A\][_^
+c3 00 00 40 00 80 00 00	...@....
+00 48 89 e9 48 b8 80 61	.H..H..a	56 57 53 55 41 54 41 55 41 56 41 57 48 83 ec 28 4c 8d 3c 24 48 8b e9 48 8d b1 98 38 00 00 ff e2 49 8d 67 28 41 5f 41 5e 41 5d 41 5c 5d 5b 5f 5e c3 00 00 40 00 80 00 00 00 48 89 e9 48 b8 80 61
+3068	MsMpEng.exe	0x24b0c680000	0x24b0c78cfff	VadS	PAGE_EXECUTE_READWRITE	269	1	Disabled	Function prologue	
+56 57 53 55 41 54 41 55	VWSUATAU
+41 56 41 57 48 83 ec 28	AVAWH..(
+4c 8d 3c 24 48 8b e9 48	L.&lt;$H..H
+8d b1 98 38 00 00 ff e2	...8....
+49 8d 67 28 41 5f 41 5e	I.g(A_A^
+41 5d 41 5c 5d 5b 5f 5e	A]A\][_^
+c3 00 00 40 00 80 00 00	...@....
+00 48 89 e9 48 b8 80 61	.H..H..a	56 57 53 55 41 54 41 55 41 56 41 57 48 83 ec 28 4c 8d 3c 24 48 8b e9 48 8d b1 98 38 00 00 ff e2 49 8d 67 28 41 5f 41 5e 41 5d 41 5c 5d 5b 5f 5e c3 00 00 40 00 80 00 00 00 48 89 e9 48 b8 80 61
+3068	MsMpEng.exe	0x24b0c960000	0x24b0ca6cfff	VadS	PAGE_EXECUTE_READWRITE	269	1	Disabled	Function prologue	
+56 57 53 55 41 54 41 55	VWSUATAU
+41 56 41 57 48 83 ec 28	AVAWH..(
+4c 8d 3c 24 48 8b e9 48	L.&lt;$H..H
+8d b1 98 38 00 00 ff e2	...8....
+49 8d 67 28 41 5f 41 5e	I.g(A_A^
+41 5d 41 5c 5d 5b 5f 5e	A]A\][_^
+c3 00 00 40 00 80 00 00	...@....
+00 48 89 e9 48 b8 80 61	.H..H..a	56 57 53 55 41 54 41 55 41 56 41 57 48 83 ec 28 4c 8d 3c 24 48 8b e9 48 8d b1 98 38 00 00 ff e2 49 8d 67 28 41 5f 41 5e 41 5d 41 5c 5d 5b 5f 5e c3 00 00 40 00 80 00 00 00 48 89 e9 48 b8 80 61
+3068	MsMpEng.exe	0x24b12350000	0x24b12350fff	VadS	PAGE_EXECUTE_READWRITE	1	1	Disabled	Function prologue	
+55 48 8d 2c 24 48 83 ec	UH.,$H..
+20 48 8b 01 48 8b 49 08	.H..H.I.
+ff d0 48 8d 65 00 5d c3	..H.e.].
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........	55 48 8d 2c 24 48 83 ec 20 48 8b 01 48 8b 49 08 ff d0 48 8d 65 00 5d c3 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc
+3068	MsMpEng.exe	0x24b1a020000	0x24b1a21ffff	VadS	PAGE_EXECUTE_READWRITE	512	1	Disabled	Function prologue	
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc 0c 00 4e 00 0c 00 01	...N....
+05 48 8b 55 28 48 8b 8d	.H.U(H..	cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc 0c 00 4e 00 0c 00 01 05 48 8b 55 28 48 8b 8d
+3068	MsMpEng.exe	0x24b19f20000	0x24b1a01ffff	VadS	PAGE_EXECUTE_READWRITE	256	1	Disabled	Function prologue	
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc cc cc cc cc cc cc cc	........
+cc 04 00 26 00 00 00 01	...&amp;....
+02 48 8b 45 20 48 89 c2	.H.E.H..	cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc 04 00 26 00 00 00 01 02 48 8b 45 20 48 89 c2</pre>
+<p style="font-size:10px;color:#6b7280;margin-top:4px">Output truncated — full data in raw file</p>
+</div></div>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A5. netscan</span><span class="meta">vol3_netscan.csv · 99 lines · 9 KB</span></div>
+<div class="artifact-body">
+<table>
+<tr><th>Volatility 3 Framework 2.7.0</th></tr>
+<tr><td></td></tr>
+<tr><td>Offset</td><td>Proto</td><td>LocalAddr</td><td>LocalPort</td><td>ForeignAddr</td><td>ForeignPort</td><td>State</td><td>PID</td><td>Owner</td><td>Created</td></tr>
+<tr><td></td></tr>
+<tr><td>0x9f00001eca20</td><td>TCPv4</td><td>172.17.4.12</td><td>50286</td><td>8.8.8.8</td><td>443</td><td>ESTABLISHED</td><td>9456</td><td>ATC_RADAR.exe</td><td>2025-07-22 19:15:10.000000 </td></tr>
+<tr><td>0x9f00001fe2e0</td><td>TCPv4</td><td>172.17.4.12</td><td>50287</td><td>8.8.8.8</td><td>443</td><td>ESTABLISHED</td><td>9456</td><td>ATC_RADAR.exe</td><td>2025-07-22 19:15:10.000000 </td></tr>
+<tr><td>0xe68922caca70</td><td>TCPv4</td><td>0.0.0.0</td><td>49668</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>2540</td><td>spoolsv.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68922e59010</td><td>TCPv4</td><td>172.17.4.12</td><td>49871</td><td>18.165.122.73</td><td>443</td><td>ESTABLISHED</td><td>2256</td><td>msedge.exe</td><td>2025-07-22 18:51:58.000000 </td></tr>
+<tr><td>0xe68922e5d010</td><td>TCPv4</td><td>172.17.4.12</td><td>50283</td><td>2.23.227.215</td><td>443</td><td>CLOSED</td><td>2256</td><td>msedge.exe</td><td>2025-07-22 19:15:09.000000 </td></tr>
+<tr><td>0xe689238948a0</td><td>TCPv4</td><td>172.17.4.12</td><td>50241</td><td>104.21.1.247</td><td>443</td><td>ESTABLISHED</td><td>9920</td><td>epxlorer.exe</td><td>2025-07-22 19:12:33.000000 </td></tr>
+<tr><td>0xe68923afc050</td><td>TCPv4</td><td>0.0.0.0</td><td>49664</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>700</td><td>lsass.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afc050</td><td>TCPv6</td><td>::</td><td>49664</td><td>::</td><td>0</td><td>LISTENING</td><td>700</td><td>lsass.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afc310</td><td>TCPv4</td><td>0.0.0.0</td><td>49665</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>536</td><td>wininit.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afc470</td><td>TCPv4</td><td>0.0.0.0</td><td>49668</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>2540</td><td>spoolsv.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afc470</td><td>TCPv6</td><td>::</td><td>49668</td><td>::</td><td>0</td><td>LISTENING</td><td>2540</td><td>spoolsv.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afc730</td><td>TCPv4</td><td>0.0.0.0</td><td>49667</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>1332</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afc9f0</td><td>TCPv4</td><td>0.0.0.0</td><td>135</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>940</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afcb50</td><td>TCPv4</td><td>0.0.0.0</td><td>135</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>940</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afcb50</td><td>TCPv6</td><td>::</td><td>135</td><td>::</td><td>0</td><td>LISTENING</td><td>940</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afccb0</td><td>TCPv4</td><td>0.0.0.0</td><td>49665</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>536</td><td>wininit.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afccb0</td><td>TCPv6</td><td>::</td><td>49665</td><td>::</td><td>0</td><td>LISTENING</td><td>536</td><td>wininit.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afd4f0</td><td>TCPv4</td><td>0.0.0.0</td><td>49667</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>1332</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afd4f0</td><td>TCPv6</td><td>::</td><td>49667</td><td>::</td><td>0</td><td>LISTENING</td><td>1332</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afd7b0</td><td>TCPv4</td><td>172.17.4.12</td><td>139</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>4</td><td>System</td><td>2025-07-22 18:50:50.000000 </td></tr>
+<tr><td>0xe68923afd910</td><td>TCPv4</td><td>0.0.0.0</td><td>49666</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>1032</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afd910</td><td>TCPv6</td><td>::</td><td>49666</td><td>::</td><td>0</td><td>LISTENING</td><td>1032</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afda70</td><td>TCPv4</td><td>0.0.0.0</td><td>49666</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>1032</td><td>svchost.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afdbd0</td><td>TCPv4</td><td>0.0.0.0</td><td>49664</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>700</td><td>lsass.exe</td><td>2025-07-22 18:50:48.000000 </td></tr>
+<tr><td>0xe68923afdd30</td><td>TCPv4</td><td>0.0.0.0</td><td>445</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>4</td><td>System</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe68923afdd30</td><td>TCPv6</td><td>::</td><td>445</td><td>::</td><td>0</td><td>LISTENING</td><td>4</td><td>System</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe689244768a0</td><td>TCPv4</td><td>172.17.4.12</td><td>49869</td><td>20.93.72.182</td><td>443</td><td>ESTABLISHED</td><td>2256</td><td>msedge.exe</td><td>2025-07-22 18:51:56.000000 </td></tr>
+<tr><td>0xe6892459a050</td><td>TCPv4</td><td>172.17.4.12</td><td>50244</td><td>2.23.227.215</td><td>443</td><td>ESTABLISHED</td><td>7012</td><td>SearchApp.exe</td><td>2025-07-22 19:14:19.000000 </td></tr>
+<tr><td>0xe68924f62730</td><td>TCPv4</td><td>0.0.0.0</td><td>9999</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>6892</td><td>ATC_RADAR.exe</td><td>2025-07-22 19:15:06.000000 </td></tr>
+<tr><td>0xe68924f62cb0</td><td>TCPv4</td><td>0.0.0.0</td><td>5040</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>5084</td><td>svchost.exe</td><td>2025-07-22 18:50:55.000000 </td></tr>
+<tr><td>0xe689275e1050</td><td>TCPv4</td><td>172.17.4.12</td><td>49924</td><td>48.209.180.244</td><td>443</td><td>ESTABLISHED</td><td>7888</td><td>smartscreen.ex</td><td>2025-07-22 18:53:08.000000 </td></tr>
+<tr><td>0xe689276a0140</td><td>UDPv4</td><td>127.0.0.1</td><td>49663</td><td>*</td><td>0</td><td></td><td>3144</td><td>svchost.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe689276fd470</td><td>TCPv4</td><td>0.0.0.0</td><td>49669</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>680</td><td>services.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe689276fd470</td><td>TCPv6</td><td>::</td><td>49669</td><td>::</td><td>0</td><td>LISTENING</td><td>680</td><td>services.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe689276fd5d0</td><td>TCPv4</td><td>0.0.0.0</td><td>49669</td><td>0.0.0.0</td><td>0</td><td>LISTENING</td><td>680</td><td>services.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe68927895c00</td><td>UDPv4</td><td>0.0.0.0</td><td>0</td><td>*</td><td>0</td><td></td><td>3924</td><td>svchost.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe68927895d90</td><td>UDPv4</td><td>0.0.0.0</td><td>0</td><td>*</td><td>0</td><td></td><td>3924</td><td>svchost.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe68927895d90</td><td>UDPv6</td><td>::</td><td>0</td><td>*</td><td>0</td><td></td><td>3924</td><td>svchost.exe</td><td>2025-07-22 18:50:49.000000 </td></tr>
+<tr><td>0xe68927b39b00</td><td>TCPv4</td><td>172.17.4.12</td><td>50295</td><td>135.234.160.246</td><td>443</td><td>CLOSED</td><td>2896</td><td>wermgr.exe</td><td>2025-07-22 19:15:14.000000 </td></tr>
+<tr><td>0xe68927d768a0</td><td>TCPv4</td><td>172.17.4.12</td><td>50294</td><td>20.190.147.11</td><td>443</td><td>CLOSED</td><td>6048</td><td>svchost.exe</td><td>2025-07-22 19:15:13.000000 </td></tr>
+<tr><td>0xe68927d7fb00</td><td>TCPv4</td><td>172.17.4.12</td><td>50259</td><td>13.107.246.254</td><td>443</td><td>ESTABLISHED</td><td>7012</td><td>SearchApp.exe</td><td>2025-07-22 19:14:22.000000 </td></tr>
+<tr><td>0xe68927eb66e0</td><td>UDPv4</td><td>0.0.0.0</td><td>5355</td><td>*</td><td>0</td><td></td><td>2168</td><td>svchost.exe</td><td>2025-07-22 18:50:50.000000 </td></tr>
+<tr><td>0xe68927eb66e0</td><td>UDPv6</td><td>::</td><td>5355</td><td>*</td><td>0</td><td></td><td>2168</td><td>svchost.exe</td><td>2025-07-22 18:50:50.000000 </td></tr>
+<tr><td>0xe68927eb7360</td><td>UDPv4</td><td>172.17.4.12</td><td>138</td><td>*</td><td>0</td><td></td><td>4</td><td>System</td><td>2025-07-22 18:50:50.000000 </td></tr>
+<tr><td>0xe68927eb7680</td><td>UDPv4</td><td>0.0.0.0</td><td>0</td><td>*</td><td>0</td><td></td><td>2168</td><td>svchost.exe</td><td>2025-07-22 18:50:50.000000 </td></tr>
+<tr><td>0xe68927eb7680</td><td>UDPv6</td><td>::</td><td>0</td><td>*</td><td>0</td><td></td><td>2168</td><td>svchost.exe</td><td>2025-07-22 18:50:50.000000 </td></tr>
+<tr><td>0xe68927eb7cc0</td><td>UDPv4</td><td>0.0.0.0</td><td>5353</td><td>*</td><td>0</td><td></td><td>2168</td><td>svchost.exe</td><td>2025-07-22 18:50:50.000000 </td></tr>
+</table>
+<p style="font-size:10px;color:#6b7280;margin-top:8px">Showing 50 of 98 rows</p>
+</div></div>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A6. pslist</span><span class="meta">vol3_pslist.csv · 154 lines · 13 KB</span></div>
+<div class="artifact-body">
+<table>
+<tr><th>Volatility 3 Framework 2.7.0</th></tr>
+<tr><td></td></tr>
+<tr><td>PID</td><td>PPID</td><td>ImageFileName</td><td>Offset(V)</td><td>Threads</td><td>Handles</td><td>SessionId</td><td>Wow64</td><td>CreateTime</td><td>ExitTime</td><td>File output</td></tr>
+<tr><td></td></tr>
+<tr><td>4</td><td>0</td><td>System</td><td>0xe68922462040</td><td>133</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:46.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>108</td><td>4</td><td>Registry</td><td>0xe689224da080</td><td>4</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:41.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>344</td><td>4</td><td>smss.exe</td><td>0xe68922cdc040</td><td>2</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:46.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>460</td><td>448</td><td>csrss.exe</td><td>0xe689231f6080</td><td>10</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:47.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>536</td><td>448</td><td>wininit.exe</td><td>0xe68923aaf0c0</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:47.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>544</td><td>528</td><td>csrss.exe</td><td>0xe68923b20140</td><td>13</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:47.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>636</td><td>528</td><td>winlogon.exe</td><td>0xe68923b95080</td><td>5</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>680</td><td>536</td><td>services.exe</td><td>0xe68922b4a080</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>700</td><td>536</td><td>lsass.exe</td><td>0xe68923a77280</td><td>10</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>820</td><td>680</td><td>svchost.exe</td><td>0xe68924246280</td><td>13</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>844</td><td>636</td><td>fontdrvhost.ex</td><td>0xe689242440c0</td><td>5</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>852</td><td>536</td><td>fontdrvhost.ex</td><td>0xe68924248180</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>940</td><td>680</td><td>svchost.exe</td><td>0xe689242be300</td><td>8</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>996</td><td>680</td><td>svchost.exe</td><td>0xe689242bc0c0</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>756</td><td>680</td><td>svchost.exe</td><td>0xe68924393340</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1032</td><td>680</td><td>svchost.exe</td><td>0xe689243b2340</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1056</td><td>680</td><td>svchost.exe</td><td>0xe689243c12c0</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1064</td><td>680</td><td>svchost.exe</td><td>0xe689243bf0c0</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1140</td><td>636</td><td>dwm.exe</td><td>0xe689243da080</td><td>13</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1168</td><td>680</td><td>svchost.exe</td><td>0xe689243de300</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1256</td><td>680</td><td>svchost.exe</td><td>0xe6892442c340</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1332</td><td>680</td><td>svchost.exe</td><td>0xe68924473280</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1396</td><td>680</td><td>svchost.exe</td><td>0xe689244bb340</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1420</td><td>680</td><td>svchost.exe</td><td>0xe689244bd2c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1440</td><td>680</td><td>svchost.exe</td><td>0xe689244d7340</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1596</td><td>680</td><td>svchost.exe</td><td>0xe689245762c0</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1616</td><td>680</td><td>svchost.exe</td><td>0xe68924510340</td><td>4</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1652</td><td>680</td><td>svchost.exe</td><td>0xe689245b02c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1664</td><td>680</td><td>svchost.exe</td><td>0xe689245b42c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1772</td><td>680</td><td>svchost.exe</td><td>0xe68924626340</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1820</td><td>680</td><td>svchost.exe</td><td>0xe6892463c340</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1848</td><td>4</td><td>MemCompression</td><td>0xe68924642040</td><td>42</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1860</td><td>680</td><td>svchost.exe</td><td>0xe68924644280</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1960</td><td>1332</td><td>taskhostw.exe</td><td>0xe689245b2080</td><td>0</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>2025-07-22 18:51:23.000000 </td><td>Disabled</td></tr>
+<tr><td>1972</td><td>680</td><td>svchost.exe</td><td>0xe689245b1080</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1980</td><td>680</td><td>svchost.exe</td><td>0xe689246c3340</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2000</td><td>680</td><td>svchost.exe</td><td>0xe689246d6300</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1868</td><td>680</td><td>svchost.exe</td><td>0xe68924724080</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2168</td><td>680</td><td>svchost.exe</td><td>0xe6892721d340</td><td>10</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2180</td><td>680</td><td>svchost.exe</td><td>0xe689247350c0</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2196</td><td>680</td><td>svchost.exe</td><td>0xe689247f0340</td><td>4</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2272</td><td>680</td><td>svchost.exe</td><td>0xe689272822c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2372</td><td>680</td><td>svchost.exe</td><td>0xe689273020c0</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2540</td><td>680</td><td>spoolsv.exe</td><td>0xe68922520080</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2600</td><td>680</td><td>svchost.exe</td><td>0xe689224ee080</td><td>13</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2660</td><td>680</td><td>svchost.exe</td><td>0xe689225ca080</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2880</td><td>680</td><td>svchost.exe</td><td>0xe689273f2280</td><td>22</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:49.000000 </td><td>N/A</td><td>Disabled</td></tr>
+</table>
+<p style="font-size:10px;color:#6b7280;margin-top:8px">Showing 50 of 153 rows</p>
+</div></div>
+<div class="artifact">
+<div class="artifact-header"><span class="name">A7. windows psscan PsScan</span><span class="meta">vol3_windows_psscan_PsScan.csv · 167 lines · 15 KB</span></div>
+<div class="artifact-body">
+<table>
+<tr><th>Volatility 3 Framework 2.7.0</th></tr>
+<tr><td></td></tr>
+<tr><td>PID</td><td>PPID</td><td>ImageFileName</td><td>Offset(V)</td><td>Threads</td><td>Handles</td><td>SessionId</td><td>Wow64</td><td>CreateTime</td><td>ExitTime</td><td>File output</td></tr>
+<tr><td></td></tr>
+<tr><td>6224</td><td>1332</td><td>taskhostw.exe</td><td>0x9f000006f300</td><td>3</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:52.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>4</td><td>0</td><td>System</td><td>0xe68922462040</td><td>133</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:46.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>108</td><td>4</td><td>Registry</td><td>0xe689224da080</td><td>4</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:41.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2600</td><td>680</td><td>svchost.exe</td><td>0xe689224ee080</td><td>13</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2540</td><td>680</td><td>spoolsv.exe</td><td>0xe68922520080</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2660</td><td>680</td><td>svchost.exe</td><td>0xe689225ca080</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>680</td><td>536</td><td>services.exe</td><td>0xe68922b4a080</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>344</td><td>4</td><td>smss.exe</td><td>0xe68922cdc040</td><td>2</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:46.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>460</td><td>448</td><td>csrss.exe</td><td>0xe689231f6080</td><td>10</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:47.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>8524</td><td>680</td><td>svchost.exe</td><td>0xe689238fa080</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:56:49.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>700</td><td>536</td><td>lsass.exe</td><td>0xe68923a77280</td><td>10</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>536</td><td>448</td><td>wininit.exe</td><td>0xe68923aaf0c0</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:47.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>544</td><td>528</td><td>csrss.exe</td><td>0xe68923b20140</td><td>13</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:47.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1608</td><td>8180</td><td>ATC_RADAR.exe</td><td>0xe68923b6a080</td><td>0</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 19:08:53.000000 </td><td>2025-07-22 19:15:02.000000 </td><td>Disabled</td></tr>
+<tr><td>636</td><td>528</td><td>winlogon.exe</td><td>0xe68923b95080</td><td>5</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>844</td><td>636</td><td>fontdrvhost.ex</td><td>0xe689242440c0</td><td>5</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>820</td><td>680</td><td>svchost.exe</td><td>0xe68924246280</td><td>13</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>852</td><td>536</td><td>fontdrvhost.ex</td><td>0xe68924248180</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>996</td><td>680</td><td>svchost.exe</td><td>0xe689242bc0c0</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>940</td><td>680</td><td>svchost.exe</td><td>0xe689242be300</td><td>8</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>756</td><td>680</td><td>svchost.exe</td><td>0xe68924393340</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1032</td><td>680</td><td>svchost.exe</td><td>0xe689243b2340</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1064</td><td>680</td><td>svchost.exe</td><td>0xe689243bf0c0</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1056</td><td>680</td><td>svchost.exe</td><td>0xe689243c12c0</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1140</td><td>636</td><td>dwm.exe</td><td>0xe689243da080</td><td>13</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1168</td><td>680</td><td>svchost.exe</td><td>0xe689243de300</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1256</td><td>680</td><td>svchost.exe</td><td>0xe6892442c340</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1332</td><td>680</td><td>svchost.exe</td><td>0xe68924473280</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1396</td><td>680</td><td>svchost.exe</td><td>0xe689244bb340</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1420</td><td>680</td><td>svchost.exe</td><td>0xe689244bd2c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1440</td><td>680</td><td>svchost.exe</td><td>0xe689244d7340</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>4628</td><td>8180</td><td>ATC_RADAR.exe</td><td>0xe6892450d080</td><td>0</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 19:08:53.000000 </td><td>2025-07-22 19:15:02.000000 </td><td>Disabled</td></tr>
+<tr><td>1616</td><td>680</td><td>svchost.exe</td><td>0xe68924510340</td><td>4</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>10096</td><td>680</td><td>svchost.exe</td><td>0xe689245452c0</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:51:29.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>10928</td><td>820</td><td>SystemSettings</td><td>0xe68924568080</td><td>17</td><td>-</td><td>1</td><td>False</td><td>2025-07-22 18:51:59.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1596</td><td>680</td><td>svchost.exe</td><td>0xe689245762c0</td><td>3</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1652</td><td>680</td><td>svchost.exe</td><td>0xe689245b02c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1972</td><td>680</td><td>svchost.exe</td><td>0xe689245b1080</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1960</td><td>1332</td><td>taskhostw.exe</td><td>0xe689245b2080</td><td>0</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>2025-07-22 18:51:23.000000 </td><td>Disabled</td></tr>
+<tr><td>1664</td><td>680</td><td>svchost.exe</td><td>0xe689245b42c0</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1772</td><td>680</td><td>svchost.exe</td><td>0xe68924626340</td><td>7</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1820</td><td>680</td><td>svchost.exe</td><td>0xe6892463c340</td><td>1</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1848</td><td>4</td><td>MemCompression</td><td>0xe68924642040</td><td>42</td><td>-</td><td>N/A</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1860</td><td>680</td><td>svchost.exe</td><td>0xe68924644280</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1980</td><td>680</td><td>svchost.exe</td><td>0xe689246c3340</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>2000</td><td>680</td><td>svchost.exe</td><td>0xe689246d6300</td><td>2</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+<tr><td>1868</td><td>680</td><td>svchost.exe</td><td>0xe68924724080</td><td>5</td><td>-</td><td>0</td><td>False</td><td>2025-07-22 18:50:48.000000 </td><td>N/A</td><td>Disabled</td></tr>
+</table>
+<p style="font-size:10px;color:#6b7280;margin-top:8px">Showing 50 of 166 rows</p>
+</div></div>
+<div class="footer"><p>Hermes Forensics Agent · Evidence Artifacts Appendix</p><p>All content is raw tool output — unmodified from original execution. Each artifact is traceable to the findings register.</p></div>
+    </div>
+
   </main>
 </div>
 
@@ -762,7 +1382,7 @@
 <div class="report-footer">
   <div class="sig-block">Examiner Signature</div>
   <p>niel · Case INC-2026-0624-0001</p>
-  <p style="margin-top:4px">Hermes Forensics Agent · 2026-06-24 22:11 UTC</p>
+  <p style="margin-top:4px">Hermes Forensics Agent · 2026-06-24 22:25 UTC</p>
   <p style="margin-top:2px;font-size:9px">This report is auto-generated from structured case data. All findings require human review before finalization.</p>
 </div>
 
