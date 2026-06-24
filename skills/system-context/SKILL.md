@@ -21,7 +21,7 @@ HOST (terminal.backend: local, HOME=/home/niel/.hermes/profiles/forensics/home)
 ├── Evidence: /home/niel/forensics/cases/ (LUKS encrypted, 30GB)
 ├── Fixtures: /home/niel/forensics/fixtures/
 ├── Scripts: /home/niel/forensics/scripts/
-└── SIFT VM: 192.168.88.14 — SSH key auth — sansforensics user
+└── SIFT VM: 172.16.146.128 — SSH key auth — sansforensics user
         │
         ├── Evidence mounted at: ~/cases/ (SSHFS from host)
         └── Native tools: sleuthkit, foremost, dc3dd, regripper, hashdeep, tshark
@@ -40,7 +40,7 @@ HOST (terminal.backend: local, HOME=/home/niel/.hermes/profiles/forensics/home)
 | plaso | forensics-plaso:20240512 | 20240512 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-plaso:20240512 log2timeline.py --storage-file /output/timeline.plaso /evidence/FILE` |
 | mft-tools | forensics-mft-tools:1.2.0.0 | 1.2.0.0 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-mft-tools:1.2.0.0 python3 -m analyzemft -f /evidence/FILE -o /output/analyzemft.csv` |
 
-5. **IMPORTANT:** volatility3 Docker entrypoint is already `vol` — the binary inside the container is called `vol` (not `volatility`). Never prefix commands with `vol`. Start directly with flags: `-f /evidence/dump.mem windows.info.Info`.
+**IMPORTANT:** volatility3 Docker entrypoint is already `volatility`. Do NOT prefix commands with `vol`. Start directly with flags: `-f /evidence/dump.mem windows.info.Info`.
 
 ### Runtime 2: Host FUSE — MemProcFS
 | Tool | Binary | Version | Command Pattern |
@@ -89,27 +89,67 @@ Pass paths as: `/home/sansforensics/cases/CASE_ID/evidence/FILE`
 
 ---
 
-## Session Startup Protocol
+## Session Startup Protocol (Automated)
 
-**ALWAYS run these steps at session start, BEFORE any investigation:**
+**PREFERRED: One-command bring-up (use this, not manual steps):**
+```bash
+bash /home/niel/forensics/scripts/forensics-up.sh
+```
+This single command: opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs session canary → reports status. System ready in ~60 seconds. No manual steps, no thinking required.
 
-1. **Run canary:** `bash /home/niel/forensics/scripts/session-canary.sh`
-   - Validates all 12 tools
-   - Reports DEGRADED tools — these are TRIAGE-ONLY
+**If up.sh fails** (system not running), do minimal manual bring-up:
+1. Check LUKS: `mountpoint -q /home/niel/forensics` — if not mounted, open manually
+2. Check SIFT VM: `bash /home/niel/forensics/scripts/sift-exec.sh "echo OK"` — if not, start VM
+3. Check Docker: `docker info >/dev/null 2>&1` — if not, `sudo systemctl start docker`
+4. **Run canary:** `bash /home/niel/forensics/scripts/session-canary.sh`
 
-2. **Read tool catalog:** `cat /home/niel/forensics/tools/tool-catalog.yaml`
-   - Contains version pins, known issues, fallback chains for every tool
+### New Case (one command):
+```bash
+CASE_ID=$(bash /home/niel/forensics/scripts/forensics-case.sh "Description")
+```
 
-3. **Check for active cases:** `ls /home/niel/forensics/cases/`
-   - Look for handoff.json files from pentest agent
+### Shutdown (one command):
+```bash
+bash /home/niel/forensics/scripts/forensics-down.sh
+```
 
-4. **Verify SIFT evidence mount:** `bash /home/niel/forensics/scripts/sift-exec.sh "ls ~/cases/"`
+### Key Scripts Reference
+| Script | Purpose |
+|--------|---------|
+| `/home/niel/forensics/scripts/forensics-up.sh` | Full system bring-up |
+| `/home/niel/forensics/scripts/forensics-down.sh` | Clean shutdown |
+| `/home/niel/forensics/scripts/forensics-case.sh` | Rapid case init |
+| `/home/niel/forensics/scripts/forensics-register.sh` | Evidence registration (hash-verify-audit) |
+| `/home/niel/forensics/scripts/forensics-vol3.sh` | Volatility3 Docker wrapper |
+| `/home/niel/forensics/scripts/forensics-mount.sh` | MemProcFS mount/unmount |
+| `/home/niel/forensics/scripts/forensics-find.sh` | Findings recorder |
+| `/home/niel/forensics/scripts/forensics-report.sh` | Report generator (HTML + PDF) |
+| `/home/niel/forensics/scripts/forensics-pipeline.sh` | End-to-end pipeline |
+| `/home/niel/forensics/scripts/forensics-screenshots.py` | Evidence screenshots (terminal PNGs) |
+| `/home/niel/forensics/scripts/forensics-artifacts.py` | Artifacts appendix generator |
+| `/home/niel/forensics/scripts/session-canary.sh` | Tool validation (9 checks) |
+| `/home/niel/forensics/scripts/sift-exec.sh` | SSH wrapper for SIFT VM |
+
+### Evidence Integrity Workflow
+After running analysis tools, capture evidence screenshots before generating the report:
+```bash
+# 1. Capture screenshots of all raw tool output
+python3 /home/niel/forensics/scripts/forensics-screenshots.py /home/niel/forensics/cases/CASE_ID
+# - case/raw/screenshots/artifact-01.png ... artifact-NN.png
+
+# 2. Generate report with appendix referencing screenshots
+bash /home/niel/forensics/scripts/forensics-report.sh CASE_ID --html
+bash /home/niel/forensics/scripts/forensics-report.sh CASE_ID --pdf
+```
 
 ---
 
 ## Evidence Handling Protocol
 
-### Case Creation
+### Case Creation (Automated)
+Use the one-command script: `CASE_ID=$(bash /home/niel/forensics/scripts/forensics-case.sh "Description")`
+
+Manual equivalent (if script unavailable):
 1. Create: `mkdir -p /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/{evidence,raw,reports,audit}`
 2. Write CASE.yaml with case_id, status=active, examiner=niel
 3. Log to audit/actions.jsonl
@@ -194,7 +234,7 @@ Forensics agent checks for pending handoffs on session start. Look for handoff.j
 1. **HOME sandboxed** — all paths must be absolute (/home/niel/...). ~/ resolves wrong.
 2. **volatility3 entrypoint** — Docker image entrypoint is `volatility`. No `vol` prefix needed in commands.
 3. **MFTECmd unavailable** — Zimmerman tools CDN changed. analyzeMFT is the primary MFT parser.
-4. **SIFT VM IP** — 192.168.88.14 (bridged networking). SSH key auth.
+4. **SIFT VM IP** — 172.16.146.128 (bridged networking). SSH key auth.
 5. **SSHFS mount** — evidence visible at /home/sansforensics/cases/ on VM. Read-only.
 6. **SIFT tool paths on VM** — pass as /home/sansforensics/cases/CASE_ID/evidence/FILE.
 7. **Session canary** — DEGRADED tools are triage-only. Do not use for evidentiary analysis.
