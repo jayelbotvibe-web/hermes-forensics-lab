@@ -86,7 +86,20 @@
     align-items: center;
     gap: 10px;
   }
-  .section-title .icon { font-size: 20px; }
+  .section-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 6px;
+    flex-shrink: 0;
+  }
+  .section-dot.amber   { background: var(--amber); }
+  .section-dot.cyan    { background: var(--cyan); }
+  .section-dot.rose    { background: var(--rose); }
+  .section-dot.violet  { background: var(--violet); }
+  .section-dot.emerald { background: var(--emerald); }
+  .section-dot.slate   { background: var(--slate); }
 
   /* ── Summary Cards ────────────────────────────────────── */
   .summary-grid {
@@ -459,7 +472,7 @@
      EXECUTIVE SUMMARY
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="icon">📋</span> Executive Summary</div>
+  <div class="section-title"><span class="section-dot amber"></span> Executive Summary</div>
   <div class="summary-grid">
     <div class="summary-card">
       <div class="label">Classification</div>
@@ -485,7 +498,7 @@
      INCIDENT TIMELINE
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="icon">⏱</span> Incident Timeline</div>
+  <div class="section-title"><span class="section-dot cyan"></span> Incident Timeline</div>
   <p style="color:var(--text-faint);font-size:12px;margin-bottom:24px">
     Chronological reconstruction of events from memory forensics artifacts.
     Color-coded by event type. Hover cards for source details.
@@ -509,7 +522,7 @@
      FINDINGS REGISTER
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="icon">🔍</span> Findings Register</div>
+  <div class="section-title"><span class="section-dot rose"></span> Findings Register</div>
   <div class="table-wrap">
     <table>
       <thead>
@@ -533,7 +546,7 @@
      INDICATORS OF COMPROMISE
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="icon">🎯</span> Indicators of Compromise</div>
+  <div class="section-title"><span class="section-dot violet"></span> Indicators of Compromise</div>
   <div class="table-wrap">
     <table class="ioc-table">
       <thead>
@@ -550,7 +563,7 @@
      EVIDENCE REGISTRY
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="icon">🔒</span> Evidence Registry</div>
+  <div class="section-title"><span class="section-dot emerald"></span> Evidence Registry</div>
   {{EVIDENCE_ITEMS}}
 </div>
 
@@ -558,7 +571,7 @@
      TOOLS DEPLOYED
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="icon">🛠</span> Tools Deployed</div>
+  <div class="section-title"><span class="section-dot slate"></span> Tools Deployed</div>
   <div class="table-wrap">
     <table>
       <thead>
