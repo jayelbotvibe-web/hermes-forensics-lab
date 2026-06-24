@@ -191,6 +191,40 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
+     EXECUTIVE SUMMARY CALLOUT
+     ═══════════════════════════════════════════════════════════ */
+  .exec-callout {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--border-strong);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin: 8px 0 0 0;
+  }
+  .exec-callout .exec-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .exec-callout .exec-text {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--ink);
+    max-width: 720px;
+  }
+  .exec-callout .exec-footer {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .exec-callout .exec-footer strong { color: var(--ink); }
+
+  /* ═══════════════════════════════════════════════════════════
      SUMMARY METRICS
      ═══════════════════════════════════════════════════════════ */
   .metric-row {
@@ -475,7 +509,7 @@
     <div class="classification">CONFIDENTIAL</div>
     <h1>Compromised Air Traffic Control Workstation</h1>
     <p class="ref">Case Reference: INC-2026-0624-0001</p>
-    <p class="ref">Examiner: niel &nbsp;·&nbsp; 2026-06-24 21:58 UTC</p>
+    <p class="ref">Examiner: niel &nbsp;·&nbsp; 2026-06-24 22:11 UTC</p>
   </div>
   <div class="cover-stats">
     <div class="cover-stat critical"><span class="num">3</span><span class="lbl">Critical</span></div>
@@ -528,7 +562,13 @@
         <div class="metric-cell"><span class="value">Phishing</span><span class="label">Attack Vector</span></div>
       </div>
 
-      <p style="font-size:13px;color:var(--ink-light);line-height:1.7;max-width:680px">On 2025-07-22, an air traffic control workstation (TSO-ATC-CT412, user 'award') was compromised within 3 minutes of user login via a phishing-delivered trojan (epxlorer.exe) masquerading as explorer.exe. The malware established command-and-control to an attacker-operated Telegram Bot API behind Cloudflare infrastructure 19 minutes after execution. At the time of compromise, ATC_RADAR.exe was actively processing aviation radar data, meaning unauthorized code coexisted with live air traffic operations. This constitutes a potential aviation safety incident with possible regulatory reporting obligations under ICAO Annex 17. Immediate network isolation and escalation to the aviation safety officer are required.</p>
+      <div class="exec-callout">
+        <div class="exec-header">Key Findings</div>
+        <div class="exec-text">On 2025-07-22, an air traffic control workstation (TSO-ATC-CT412, user 'award') was compromised within 3 minutes of user login via a phishing-delivered trojan (epxlorer.exe) masquerading as explorer.exe. The malware established command-and-control to an attacker-operated Telegram Bot API behind Cloudflare infrastructure 19 minutes after execution. At the time of compromise, ATC_RADAR.exe was actively processing aviation radar data, meaning unauthorized code coexisted with live air traffic operations.</div>
+        <div class="exec-footer">
+          <strong>Required Action:</strong> Immediate network isolation of TSO-ATC-CT412 · Escalate to aviation safety officer · Potential ICAO Annex 17 reporting obligation
+        </div>
+      </div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════
@@ -581,93 +621,21 @@
       <div class="section-desc">Each finding includes the observation, interpretation, impact assessment, MITRE ATT&CK mapping, tool traceability, and remediation guidance.</div>
 
       <div class="finding-card">
-      <div class="finding-card-header">
-        <div>
-          <div class="f-id">F-niel-001</div>
-          <h3>Malware Execution: epxlorer.exe Masquerading as explorer.exe</h3>
-        </div>
-        <div style="text-align:right">
-          <span class="badge badge-critical">CRITICAL</span>
-          <span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span>
-        </div>
-      </div>
-      <div class="finding-card-body">
-        <p><strong>Observation:</strong> Process epxlorer.exe (PID 9920) was spawned by explorer.exe (PID 5116) at 2025-07-22 18:53:11 UTC, just 2 minutes 21 seconds after user login. The binary was executed from C:\Users\award\Downloads\epxlorer.exe.</p>
-        <p><strong>Impact:</strong> The malware achieved code execution on an air traffic control workstation within 3 minutes of user login. The filename explicitly targets the Windows shell process (explorer.exe → epxlorer.exe, substituting 'l' with '1') to evade casual observation in Task Manager. This is a targeted attack against an aviation-critical system.</p>
-      </div>
-      <div class="finding-card-meta">
-        <div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1036.005, T1204.002</div></div>
-        <div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div>
-        <div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div>
-        <div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">MemProcFS proc.txt confirmed identical process tree</div></div>
-      </div>
-    </div>
+      <div class="finding-card-header"><div><div class="f-id">F-niel-001</div><h3>Malware Execution: epxlorer.exe Masquerading as explorer.exe</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
+      <div class="finding-card-body"><p><strong>Observation:</strong> Process epxlorer.exe (PID 9920) was spawned by explorer.exe (PID 5116) at 2025-07-22 18:53:11 UTC, just 2 minutes 21 seconds after user login. The binary was executed from C:\Users\award\Downloads\epxlorer.exe.</p><p><strong>Impact:</strong> The malware achieved code execution on an air traffic control workstation within 3 minutes of user login. The filename explicitly targets the Windows shell process (explorer.exe → epxlorer.exe, substituting 'l' with '1') to evade casual observation in Task Manager. This is a targeted attack against an aviation-critical system.</p></div>
+      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1036.005, T1204.002</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">MemProcFS proc.txt confirmed identical process tree</div></div></div></div>
 <div class="finding-card">
-      <div class="finding-card-header">
-        <div>
-          <div class="f-id">F-niel-002</div>
-          <h3>Command and Control via Fraudulent Telegram Bot API</h3>
-        </div>
-        <div style="text-align:right">
-          <span class="badge badge-critical">CRITICAL</span>
-          <span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span>
-        </div>
-      </div>
-      <div class="finding-card-body">
-        <p><strong>Observation:</strong> epxlorer.exe established an outbound HTTPS connection to 104.21.1.247:443 at 2025-07-22 19:12:33 UTC — 19 minutes after execution. The destination IP is a Cloudflare edge node fronting the attacker-controlled domain api-telegram-org.ctf.do. The malware uses Telegram Bot API (token: 8169267144:AAFwkhmXh71SMVcvFLantjTlwlRbT9HdJdU) as its C2 channel, abusing legitimate cloud infrastructure to blend with normal HTTPS traffic.</p>
-        <p><strong>Impact:</strong> Active C2 channel established. Attacker has bidirectional communication with the compromised host. Telegram API provides file upload/download capabilities — data exfiltration or secondary payload delivery is highly probable. Cloudflare proxying makes IP-based blocking ineffective.</p>
-      </div>
-      <div class="finding-card-meta">
-        <div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1102.002, T1573</div></div>
-        <div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div>
-        <div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_netscan.csv</div></div>
-        <div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None — network capture unavailable for encrypted traffic analysis</div></div>
-      </div>
-    </div>
+      <div class="finding-card-header"><div><div class="f-id">F-niel-002</div><h3>Command and Control via Fraudulent Telegram Bot API</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
+      <div class="finding-card-body"><p><strong>Observation:</strong> epxlorer.exe established an outbound HTTPS connection to 104.21.1.247:443 at 2025-07-22 19:12:33 UTC — 19 minutes after execution. The destination IP is a Cloudflare edge node fronting the attacker-controlled domain api-telegram-org.ctf.do. The malware uses Telegram Bot API (token: 8169267144:AAFwkhmXh71SMVcvFLantjTlwlRbT9HdJdU) as its C2 channel, abusing legitimate cloud infrastructure to blend with normal HTTPS traffic.</p><p><strong>Impact:</strong> Active C2 channel established. Attacker has bidirectional communication with the compromised host. Telegram API provides file upload/download capabilities — data exfiltration or secondary payload delivery is highly probable. Cloudflare proxying makes IP-based blocking ineffective.</p></div>
+      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1102.002, T1573</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_netscan.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None — network capture unavailable for encrypted traffic analysis</div></div></div></div>
 <div class="finding-card">
-      <div class="finding-card-header">
-        <div>
-          <div class="f-id">F-niel-003</div>
-          <h3>Phishing Delivery Vector: Browser Download of Malicious Executable</h3>
-        </div>
-        <div style="text-align:right">
-          <span class="badge badge-high">HIGH</span>
-          <span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span>
-        </div>
-      </div>
-      <div class="finding-card-body">
-        <p><strong>Observation:</strong> epxlorer.exe was discovered at three virtual addresses in the memory filescan, including a partial browser download artifact (epxlorer.exe435568.crdownload). The .crdownload extension is specific to Chromium-based browsers (Microsoft Edge in this environment — confirmed by extensive Edge artifacts throughout the filescan). Per CTF intelligence, the phishing email originated from ktso.sec@mailforce.net.</p>
-        <p><strong>Impact:</strong> User 'award' received a phishing email, clicked a link, and downloaded the malware via Microsoft Edge. The .crdownload artifact proves this was a browser-initiated download, not a drive-by or automated deployment. User awareness training gap identified. The phishing sender domain (mailforce.net) should be investigated for additional campaigns targeting the organization.</p>
-      </div>
-      <div class="finding-card-meta">
-        <div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1566.001, T1204.002</div></div>
-        <div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div>
-        <div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_filescan.csv</div></div>
-        <div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None</div></div>
-      </div>
-    </div>
+      <div class="finding-card-header"><div><div class="f-id">F-niel-003</div><h3>Phishing Delivery Vector: Browser Download of Malicious Executable</h3></div><div style="text-align:right"><span class="badge badge-high">HIGH</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
+      <div class="finding-card-body"><p><strong>Observation:</strong> epxlorer.exe was discovered at three virtual addresses in the memory filescan, including a partial browser download artifact (epxlorer.exe435568.crdownload). The .crdownload extension is specific to Chromium-based browsers (Microsoft Edge in this environment — confirmed by extensive Edge artifacts throughout the filescan). Per CTF intelligence, the phishing email originated from ktso.sec@mailforce.net.</p><p><strong>Impact:</strong> User 'award' received a phishing email, clicked a link, and downloaded the malware via Microsoft Edge. The .crdownload artifact proves this was a browser-initiated download, not a drive-by or automated deployment. User awareness training gap identified. The phishing sender domain (mailforce.net) should be investigated for additional campaigns targeting the organization.</p></div>
+      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1566.001, T1204.002</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_filescan.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">None</div></div></div></div>
 <div class="finding-card">
-      <div class="finding-card-header">
-        <div>
-          <div class="f-id">F-niel-004</div>
-          <h3>Critical Asset Compromised: Air Traffic Control Workstation</h3>
-        </div>
-        <div style="text-align:right">
-          <span class="badge badge-critical">CRITICAL</span>
-          <span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span>
-        </div>
-      </div>
-      <div class="finding-card-body">
-        <p><strong>Observation:</strong> The compromised host (TSO-ATC-CT412, user 'award') runs ATC_RADAR.exe — an air traffic control radar application with multiple active processes and network connections to 8.8.8.8 (Google DNS-over-HTTPS). The workstation name (ATC-CT412) and application context confirm this is not a standard enterprise endpoint — it is an aviation operations system. Multiple ATC_RADAR.exe instances ran concurrently with epxlorer.exe, meaning the malware coexisted with active ATC operations.</p>
-        <p><strong>Impact:</strong> This is a worst-case compromise scenario. An attacker gained code execution on a safety-critical aviation system while it was actively processing radar data. Even if the malware's primary purpose was reconnaissance or C2 relay, the mere presence of unauthorized code on an ATC workstation constitutes a potential aviation safety incident. Regulatory reporting obligations may apply (ICAO Annex 17, national aviation authority).</p>
-      </div>
-      <div class="finding-card-meta">
-        <div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1003.001</div></div>
-        <div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div>
-        <div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div>
-        <div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">Dual-tool corroboration</div></div>
-      </div>
-    </div>
+      <div class="finding-card-header"><div><div class="f-id">F-niel-004</div><h3>Critical Asset Compromised: Air Traffic Control Workstation</h3></div><div style="text-align:right"><span class="badge badge-critical">CRITICAL</span><span class="badge badge-high" style="margin-left:4px">HIGH CONFIDENCE</span></div></div>
+      <div class="finding-card-body"><p><strong>Observation:</strong> The compromised host (TSO-ATC-CT412, user 'award') runs ATC_RADAR.exe — an air traffic control radar application with multiple active processes and network connections to 8.8.8.8 (Google DNS-over-HTTPS). The workstation name (ATC-CT412) and application context confirm this is not a standard enterprise endpoint — it is an aviation operations system. Multiple ATC_RADAR.exe instances ran concurrently with epxlorer.exe, meaning the malware coexisted with active ATC operations.</p><p><strong>Impact:</strong> This is a worst-case compromise scenario. An attacker gained code execution on a safety-critical aviation system while it was actively processing radar data. Even if the malware's primary purpose was reconnaissance or C2 relay, the mere presence of unauthorized code on an ATC workstation constitutes a potential aviation safety incident. Regulatory reporting obligations may apply (ICAO Annex 17, national aviation authority).</p></div>
+      <div class="finding-card-meta"><div><div class="meta-label">MITRE ATT&CK</div><div class="meta-value">T1003.001</div></div><div><div class="meta-label">Tool</div><div class="meta-value" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</div></div><div><div class="meta-label">Evidence</div><div class="meta-value">EVID-001 · raw/vol3_pslist.csv</div></div><div><div class="meta-label">Cross-Validation</div><div class="meta-value" style="font-size:10px">Dual-tool corroboration</div></div></div></div>
 
     </div>
 
@@ -688,10 +656,10 @@
 <tr><td><span class="ioc-tag ioc-hash">MD5</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">75ea94b54420c39dcd3d8ce574ba9d34</td><td style="font-size:11px">epxlorer.exe malware hash</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
 <tr><td><span class="ioc-tag ioc-file">Filename</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">epxlorer.exe</td><td style="font-size:11px">Malware binary</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
 <tr><td><span class="ioc-tag ioc-file">File Path</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">C:\Users\award\Downloads\epxlorer.exe</td><td style="font-size:11px">Execution location</td><td><span class="tl-finding-ref">F-niel-001</span></td></tr>
-<tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">104.21.1.247</td><td style="font-size:11px">C2 server (Cloudflare proxy)</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
-<tr><td><span class="ioc-tag ioc-domain">Domain</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">api-telegram-org.ctf.do</td><td style="font-size:11px">Attacker C2 domain</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
+<tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">104.21.1.247</td><td style="font-size:11px">C2 server (Cloudflare)</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
+<tr><td><span class="ioc-tag ioc-domain">Domain</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">api-telegram-org.ctf.do</td><td style="font-size:11px">C2 domain</td><td><span class="tl-finding-ref">F-niel-002</span></td></tr>
 <tr><td><span class="ioc-tag ioc-email">Email</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">ktso.sec@mailforce.net</td><td style="font-size:11px">Phishing sender</td><td><span class="tl-finding-ref">F-niel-003</span></td></tr>
-<tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">172.17.4.12</td><td style="font-size:11px">Compromised host internal IP</td><td><span class="tl-finding-ref">F-niel-004</span></td></tr>
+<tr><td><span class="ioc-tag ioc-ip">IP</span></td><td style="font-family:monospace;font-size:11px;word-break:break-all">172.17.4.12</td><td style="font-size:11px">Compromised host</td><td><span class="tl-finding-ref">F-niel-004</span></td></tr>
 </tbody>
       </table>
     </div>
@@ -729,11 +697,7 @@
       <div class="section-title">Chain of Custody</div>
       <div class="section-desc">All evidence items with cryptographic hashes and acquisition metadata.</div>
 
-      <div class="evidence-card">
-      <div class="ev-label">Evidence ID</div><div class="ev-value">EVID-001 — BelkaCTF_7_CASE250722_KTSOAERO.zip</div>
-      <div class="ev-label" style="margin-top:8px">SHA-256</div><div class="ev-value">3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35</div>
-      <div class="ev-label" style="margin-top:8px">Source</div><div class="ev-value">https://dl.ctf.do/BelkaCTF_7_CASE250722_KTSOAERO.zip</div>
-    </div>
+      <div class="evidence-card"><div class="ev-label">Evidence ID</div><div class="ev-value">EVID-001 — BelkaCTF_7_CASE250722_KTSOAERO.zip</div><div class="ev-label" style="margin-top:8px">SHA-256</div><div class="ev-value">3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35</div><div class="ev-label" style="margin-top:8px">Source</div><div class="ev-value">https://dl.ctf.do/BelkaCTF_7_CASE250722_KTSOAERO.zip</div></div>
 
     </div>
 
@@ -745,18 +709,10 @@
       <div class="section-title">Containment & Eradication</div>
       <div class="section-desc">Prioritized remediation actions per finding. Execute in severity order (Critical → High → Medium).</div>
 
-      <div class="finding-card" style="border-left: 3px solid var(--critical);margin-bottom:16px">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-001</div><h3 style="font-size:14px">Malware Execution: epxlorer.exe Masquerading as explorer.exe</h3></div><span class="badge badge-critical">CRITICAL</span></div>
-      <div class="finding-card-body"><p style="font-size:12px">Immediately isolate TSO-ATC-CT412 from all networks. Kill PID 9920. Quarantine C:\Users\award\Downloads\epxlorer.exe. Do NOT reboot before capturing full disk image — volatile evidence in memory will be lost.</p></div></div>
-<div class="finding-card" style="border-left: 3px solid var(--critical);margin-bottom:16px">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-002</div><h3 style="font-size:14px">Command and Control via Fraudulent Telegram Bot API</h3></div><span class="badge badge-critical">CRITICAL</span></div>
-      <div class="finding-card-body"><p style="font-size:12px">Block outbound HTTPS to api-telegram-org.ctf.do at network perimeter. Block Telegram Bot API endpoints if not business-justified. Deploy SSL inspection for traffic to unknown Cloudflare IPs. Check firewall logs for additional connections from 172.17.4.12 in the 18:50-19:18 UTC window.</p></div></div>
-<div class="finding-card" style="border-left: 3px solid var(--critical);margin-bottom:16px">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-003</div><h3 style="font-size:14px">Phishing Delivery Vector: Browser Download of Malicious Executable</h3></div><span class="badge badge-high">HIGH</span></div>
-      <div class="finding-card-body"><p style="font-size:12px">Search mail server for emails from ktso.sec@mailforce.net — identify all recipients. Purge the phishing email from all inboxes. Block mailforce.net at email gateway. Initiate user awareness training for 'award' and ATC personnel. Review Edge browser security policies — consider disabling automatic execution of downloaded files.</p></div></div>
-<div class="finding-card" style="border-left: 3px solid var(--critical);margin-bottom:16px">
-      <div class="finding-card-header"><div><div class="f-id">F-niel-004</div><h3 style="font-size:14px">Critical Asset Compromised: Air Traffic Control Workstation</h3></div><span class="badge badge-critical">CRITICAL</span></div>
-      <div class="finding-card-body"><p style="font-size:12px">Escalate to aviation safety officer and CISO immediately. This may require mandatory reporting to the national aviation authority. Ground the workstation — do not allow it to process live radar data until forensic imaging is complete and the system is rebuilt from trusted media. Engage the ATC software vendor (ATC_RADAR.exe) to verify software integrity. Review separation requirements between administrative workstations and operational ATC systems.</p></div></div>
+      <div class="finding-card" style="border-left:3px solid var(--critical);margin-bottom:16px"><div class="finding-card-header"><div><div class="f-id">F-niel-001</div><h3 style="font-size:14px">Malware Execution: epxlorer.exe Masquerading as explorer.exe</h3></div><span class="badge badge-critical">CRITICAL</span></div><div class="finding-card-body"><p style="font-size:12px">Immediately isolate TSO-ATC-CT412 from all networks. Kill PID 9920. Quarantine C:\Users\award\Downloads\epxlorer.exe. Do NOT reboot before capturing full disk image — volatile evidence in memory will be lost.</p></div></div>
+<div class="finding-card" style="border-left:3px solid var(--critical);margin-bottom:16px"><div class="finding-card-header"><div><div class="f-id">F-niel-002</div><h3 style="font-size:14px">Command and Control via Fraudulent Telegram Bot API</h3></div><span class="badge badge-critical">CRITICAL</span></div><div class="finding-card-body"><p style="font-size:12px">Block outbound HTTPS to api-telegram-org.ctf.do at network perimeter. Block Telegram Bot API endpoints if not business-justified. Deploy SSL inspection for traffic to unknown Cloudflare IPs. Check firewall logs for additional connections from 172.17.4.12 in the 18:50-19:18 UTC window.</p></div></div>
+<div class="finding-card" style="border-left:3px solid var(--critical);margin-bottom:16px"><div class="finding-card-header"><div><div class="f-id">F-niel-003</div><h3 style="font-size:14px">Phishing Delivery Vector: Browser Download of Malicious Executable</h3></div><span class="badge badge-high">HIGH</span></div><div class="finding-card-body"><p style="font-size:12px">Search mail server for emails from ktso.sec@mailforce.net — identify all recipients. Purge the phishing email from all inboxes. Block mailforce.net at email gateway. Initiate user awareness training for 'award' and ATC personnel. Review Edge browser security policies — consider disabling automatic execution of downloaded files.</p></div></div>
+<div class="finding-card" style="border-left:3px solid var(--critical);margin-bottom:16px"><div class="finding-card-header"><div><div class="f-id">F-niel-004</div><h3 style="font-size:14px">Critical Asset Compromised: Air Traffic Control Workstation</h3></div><span class="badge badge-critical">CRITICAL</span></div><div class="finding-card-body"><p style="font-size:12px">Escalate to aviation safety officer and CISO immediately. This may require mandatory reporting to the national aviation authority. Ground the workstation — do not allow it to process live radar data until forensic imaging is complete and the system is rebuilt from trusted media. Engage the ATC software vendor (ATC_RADAR.exe) to verify software integrity. Review separation requirements between administrative workstations and operational ATC systems.</p></div></div>
 
     </div>
 
@@ -770,10 +726,10 @@
 
       <div class="gap-card"><div class="gap-label">GAP 01 — Disk Image Not Analyzed</div><div class="gap-text">Without filesystem forensics, persistence mechanisms, additional dropped files, and full file-system timeline cannot be confirmed.</div></div>
 <div class="gap-card"><div class="gap-label">GAP 02 — Network Capture Unavailable</div><div class="gap-text">Encrypted C2 traffic cannot be analyzed for data exfiltration volume. Lateral movement within the subnet cannot be assessed.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 03 — Registry Hives Not Examined</div><div class="gap-text">User activity artifacts (RecentDocs, UserAssist) and malware persistence locations (Run keys, scheduled tasks, services) remain unexamined.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 04 — Malware Not Reverse-Engineered</div><div class="gap-text">Full capability assessment of epxlorer.exe (keylogging, screen capture, lateral movement modules, exfiltration) is pending.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 05 — Supplementary Evidence Not Analyzed</div><div class="gap-text">The 5.6 GB supplementary file (SHA-256: e42f5254...) containing Android artifacts was not downloaded or analyzed.</div></div>
-<div class="gap-card"><div class="gap-label">GAP 06 — Single Host Analysis Only</div><div class="gap-text">Only one memory dump was analyzed. Compromise of additional systems on the network cannot be ruled out.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 03 — Registry Hives Not Examined</div><div class="gap-text">User activity artifacts and malware persistence locations (Run keys, scheduled tasks, services) remain unexamined.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 04 — Malware Not Reverse-Engineered</div><div class="gap-text">Full capability assessment of epxlorer.exe is pending.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 05 — Supplementary Evidence Not Analyzed</div><div class="gap-text">The 5.6 GB supplementary file containing Android artifacts was not analyzed.</div></div>
+<div class="gap-card"><div class="gap-label">GAP 06 — Single Host Analysis Only</div><div class="gap-text">Compromise of additional systems on the network cannot be ruled out.</div></div>
 
     </div>
 
@@ -806,7 +762,7 @@
 <div class="report-footer">
   <div class="sig-block">Examiner Signature</div>
   <p>niel · Case INC-2026-0624-0001</p>
-  <p style="margin-top:4px">Hermes Forensics Agent · 2026-06-24 21:58 UTC</p>
+  <p style="margin-top:4px">Hermes Forensics Agent · 2026-06-24 22:11 UTC</p>
   <p style="margin-top:2px;font-size:9px">This report is auto-generated from structured case data. All findings require human review before finalization.</p>
 </div>
 
