@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forensic Analysis Report — {{CASE_ID}}</title>
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     DESIGN SYSTEM — Data-First Forensic Report
+     Clean, labeled, print-native. Minimal color, maximum data.
+     ═══════════════════════════════════════════════════════════ */
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a5e;
+    --paper: #ffffff;
+    --paper-tint: #f8f9fb;
+    --border: #dde1e6;
+    --border-strong: #c4c9d0;
+    --accent: #2563eb;
+    --critical: #dc2626;
+    --high: #ea580c;
+    --medium: #ca8a04;
+    --low: #0891b2;
+    --info: #4f46e5;
+    --muted: #6b7280;
+    --tag-malware: #dc2626;
+    --tag-network: #2563eb;
+    --tag-process: #7c3aed;
+    --tag-file: #059669;
+    --tag-system: #d97706;
+    --tag-user: #6b7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--paper-tint);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 13px;
+    counter-reset: section;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     COVER PAGE
+     ═══════════════════════════════════════════════════════════ */
+  .cover {
+    background: var(--paper);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 56px 40px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 40px;
+    align-items: end;
+  }
+  .cover-left .classification {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--critical);
+    border: 2px solid var(--critical);
+    padding: 4px 14px;
+    margin-bottom: 20px;
+  }
+  .cover-left h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .cover-left .ref {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .cover-stats {
+    display: flex;
+    gap: 32px;
+    text-align: right;
+  }
+  .cover-stat .num {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--ink);
+    display: block;
+    line-height: 1;
+  }
+  .cover-stat .lbl {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .cover-stat.critical .num { color: var(--critical); }
+
+  /* ═══════════════════════════════════════════════════════════
+     SIDEBAR + MAIN LAYOUT
+     ═══════════════════════════════════════════════════════════ */
+  .report-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--paper);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    min-height: 100vh;
+  }
+  .sidebar {
+    background: var(--paper-tint);
+    border-right: 1px solid var(--border);
+    padding: 32px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    font-size: 11px;
+  }
+  .sidebar h4 {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    margin-top: 24px;
+  }
+  .sidebar h4:first-child { margin-top: 0; }
+  .sidebar a {
+    display: block;
+    color: var(--ink-light);
+    text-decoration: none;
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+  }
+  .sidebar a:hover { color: var(--ink); }
+  .sidebar .quick-stat {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    display: block;
+    line-height: 1.2;
+  }
+  .sidebar .quick-label {
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+     ═══════════════════════════════════════════════════════════ */
+  .main-content { padding: 32px 40px; }
+
+  .section-block { margin-bottom: 40px; }
+  .section-block:last-child { margin-bottom: 0; }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .section-label::before {
+    counter-increment: section;
+    content: counter(section, decimal-leading-zero) ".0  ";
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .section-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     SUMMARY METRICS
+     ═══════════════════════════════════════════════════════════ */
+  .metric-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .metric-cell {
+    background: var(--paper);
+    padding: 16px;
+    text-align: center;
+  }
+  .metric-cell .value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--ink);
+    display: block;
+  }
+  .metric-cell .label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .metric-cell.critical .value { color: var(--critical); }
+
+  /* ═══════════════════════════════════════════════════════════
+     TABLES
+     ═══════════════════════════════════════════════════════════ */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    border-bottom: 2px solid var(--border-strong);
+    background: var(--paper-tint);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    word-break: break-word;
+  }
+  tbody tr:nth-child(even) td { background: var(--paper-tint); }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .badge-critical { background: #fef2f2; color: var(--critical); border: 1px solid #fecaca; }
+  .badge-high     { background: #fff7ed; color: var(--high); border: 1px solid #fed7aa; }
+  .badge-medium   { background: #fefce8; color: var(--medium); border: 1px solid #fef08a; }
+  .badge-low      { background: #ecfeff; color: var(--low); border: 1px solid #a5f3fc; }
+  .badge-info     { background: #eef2ff; color: var(--info); border: 1px solid #c7d2fe; }
+
+  /* IOC tags */
+  .ioc-tag {
+    display: inline-block;
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .ioc-ip      { background: #eff6ff; color: var(--tag-network); }
+  .ioc-domain  { background: #ecfdf5; color: var(--tag-file); }
+  .ioc-hash    { background: #f5f3ff; color: var(--tag-process); }
+  .ioc-file    { background: #fef2f2; color: var(--tag-malware); }
+  .ioc-email   { background: #fffbeb; color: var(--tag-system); }
+
+  /* ═══════════════════════════════════════════════════════════
+     TIMELINE — Data table format
+     ═══════════════════════════════════════════════════════════ */
+  .timeline-table td:first-child {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 11px;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .tl-event-type {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .tl-type-malware { background: var(--tag-malware); }
+  .tl-type-network { background: var(--tag-network); }
+  .tl-type-process { background: var(--tag-process); }
+  .tl-type-file    { background: var(--tag-file); }
+  .tl-type-system  { background: var(--tag-system); }
+  .tl-type-user    { background: var(--tag-user); }
+  .tl-finding-ref {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     EVIDENCE CARDS
+     ═══════════════════════════════════════════════════════════ */
+  .evidence-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--paper);
+  }
+  .evidence-card .ev-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .evidence-card .ev-value {
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    word-break: break-all;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     FINDING CARD
+     ═══════════════════════════════════════════════════════════ */
+  .finding-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .finding-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+  }
+  .finding-card-header .f-id {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .finding-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .finding-card-body {
+    padding: 20px;
+  }
+  .finding-card-body p {
+    font-size: 13px;
+    color: var(--ink-light);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .finding-card-body p:last-child { margin-bottom: 0; }
+  .finding-card-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--paper-tint);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .finding-card-meta .meta-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .finding-card-meta .meta-value {
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     GAP CARD
+     ═══════════════════════════════════════════════════════════ */
+  .gap-card {
+    border: 1px dashed var(--border-strong);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    background: var(--paper-tint);
+  }
+  .gap-card .gap-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--medium);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .gap-card .gap-text {
+    font-size: 12px;
+    color: var(--ink-light);
+    line-height: 1.5;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ */
+  .report-footer {
+    text-align: center;
+    padding: 32px 40px;
+    border-top: 2px solid var(--border-strong);
+    color: var(--muted);
+    font-size: 10px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  .report-footer .sig-block {
+    width: 180px;
+    border-top: 1px solid var(--ink);
+    margin: 24px auto 8px;
+    padding-top: 4px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     PRINT
+     ═══════════════════════════════════════════════════════════ */
+  @media print {
+    @page { size: A4; margin: 15mm 12mm; }
+    body { background: white; font-size: 10pt; }
+    .sidebar { display: none; }
+    .report-body { display: block; max-width: 100%; border: none; }
+    .main-content { padding: 0; }
+    .cover { padding: 0 0 24px 0; border: none; }
+    .cover-left h1 { font-size: 20pt; }
+    .section-block { page-break-inside: avoid; }
+    .finding-card { page-break-inside: avoid; }
+    table { font-size: 8pt; }
+    thead th { font-size: 7pt; padding: 6px 8px; }
+    tbody td { font-size: 8pt; padding: 6px 8px; }
+    .metric-row { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COVER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-left">
+    <div class="classification">{{CLASSIFICATION}}</div>
+    <h1>{{CASE_TITLE}}</h1>
+    <p class="ref">Case Reference: {{CASE_ID}}</p>
+    <p class="ref">Examiner: {{EXAMINER}} &nbsp;·&nbsp; {{REPORT_DATE}}</p>
+  </div>
+  <div class="cover-stats">
+    <div class="cover-stat critical"><span class="num">{{CRITICAL_COUNT}}</span><span class="lbl">Critical</span></div>
+    <div class="cover-stat"><span class="num">{{FINDING_COUNT}}</span><span class="lbl">Total Findings</span></div>
+    <div class="cover-stat"><span class="num">{{IOC_COUNT}}</span><span class="lbl">Indicators</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BODY: SIDEBAR + MAIN
+     ═══════════════════════════════════════════════════════════ -->
+<div class="report-body">
+  <nav class="sidebar">
+    <h4>Report Sections</h4>
+    <a href="#s01">01.0 &nbsp;Executive Summary</a>
+    <a href="#s02">02.0 &nbsp;Incident Timeline</a>
+    <a href="#s03">03.0 &nbsp;Findings</a>
+    <a href="#s04">04.0 &nbsp;Indicators of Compromise</a>
+    <a href="#s05">05.0 &nbsp;System Profile</a>
+    <a href="#s06">06.0 &nbsp;Evidence Registry</a>
+    <a href="#s07">07.0 &nbsp;Remediation Actions</a>
+    <a href="#s08">08.0 &nbsp;Investigation Gaps</a>
+    <a href="#s09">09.0 &nbsp;Tools & Methodology</a>
+
+    <h4>Quick Stats</h4>
+    <span class="quick-stat">{{TARGET_HOST}}</span>
+    <span class="quick-label">Target Host</span>
+    <span class="quick-stat">{{TARGET_OS}}</span>
+    <span class="quick-label">Operating System</span>
+    <span class="quick-stat">{{TIMELINE_DURATION}}</span>
+    <span class="quick-label">Investigation Window</span>
+    <span class="quick-stat">{{EVIDENCE_COUNT}}</span>
+    <span class="quick-label">Evidence Items</span>
+  </nav>
+
+  <main class="main-content">
+
+    <!-- ═══════════════════════════════════════════════════════
+         01.0 EXECUTIVE SUMMARY
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s01">
+      <div class="section-label">Executive Summary</div>
+      <div class="section-title">Incident Overview</div>
+      <div class="section-desc">Concise narrative of the incident — what happened, when, impact, and required actions.</div>
+
+      <div class="metric-row">
+        <div class="metric-cell critical"><span class="value">{{CRITICAL_COUNT}}</span><span class="label">Critical Severity</span></div>
+        <div class="metric-cell"><span class="value">{{COMPROMISE_YESNO}}</span><span class="label">Compromise Confirmed</span></div>
+        <div class="metric-cell"><span class="value">{{TIMELINE_MINUTES}} min</span><span class="label">Time to C2</span></div>
+        <div class="metric-cell"><span class="value">{{ATTACK_VECTOR}}</span><span class="label">Attack Vector</span></div>
+      </div>
+
+      <p style="font-size:13px;color:var(--ink-light);line-height:1.7;max-width:680px">{{EXECUTIVE_SUMMARY}}</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         02.0 INCIDENT TIMELINE
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s02">
+      <div class="section-label">Incident Timeline</div>
+      <div class="section-title">Event Reconstruction</div>
+      <div class="section-desc">Chronological sequence of events reconstructed from memory forensics artifacts. Each event is traced to a specific tool and finding reference.</div>
+
+      <table class="timeline-table">
+        <thead>
+          <tr>
+            <th style="width:80px">Time (UTC)</th>
+            <th style="width:80px">Date</th>
+            <th>Event</th>
+            <th style="width:60px">Type</th>
+            <th style="width:120px">Source Tool</th>
+            <th style="width:80px">Finding Ref</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{TIMELINE_ROWS}}
+        </tbody>
+      </table>
+
+      <p style="font-size:10px;color:var(--muted);margin-top:12px">
+        Type legend:
+        <span style="margin-left:12px"><span class="tl-event-type tl-type-malware"></span> Malware</span>
+        <span style="margin-left:8px"><span class="tl-event-type tl-type-network"></span> Network/C2</span>
+        <span style="margin-left:8px"><span class="tl-event-type tl-type-process"></span> Process</span>
+        <span style="margin-left:8px"><span class="tl-event-type tl-type-system"></span> System</span>
+        <span style="margin-left:8px"><span class="tl-event-type tl-type-user"></span> User</span>
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         03.0 FINDINGS
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s03">
+      <div class="section-label">Findings</div>
+      <div class="section-title">Detailed Investigation Findings</div>
+      <div class="section-desc">Each finding includes the observation, interpretation, impact assessment, MITRE ATT&CK mapping, tool traceability, and remediation guidance.</div>
+
+      {{FINDINGS_CARDS}}
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         04.0 IOCs
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s04">
+      <div class="section-label">Indicators of Compromise</div>
+      <div class="section-title">Actionable IOCs</div>
+      <div class="section-desc">Blockable and searchable indicators extracted from findings. Use these to hunt for additional compromised hosts and block attacker infrastructure.</div>
+
+      <table>
+        <thead>
+          <tr><th style="width:100px">Type</th><th>Indicator</th><th style="width:200px">Context</th><th style="width:100px">Source Finding</th></tr>
+        </thead>
+        <tbody>{{IOC_ROWS}}</tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         05.0 SYSTEM PROFILE
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s05">
+      <div class="section-label">System Profile</div>
+      <div class="section-title">Target System Identification</div>
+      <div class="section-desc">System metadata extracted from the memory dump. This is contextual information, not a finding.</div>
+
+      <table>
+        <thead><tr><th style="width:200px">Property</th><th>Value</th></tr></thead>
+        <tbody>{{SYSTEM_PROFILE_ROWS}}</tbody>
+      </table>
+      <p style="font-size:10px;color:var(--muted);margin-top:8px">Source: volatility3 2.7.0 — windows.info.Info</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         06.0 EVIDENCE REGISTRY
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s06">
+      <div class="section-label">Evidence Registry</div>
+      <div class="section-title">Chain of Custody</div>
+      <div class="section-desc">All evidence items with cryptographic hashes and acquisition metadata.</div>
+
+      {{EVIDENCE_CARDS}}
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         07.0 REMEDIATION
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s07">
+      <div class="section-label">Remediation</div>
+      <div class="section-title">Containment & Eradication</div>
+      <div class="section-desc">Prioritized remediation actions per finding. Execute in severity order (Critical → High → Medium).</div>
+
+      {{REMEDIATION_ITEMS}}
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         08.0 INVESTIGATION GAPS
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s08">
+      <div class="section-label">Investigation Gaps</div>
+      <div class="section-title">Limitations & Unresolved Questions</div>
+      <div class="section-desc">Areas not yet examined. Each gap represents uncertainty that should be addressed before final conclusions.</div>
+
+      {{GAP_CARDS}}
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         09.0 TOOLS
+         ═══════════════════════════════════════════════════════ -->
+    <div class="section-block" id="s09">
+      <div class="section-label">Tools & Methodology</div>
+      <div class="section-title">Forensic Toolchain</div>
+      <div class="section-desc">Tools, versions, and runtimes used during this investigation. All tools validated by session canary before evidence analysis.</div>
+
+      <table>
+        <thead><tr><th>Tool</th><th>Version</th><th>Runtime</th><th>Validation Status</th></tr></thead>
+        <tbody>{{TOOLS_ROWS}}</tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="report-footer">
+  <div class="sig-block">Examiner Signature</div>
+  <p>{{EXAMINER}} · Case {{CASE_ID}}</p>
+  <p style="margin-top:4px">Hermes Forensics Agent · {{REPORT_DATE}}</p>
+  <p style="margin-top:2px;font-size:9px">This report is auto-generated from structured case data. All findings require human review before finalization.</p>
+</div>
+
+</body>
+</html>
