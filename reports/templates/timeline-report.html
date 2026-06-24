@@ -113,6 +113,7 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    table-layout: auto;
   }
   th {
     text-align: left;
@@ -125,14 +126,18 @@
     color: var(--text-faint);
     border-bottom: 1px solid var(--border);
     background: rgba(15,23,42,0.8);
+    white-space: nowrap;
   }
   td {
     padding: 10px 14px;
     border-bottom: 1px solid rgba(30,41,59,0.5);
     color: var(--text-dim);
+    vertical-align: top;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
   tr:hover td { background: rgba(139,92,246,0.05); }
-  .badge-cell { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+  .badge-cell { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 600; white-space: nowrap; }
   .badge-high   { background: rgba(251,113,133,0.15); color: var(--rose); }
   .badge-medium { background: rgba(251,191,36,0.15); color: var(--amber); }
   .badge-low    { background: rgba(34,211,238,0.15); color: var(--cyan); }
@@ -305,13 +310,128 @@
     margin: 24px auto 8px;
   }
 
-  /* ── Print ────────────────────────────────────────────── */
+  /* ── Print / PDF ──────────────────────────────────────── */
   @media print {
-    body { background: white; color: #1f2937; font-size: 10pt; }
-    .report-header { background: #0f172a; -webkit-print-color-adjust: exact; }
-    .tl-card, .summary-card, .evidence-item { background: #f8fafc; border-color: #e2e8f0; }
+    @page {
+      size: A4 landscape;
+      margin: 12mm;
+      @bottom-center {
+        content: "Hermes Forensics Agent — Confidential";
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 7pt;
+        color: #94a3b8;
+      }
+    }
+    @page :first {
+      @bottom-center { content: none; }
+    }
+
+    body {
+      background: white;
+      color: #1f2937;
+      font-size: 8pt;
+      line-height: 1.4;
+    }
+
+    /* Color preservation */
+    .report-header, .tl-card, .summary-card, .evidence-item, table, .tl-dot {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .report-header {
+      background: #0f172a !important;
+      padding: 16px 24px;
+    }
+    .report-header h1 { font-size: 16pt; }
+    .report-header .badge { font-size: 7pt; }
+    .report-header .stat .num { font-size: 20pt; }
+    .report-header .stat .lbl { font-size: 6pt; }
+    .report-header .meta { font-size: 8pt; }
+    .report-header .right { gap: 20px; }
+
+    .container { max-width: 100%; padding: 16px 24px; }
+
+    .section { margin-bottom: 20px; page-break-inside: avoid; }
+    .section-title { font-size: 11pt; margin-bottom: 10px; padding-bottom: 6px; }
+
+    .summary-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .summary-card { padding: 10px; }
+    .summary-card .value { font-size: 11pt; }
+    .summary-card .label { font-size: 6pt; }
+
+    /* Timeline compact for print */
+    .timeline { padding-left: 28px; }
+    .timeline::before { left: 12px; }
+    .tl-event { margin-bottom: 16px; padding-left: 22px; }
+    .tl-dot { left: -35px; width: 10px; height: 10px; }
+    .tl-time { font-size: 8pt; }
+    .tl-card { padding: 8px 12px; border-radius: 4px; }
+    .tl-card .tl-title { font-size: 9pt; }
+    .tl-card .tl-desc { font-size: 7pt; }
+    .tl-source, .tl-artifact, .tl-finding-ref { font-size: 6pt; padding: 1px 5px; }
+
+    /* Tables — fixed layout for PDF */
+    .table-wrap { overflow-x: visible; }
+    table {
+      font-size: 7pt;
+      table-layout: fixed;
+      width: 100%;
+    }
+    th {
+      font-size: 6pt;
+      padding: 6px 6px;
+      letter-spacing: 1px;
+    }
+    td {
+      padding: 6px 6px;
+      font-size: 7pt;
+    }
+
+    /* Findings table column widths (6 columns) */
+    .findings-table th:nth-child(1) { width: 8%; }   /* ID */
+    .findings-table th:nth-child(2) { width: 36%; }  /* Finding */
+    .findings-table th:nth-child(3) { width: 12%; }  /* Severity */
+    .findings-table th:nth-child(4) { width: 16%; }  /* MITRE */
+    .findings-table th:nth-child(5) { width: 16%; }  /* Tool */
+    .findings-table th:nth-child(6) { width: 12%; }  /* Evidence */
+
+    /* IOC table column widths */
+    .ioc-table th:nth-child(1) { width: 12%; }
+    .ioc-table th:nth-child(2) { width: 36%; }
+    .ioc-table th:nth-child(3) { width: 32%; }
+    .ioc-table th:nth-child(4) { width: 20%; }
+
+    .badge-cell { font-size: 6pt; padding: 1px 5px; }
+    .ioc-tag { font-size: 6pt; padding: 1px 5px; }
+
+    .evidence-item { padding: 8px 12px; margin-bottom: 6px; }
+    .evidence-item .ev-id { font-size: 8pt; }
+    .evidence-item .ev-hash { font-size: 6pt; }
+
+    .report-footer { padding: 12px 24px; font-size: 7pt; }
+    .report-footer .sig-line { width: 120px; margin: 16px auto 4px; }
+
+    /* Hide screen-only elements */
+    .tl-card, .summary-card, .evidence-item {
+      background: #f8fafc;
+      border-color: #d1d5db;
+    }
+    .tl-card.malware { border-left-color: #dc2626; }
+    .tl-card.network { border-left-color: #0891b2; }
+    .tl-card.process { border-left-color: #7c3aed; }
+    .tl-card.file    { border-left-color: #059669; }
+    .tl-card.system  { border-left-color: #d97706; }
+    .tl-card.user    { border-left-color: #6b7280; }
     .tl-card .tl-title { color: #0f172a; }
-    .tl-card .tl-desc { color: #64748b; }
+    .tl-card .tl-desc { color: #4b5563; }
+    .tl-dot { background: white !important; }
+    .tl-dot.malware  { border-color: #dc2626; background: #fecaca; }
+    .tl-dot.network  { border-color: #0891b2; background: #cffafe; }
+    .tl-dot.process  { border-color: #7c3aed; background: #ede9fe; }
+    .tl-dot.file     { border-color: #059669; background: #d1fae5; }
+    .tl-dot.system   { border-color: #d97706; background: #fef3c7; }
+    .tl-dot.user     { border-color: #6b7280; background: #f3f4f6; }
   }
 </style>
 </head>
@@ -415,7 +535,7 @@
 <div class="section">
   <div class="section-title"><span class="icon">🎯</span> Indicators of Compromise</div>
   <div class="table-wrap">
-    <table>
+    <table class="ioc-table">
       <thead>
         <tr><th>Type</th><th>Indicator</th><th>Context</th><th>Finding</th></tr>
       </thead>
