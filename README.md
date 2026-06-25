@@ -118,7 +118,7 @@ opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs sessi
 
 ![Forensics System Architecture](architecture.png)
 
-**[→ Full interactive version](index.html)**
+**[→ Full interactive version](https://jayelbotvibe-web.github.io/hermes-forensics-lab/)**
 
 ---
 
