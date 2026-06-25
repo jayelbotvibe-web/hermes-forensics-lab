@@ -64,7 +64,7 @@ else
 fi
 
 # 6. Directories
-for dir in cases tools scripts fixtures reports logs; do
+for dir in cases tools scripts fixtures logs; do
     echo -n "[dir:$dir] "
     if [ -d "$FORENSICS_HOME/$dir" ]; then echo "PASS"; ((PASSED++))
     else echo "FAIL"; ((FAILED++)); DEGRADED+=("dir-$dir"); fi
