@@ -55,9 +55,9 @@
       <div class="header-row">
         <div class="pulse-dot"></div>
         <h1>Hermes Forensics Agent — System Architecture</h1>
-        <span class="review-badge" style="background:rgba(139,92,246,0.15);border-color:#8b5cf6;color:#8b5cf6">v3.1 INTEGRITY</span>
+        <span class="review-badge" style="background:rgba(34,211,153,0.15);border-color:#34d399;color:#34d399">v4.0 PONYTAIL</span>
       </div>
-      <p class="subtitle">Docker on Host • SIFT VM (NAT, 12GB) • LUKS Evidence • 14 Scripts • Data-First Reports • v3.1</p>
+      <p class="subtitle">Docker on Host • SIFT VM (Bridged, 12GB) • Host Filesystem • 4 Files (ponytail-pruned) • Supervisor Dispatch • v4.0</p>
     </div>
 
     <div class="diagram-container">
@@ -90,7 +90,7 @@
 
         <!-- HOST MACHINE -->
         <rect x="20" y="20" width="1160" height="780" rx="10" fill="rgba(251, 191, 36, 0.03)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,3"/>
-        <text x="32" y="38" fill="#fbbf24" font-size="9" font-weight="600">Host Machine — niel@laptop (Ubuntu 24.04) — terminal.backend: local</text>
+        <text x="32" y="38" fill="#fbbf24" font-size="9" font-weight="600">Host Machine — niel@laptop (Ubuntu 26.04, 30GB RAM) — terminal.backend: local</text>
 
         <!-- LUKS VOLUME -->
         <rect x="35" y="370" width="1130" height="185" rx="8" fill="rgba(136, 19, 55, 0.03)" stroke="#fb7185" stroke-width="1" stroke-dasharray="6,3"/>
@@ -111,7 +111,7 @@
         <rect x="50" y="170" width="340" height="100" rx="6" fill="rgba(6, 78, 59, 0.25)" stroke="#34d399" stroke-width="2"/>
         <text x="220" y="193" fill="white" font-size="12" font-weight="600" text-anchor="middle">Hermes Forensics Profile</text>
         <text x="220" y="209" fill="#34d399" font-size="9" text-anchor="middle">forensics  |  terminal.backend: local</text>
-        <text x="220" y="227" fill="#94a3b8" font-size="8" text-anchor="middle">8 forensic skills • stability-first persona</text>
+        <text x="220" y="227" fill="#94a3b8" font-size="8" text-anchor="middle">10 forensic skills • dispatched via manager</text>
         <text x="220" y="243" fill="#94a3b8" font-size="8" text-anchor="middle">session canary • cross-validation • chain-of-custody</text>
         <text x="220" y="259" fill="#64748b" font-size="7" text-anchor="middle">Can see ~/forensics/ directly — no SSH schism</text>
 
@@ -133,8 +133,8 @@
 
         <!-- SIFT VM -->
         <rect x="430" y="55" width="735" height="245" rx="10" fill="rgba(34, 211, 238, 0.03)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="6,3"/>
-        <text x="442" y="73" fill="#22d3ee" font-size="10" font-weight="600">SIFT Workstation VM — VMware • 12GB RAM • 4 vCPU</text>
-        <text x="442" y="87" fill="#64748b" font-size="7">Ubuntu 22.04  |  SSH :2222  |  sansforensics@sift  |  NFS mount: /cases/ ← host:~/forensics/</text>
+        <text x="442" y="73" fill="#22d3ee" font-size="10" font-weight="600">SIFT Workstation VM — VMware • Bridged (172.16.146.128) • 12GB RAM</text>
+        <text x="442" y="87" fill="#64748b" font-size="7">Ubuntu 22.04  |  SSH 172.16.146.128  |  sansforensics@sift  |  Bridged network, no port forward</text>
 
         <!-- NATIVE TOOLS -->
         <rect x="450" y="100" width="340" height="185" rx="6" fill="rgba(34, 211, 238, 0.04)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="3,3"/>
@@ -323,39 +323,39 @@
     <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.3);border-radius:0.75rem;padding:1.5rem;margin-top:1.5rem">
       <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
         <div style="width:8px;height:8px;border-radius:50%;background:#8b5cf6"></div>
-        <h3 style="font-size:1rem;font-weight:600">⚡ One-Command Automation — 9 Scripts</h3>
+        <h3 style="font-size:1rem;font-weight:600">⚡ Supervisor Dispatch — 4 Scripts (Ponytail-Pruned)</h3>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;color:#94a3b8;font-size:0.75rem;margin-bottom:0.75rem">
         <div>
-          <strong style="color:#a78bfa">Session Management</strong><br>
-          <code style="color:#c4b5fd">forensics-up.sh</code> — LUKS → VM → Docker → Canary → Ready (~60s)<br>
-          <code style="color:#c4b5fd">forensics-down.sh</code> — Clean shutdown with confirmation prompt<br>
-          <code style="color:#c4b5fd">forensics-case.sh</code> — Case init with stdout capture
+          <strong style="color:#a78bfa">Core Scripts (4)</strong><br>
+          <code style="color:#c4b5fd">session-canary.sh</code> — Validates all 19 tools across 3 runtimes<br>
+          <code style="color:#c4b5fd">sift-exec.sh</code> — SSH wrapper (HOME sandbox-safe, bridged IP)<br>
+          <code style="color:#c4b5fd">down.sh</code> — Clean shutdown (LUKS, SIFT VM, MemProcFS)<br>
+          <code style="color:#c4b5fd">check-labs</code> — One command, both lab canaries
         </div>
         <div>
-          <strong style="color:#a78bfa">Analysis Pipeline</strong><br>
-          <code style="color:#c4b5fd">forensics-register.sh</code> — Hash → verify → evidence.json → audit (6→1)<br>
-          <code style="color:#c4b5fd">forensics-vol3.sh</code> — Volatility3 wrapper, auto-discovers dump<br>
-          <code style="color:#c4b5fd">forensics-mount.sh</code> — MemProcFS mount with stale-cleanup
+          <strong style="color:#a78bfa">Reference</strong><br>
+          <code style="color:#c4b5fd">tool-catalog.yaml</code> — Tool versions, Docker images, pitfalls, fallbacks<br>
+          <code style="color:#c4b5fd">FORENSICS-BUILD-RUNBOOK.md</code> — Step-by-step build guide<br>
+          <code style="color:#c4b5fd">CASE.yaml</code> — Case metadata template (agent-created)
         </div>
         <div>
-          <strong style="color:#a78bfa">Reporting</strong><br>
-          <code style="color:#c4b5fd">forensics-find.sh</code> — Structured findings recorder<br>
-          <code style="color:#c4b5fd">forensics-report.sh</code> — Markdown report from case JSON
+          <strong style="color:#fbbf24">Supervisor Dispatch</strong><br>
+          <code style="color:#c4b5fd">hermes -z "task" --profile forensics</code><br>
+          <span style="color:#64748b">Manager routes, profiles execute. No manual switching.</span>
         </div>
         <div>
-          <strong style="color:#a78bfa">Full Pipeline</strong><br>
-          <code style="color:#c4b5fd">forensics-pipeline.sh</code> — Download → Extract → Register → Vol3 → Report<br>
-          <span style="color:#64748b">One command from URL to forensic report.</span><br><br>
-          <strong style="color:#fbbf24">🆕 HTML Timeline Report</strong><br>
-          <code style="color:#c4b5fd">forensics-report.sh --html</code> — Dark theme report with visual swimlane timeline<br>
-          <span style="color:#64748b">10 color-coded event types · IOCs · findings · evidence registry</span>
+          <strong style="color:#34d399">Ponytail-Pruned</strong><br>
+          <span style="color:#64748b">12 files → 5 files (58% reduction)</span><br>
+          <span style="color:#64748b">Deleted: up.sh, case.sh, register.sh, vol3.sh,</span><br>
+          <span style="color:#64748b">find.sh, report.sh, pipeline.sh</span><br>
+          <span style="color:#64748b">Agent handles what scripts wrapped.</span>
         </div>
       </div>
       <div style="padding-top:0.75rem;border-top:1px solid rgba(139,92,246,0.15)">
         <span style="color:#64748b;font-size:0.7rem">📄 </span>
-        <a href="docs/AUTOMATION.md" style="color:#8b5cf6;font-size:0.7rem;text-decoration:none">AUTOMATION.md</a>
-        <span style="color:#64748b;font-size:0.7rem"> — 13 manual steps eliminated · syntax-checked · troubleshooting guide</span>
+        <a href="FORENSICS-BUILD-RUNBOOK.md" style="color:#8b5cf6;font-size:0.7rem;text-decoration:none">FORENSICS-BUILD-RUNBOOK.md</a>
+        <span style="color:#64748b;font-size:0.7rem"> — Complete build guide · 7 phases · pitfalls documented</span>
       </div>
     </div>
 
