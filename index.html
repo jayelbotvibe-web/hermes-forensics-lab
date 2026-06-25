@@ -55,9 +55,9 @@
       <div class="header-row">
         <div class="pulse-dot"></div>
         <h1>Hermes Forensics Agent — System Architecture</h1>
-        <span class="review-badge" style="background:rgba(34,211,153,0.15);border-color:#34d399;color:#34d399">v4.0 PONYTAIL</span>
+        <span class="review-badge" style="background:rgba(34,211,153,0.15);border-color:#34d399;color:#34d399">v4.1 CLEAN</span>
       </div>
-      <p class="subtitle">Docker on Host • SIFT VM (Bridged, 12GB) • Host Filesystem • 4 Files (ponytail-pruned) • Supervisor Dispatch • v4.0</p>
+      <p class="subtitle">Docker on Host • SIFT VM (NAT vmnet8) • Host Filesystem • 3 Scripts + tool-catalog • 18 checks • v4.1</p>
     </div>
 
     <div class="diagram-container">
@@ -345,10 +345,10 @@
           <span style="color:#64748b">Manager routes, profiles execute. No manual switching.</span>
         </div>
         <div>
-          <strong style="color:#34d399">Ponytail-Pruned</strong><br>
-          <span style="color:#64748b">12 files → 5 files (58% reduction)</span><br>
-          <span style="color:#64748b">Deleted: up.sh, case.sh, register.sh, vol3.sh,</span><br>
-          <span style="color:#64748b">find.sh, report.sh, pipeline.sh</span><br>
+          <strong style="color:#34d399">Folder Structure (18 checks)</strong><br>
+          <span style="color:#64748b">cases/  scripts/  tools/  fixtures/  logs/</span><br>
+          <span style="color:#64748b">Reports live in case dirs (not root)</span><br>
+          <span style="color:#64748b">12 files → 5 files (58% ponytail reduction)</span><br>
           <span style="color:#64748b">Agent handles what scripts wrapped.</span>
         </div>
       </div>
