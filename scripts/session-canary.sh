@@ -4,7 +4,7 @@
 # Exit 0 = all operational, non-zero = degraded
 set -uo pipefail
 
-FORENSICS_HOME="/home/niel/forensics"
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
 DEGRADED=()
 PASSED=0
 FAILED=0
@@ -40,14 +40,14 @@ done
 
 # 3. MemProcFS
 echo -n "[host:memprocfs] "
-if [ -x "/home/niel/memprocfs/memprocfs" ]; then echo "PASS (v5.17.8)"; ((PASSED++))
+if [ -x "${MEMPROCFS_HOME:-$HOME/memprocfs}/memprocfs" ]; then echo "PASS (v5.17.8)"; ((PASSED++))
 else echo "FAIL"; ((FAILED++)); DEGRADED+=("memprocfs"); fi
 
 # 4. SIFT VM connectivity
-SSH_OPTS="-o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i /home/niel/.ssh/id_rsa"
+SSH_OPTS="-o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ${SSH_KEY:-$HOME/.ssh/id_rsa}"
 echo -n "[sift:ssh] "
-SSH_OUT=$(ssh $SSH_OPTS sansforensics@172.16.146.128 "echo ok" 2>&1)
-if [ $? -eq 0 ]; then echo "PASS (172.16.146.128)"; ((PASSED++))
+SSH_OUT=$(ssh $SSH_OPTS sansforensics@${SIFT_HOST:-172.16.146.128} "echo ok" 2>&1)
+if [ $? -eq 0 ]; then echo "PASS (${SIFT_HOST:-172.16.146.128})"; ((PASSED++))
 else echo "DEGRADED ($SSH_OUT)"; DEGRADED+=("sift-ssh"); fi
 
 # 5. SIFT VM tools

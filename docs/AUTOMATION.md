@@ -41,12 +41,12 @@ bash ~/forensics/scripts/forensics-down.sh
 ╚══════════════════════════════════════════════╝
 
 [1/4] LUKS Evidence Volume
-  ✓ Already mounted at /home/niel/forensics
+  ✓ Already mounted at ~/forensics
   6.5G used / 30G total
 
 [2/4] SIFT Workstation VM
   ✓ VM already running
-  ✓ SSH ready — up 6 minutes — IP: 172.16.146.128
+  ✓ SSH ready — up 6 minutes — IP: ${SIFT_HOST:-172.16.146.128}
 
 [3/4] Docker Runtime
   ✓ Docker running — 6 forensic images
@@ -70,7 +70,7 @@ bash ~/forensics/scripts/forensics-down.sh
 
 **What it does:**
 1. Generates a case ID: `INC-YYYY-MMDD-NNNN` (auto-increments)
-2. Creates the full directory structure under `/home/niel/forensics/cases/`
+2. Creates the full directory structure under `~/forensics/cases/`
 3. Writes `CASE.yaml`, empty `evidence.json`, `findings.json`, `timeline.json`
 4. Initializes `audit/actions.jsonl` with the case_open event
 5. Prints case info to stderr, returns CASE_ID to stdout
@@ -167,7 +167,7 @@ bash forensics-mount.sh INC-2026-0624-0001     # Mount
 bash forensics-mount.sh --unmount              # Unmount
 ```
 
-After mounting, browse at `/home/niel/forensics/mounts/mem/`:
+After mounting, browse at `~/forensics/mounts/mem/`:
 - `sys/proc/proc.txt` — Process list
 - `sys/net/tcp.txt` — Network connections
 - `forensic/findevil.txt` — Auto-detected malware
@@ -207,7 +207,7 @@ Captures terminal-style PNG screenshots of all raw tool output. Essential for ev
 
 **Usage:**
 ```bash
-python3 forensics-screenshots.py /home/niel/forensics/cases/INC-2026-0624-0001
+python3 forensics-screenshots.py ~/forensics/cases/INC-2026-0624-0001
 # → case/raw/screenshots/artifact-01.png ... artifact-NN.png
 # → case/raw/screenshots/index.html (gallery viewer)
 ```
@@ -220,7 +220,7 @@ Generates a standalone HTML appendix page with all raw tool output formatted as 
 
 **Usage:**
 ```bash
-python3 forensics-artifacts.py /home/niel/forensics/cases/INC-2026-0624-0001
+python3 forensics-artifacts.py ~/forensics/cases/INC-2026-0624-0001
 # → case/raw/artifacts.html
 ```
 
@@ -260,7 +260,7 @@ Runs all 5 phases: Case Init → Download → Extract+Register → Baseline Vol3
 **Manual check:**
 ```bash
 vmrun list                                    # Is VM running?
-ssh sansforensics@172.16.146.128 'echo OK'    # Can we SSH?
+ssh sansforensics@${SIFT_HOST:-172.16.146.128} 'echo OK'    # Can we SSH?
 bash ~/forensics/scripts/sift-exec.sh whoami  # Wrapper test
 ```
 
@@ -313,7 +313,7 @@ sudo systemctl start docker
 
 **Cause:** The script finds the highest existing case number for today's date. Old cases with high numbers will cause the next number to be high.
 
-**Fix:** Clean up old test case directories from `/home/niel/forensics/cases/`
+**Fix:** Clean up old test case directories from `~/forensics/cases/`
 
 ---
 
@@ -321,7 +321,7 @@ sudo systemctl start docker
 
 ### SIFT VM Networking (NAT)
 
-The SIFT VM runs on VMware NAT networking (`vmnet8`) at `172.16.146.128`. This is more reliable than bridged networking because:
+The SIFT VM runs on VMware NAT networking (`vmnet8`) at `${SIFT_HOST:-172.16.146.128}`. This is more reliable than bridged networking because:
 - DHCP lease comes from VMware's internal server, never expires across sessions
 - No dependency on external network or WiFi AP
 - IP is stable across reboots
@@ -352,21 +352,21 @@ Override the path: `FORENSICS_KEYFILE=/path/to/keyfile bash forensics-up.sh`
 
 | Script | Path |
 |--------|------|
-| System bring-up | `/home/niel/forensics/scripts/forensics-up.sh` |
-| System shutdown | `/home/niel/forensics/scripts/forensics-down.sh` |
-| Case initialization | `/home/niel/forensics/scripts/forensics-case.sh` |
-| Evidence registration | `/home/niel/forensics/scripts/forensics-register.sh` |
-| Volatility3 wrapper | `/home/niel/forensics/scripts/forensics-vol3.sh` |
-| MemProcFS mount | `/home/niel/forensics/scripts/forensics-mount.sh` |
-| Findings recorder | `/home/niel/forensics/scripts/forensics-find.sh` |
-| Report generator | `/home/niel/forensics/scripts/forensics-report.sh` |
-| Evidence screenshots | `/home/niel/forensics/scripts/forensics-screenshots.py` |
-| Artifacts appendix | `/home/niel/forensics/scripts/forensics-artifacts.py` |
-| End-to-end pipeline | `/home/niel/forensics/scripts/forensics-pipeline.sh` |
-| Session canary | `/home/niel/forensics/scripts/session-canary.sh` |
-| SIFT SSH wrapper | `/home/niel/forensics/scripts/sift-exec.sh` |
-| Cross-validation | `/home/niel/forensics/scripts/cross-validate.sh` |
-| Handoff (pentest↔forensics) | `/home/niel/forensics/scripts/handoff.sh` |
+| System bring-up | `~/forensics/scripts/forensics-up.sh` |
+| System shutdown | `~/forensics/scripts/forensics-down.sh` |
+| Case initialization | `~/forensics/scripts/forensics-case.sh` |
+| Evidence registration | `~/forensics/scripts/forensics-register.sh` |
+| Volatility3 wrapper | `~/forensics/scripts/forensics-vol3.sh` |
+| MemProcFS mount | `~/forensics/scripts/forensics-mount.sh` |
+| Findings recorder | `~/forensics/scripts/forensics-find.sh` |
+| Report generator | `~/forensics/scripts/forensics-report.sh` |
+| Evidence screenshots | `~/forensics/scripts/forensics-screenshots.py` |
+| Artifacts appendix | `~/forensics/scripts/forensics-artifacts.py` |
+| End-to-end pipeline | `~/forensics/scripts/forensics-pipeline.sh` |
+| Session canary | `~/forensics/scripts/session-canary.sh` |
+| SIFT SSH wrapper | `~/forensics/scripts/sift-exec.sh` |
+| Cross-validation | `~/forensics/scripts/cross-validate.sh` |
+| Handoff (pentest↔forensics) | `~/forensics/scripts/handoff.sh` |
 
 ---
 

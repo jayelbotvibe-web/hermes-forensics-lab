@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 """Generate evidence artifacts appendix HTML from raw tool output files."""
 import os, sys, json
 from datetime import datetime
 
-CASE_DIR = sys.argv[1] if len(sys.argv) > 1 else "/home/niel/forensics/cases/INC-2026-0624-0001"
+CASE_DIR = sys.argv[1] if len(sys.argv) > 1 else "$FORENSICS_HOME/cases/INC-2026-0624-0001"
 RAW_DIR = os.path.join(CASE_DIR, "raw")
 OUT = os.path.join(RAW_DIR, "artifacts.html")
 

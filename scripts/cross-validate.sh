@@ -26,9 +26,9 @@ case "$ARTIFACT_TYPE" in
 
         # MFTECmd not yet installed in Docker image — see Dockerfile
         # PENDING: add mono + MFTECmd to tools/mft-tools/Dockerfile
-        echo "MFTECmd not available — single-tool analysis only"
-        echo "✓ Single-tool result recorded (no cross-validation possible)"
-        exit 0
+        echo "MFTECmd not available — cross-validation not possible for MFT artifacts"
+        echo "✗ MFT cross-validation unsupported — install MFTECmd in tools/mft-tools/Dockerfile"
+        exit 1
         ;;
 
     *)

@@ -7,13 +7,13 @@ tools:
 
   memprocfs:
     runtime: host_fuse
-    binary: /home/niel/memprocfs/memprocfs  # or install to /usr/local/bin/memprocfs
+    binary: ~/memprocfs/memprocfs  # or install to /usr/local/bin/memprocfs
     version: "5.17.8"
     stability: HIGH
     fallback: volatility3
     note: "Mounts memory dump as virtual filesystem — agent browses like a directory"
     run: >
-      /home/niel/memprocfs/memprocfs -device MEMORY_DUMP -mount /mnt/mem -forensic 1
+      ~/memprocfs/memprocfs -device MEMORY_DUMP -mount /mnt/mem -forensic 1
     unmount: fusermount -u /mnt/mem
     key_paths:
       processes: /mnt/mem/sys/proc/
@@ -32,13 +32,13 @@ tools:
     image: forensics-volatility3:2.7.0
     version: "2.7.0"
     stability: HIGH
-    fallback: volatility2
+    fallback: null
     memory_limit_mb: 16384
-    validation_fixture: /home/niel/forensics/fixtures/win10-22h2.mem
+    # validation_fixture: user-provided (place in $FORENSICS_HOME/fixtures/)
     run: >
       docker run --rm --memory=16g
-      -v /home/niel/forensics/fixtures:/fixtures:ro
-      -v /home/niel/forensics/cases:/output
+      -v $FORENSICS_HOME/fixtures:/fixtures:ro
+      -v $FORENSICS_HOME/cases:/output
       forensics-volatility3:2.7.0
       -f /fixtures/FIXTURE_FILE -o /output/CASE_ID/raw/
     known_issues:
@@ -61,11 +61,11 @@ tools:
     version: "20240512"
     stability: MEDIUM
     fallback: sift_exec mactime
-    validation_fixture: /home/niel/forensics/fixtures/test-disk.E01
+    # validation_fixture: user-provided (place in $FORENSICS_HOME/fixtures/)
     run: >
       docker run --rm
-      -v /home/niel/forensics/fixtures:/fixtures:ro
-      -v /home/niel/forensics/cases:/output
+      -v $FORENSICS_HOME/fixtures:/fixtures:ro
+      -v $FORENSICS_HOME/cases:/output
       forensics-plaso:20240512
       log2timeline.py --storage-file /output/CASE_ID/raw/timeline.plaso /fixtures/FIXTURE_FILE
     known_issues:
@@ -79,16 +79,16 @@ tools:
     stability: MEDIUM
     fallback: null
     note: "analyzeMFT primary; MFTECmd pending — Zimmerman CDN URL changed"
-    validation_fixture: /home/niel/forensics/fixtures/test-mft.bin
+    # validation_fixture: user-provided (place in $FORENSICS_HOME/fixtures/)
     run_mftecmd: >
       docker run --rm
-      -v /home/niel/forensics/cases:/output
+      -v $FORENSICS_HOME/cases:/output
       -v EVIDENCE_DIR:/evidence:ro
       forensics-mft-tools:1.2.0.0
       mono /opt/mftecmd/MFTECmd.dll -f /evidence/EVIDENCE_FILE --csv /output/CASE_ID/raw --csvf mftecmd.csv
     run_analyzemft: >
       docker run --rm
-      -v /home/niel/forensics/cases:/output
+      -v $FORENSICS_HOME/cases:/output
       -v EVIDENCE_DIR:/evidence:ro
       forensics-mft-tools:1.2.0.0
       python3 -m analyzemft -f /evidence/EVIDENCE_FILE -o /output/CASE_ID/raw/analyzemft.csv
@@ -102,7 +102,7 @@ tools:
     version: "4.11.1"
     stability: HIGH
     fallback: null
-    run: /home/niel/forensics/scripts/sift-exec.sh
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
     pin_command: "fls -V 2>&1 | head -1"
 
   foremost:
@@ -110,21 +110,21 @@ tools:
     version: "1.5.7"
     stability: HIGH
     fallback: photorec
-    run: /home/niel/forensics/scripts/sift-exec.sh
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
 
   photorec:
     runtime: sift_vm
     version: "7.1"
     stability: HIGH
     fallback: foremost
-    run: /home/niel/forensics/scripts/sift-exec.sh
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
 
   dc3dd:
     runtime: sift_vm
     version: "7.3.1"
     stability: HIGH
     fallback: ddrescue
-    run: /home/niel/forensics/scripts/sift-exec.sh sudo
+    run: $FORENSICS_HOME/scripts/sift-exec.sh sudo
     known_issues:
       - "Kernel I/O scheduler: block size may drift on 6.x+ kernels. Verify hash post-image."
 
@@ -133,21 +133,21 @@ tools:
     version: "3.0"
     stability: HIGH
     fallback: python-registry
-    run: /home/niel/forensics/scripts/sift-exec.sh
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
 
   hashdeep:
     runtime: sift_vm
     version: "4.4"
     stability: HIGH
     fallback: sha256sum
-    run: /home/niel/forensics/scripts/sift-exec.sh
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
 
   tshark:
     runtime: sift_vm
     version: "4.0"
     stability: HIGH
     fallback: tcpdump
-    run: /home/niel/forensics/scripts/sift-exec.sh
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
 
 # ═══ Fallback chains ═══
 fallbacks:

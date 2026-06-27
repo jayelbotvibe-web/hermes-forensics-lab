@@ -6,14 +6,17 @@
 #         bash forensics-mount.sh --unmount
 #
 # Mounts the first .mem file in the case evidence directory via MemProcFS.
-# Auto-cleans stale mounts. After mounting, browse at /home/niel/forensics/mounts/mem/
+# Auto-cleans stale mounts. After mounting, browse at $FORENSICS_HOME/mounts/mem/
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 ACTION="${1:-}"
-MEMPROCFS="/home/niel/memprocfs/memprocfs"
-MOUNT_POINT="/home/niel/forensics/mounts/mem"
-FORENSICS_DIR="/home/niel/forensics"
+MEMPROCFS="${MEMPROCFS_HOME:-$HOME/memprocfs}/memprocfs"
+MOUNT_POINT="$FORENSICS_HOME/mounts/mem"
+FORENSICS_DIR="$FORENSICS_HOME"
 
 # ── Unmount mode ──────────────────────────────────────────────────────────
 

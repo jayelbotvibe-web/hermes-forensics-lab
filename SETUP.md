@@ -41,7 +41,7 @@ On the **VM**:
 ```bash
 sudo apt install -y sshfs
 mkdir -p ~/cases
-sshfs niel@<HOST_IP>:/home/niel/forensics/cases ~/cases -o ro
+sshfs <user>@<HOST_IP>:~/forensics/cases ~/cases -o ro
 ```
 
 Replace `<HOST_IP>` with your host's IP on the bridged network.

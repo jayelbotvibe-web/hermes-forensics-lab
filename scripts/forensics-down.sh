@@ -10,6 +10,9 @@
 #   2. Gracefully stops the SIFT Workstation VM
 #   3. Locks the LUKS evidence volume
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 RED='\033[0;31m'
@@ -18,9 +21,9 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-FORENSICS_DIR="/home/niel/forensics"
+FORENSICS_DIR="$FORENSICS_HOME"
 LUKS_NAME="forensics_crypt"
-SIFT_VMX="/home/niel/vmware/SIFT/SIFT.vmx"
+SIFT_VMX="${SIFT_VMX:-$HOME/vmware/SIFT/SIFT.vmx}"
 FORCE=false
 
 # ── Args ────────────────────────────────────────────────────────────────
@@ -65,7 +68,7 @@ echo ""
 
 echo -e "${CYAN}[1/3] Unmounting MemProcFS${NC}"
 UNMOUNTED=0
-for mp in /home/niel/forensics/mounts/*/; do
+for mp in $FORENSICS_HOME/mounts/*/; do
     mp="${mp%/}"
     if mountpoint -q "$mp" 2>/dev/null; then
         fusermount -u "$mp" 2>/dev/null && {

@@ -17,6 +17,9 @@
 #       "https://ctf.example.com/dump.zip" \
 #       "3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35"
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 CASE_ID="${1:?Usage: forensics-register.sh CASE_ID /path/to/file [source_url] [expected_sha256]}"
@@ -24,10 +27,10 @@ SRC_FILE="${2:?Usage: forensics-register.sh CASE_ID /path/to/file [source_url] [
 SOURCE_URL="${3:-manual}"
 EXPECTED_SHA256="${4:-}"
 
-FORENSICS_DIR="/home/niel/forensics"
+FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
 EVIDENCE_DIR="$CASE_DIR/evidence"
-EXAMINER="${USER:-niel}"
+EXAMINER="${USER:-examiner}"
 
 if [ ! -d "$CASE_DIR" ]; then
     echo "ERROR: Case directory not found: $CASE_DIR" >&2

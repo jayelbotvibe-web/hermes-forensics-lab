@@ -1,0 +1,5 @@
+jinja2>=3.0
+weasyprint>=60
+markitdown
+# WeasyPrint system dependencies (install via apt):
+#   sudo apt install libpango-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf2.0-0

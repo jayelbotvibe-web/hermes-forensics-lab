@@ -14,8 +14,11 @@
 #
 # Example:
 #   CASE_ID=$(bash ~/forensics/scripts/forensics-case.sh "BelkaCTF 7")
-#   echo "Working in /home/niel/forensics/cases/$CASE_ID"
+#   echo "Working in $FORENSICS_HOME/cases/$CASE_ID"
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 DESCRIPTION="${1:-Unnamed case}"
@@ -28,9 +31,9 @@ case "$DESCRIPTION" in
         exit 0 ;;
 esac
 
-FORENSICS_DIR="/home/niel/forensics"
+FORENSICS_DIR="$FORENSICS_HOME"
 CASES_DIR="$FORENSICS_DIR/cases"
-EXAMINER="${USER:-niel}"
+EXAMINER="${USER:-examiner}"
 
 # Generate case ID
 DATE_PREFIX=$(date -u +%Y-%m%d)

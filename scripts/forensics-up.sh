@@ -14,6 +14,9 @@
 # After this, the forensics system is ready for any investigation.
 # ============================================================================
 # No 'set -e' — this is a bring-up script, it reports degradation, never aborts.
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 RED='\033[0;31m'
@@ -22,12 +25,12 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-FORENSICS_DIR="/home/niel/forensics"
-LUKS_IMG="/home/niel/forensics.img"
+FORENSICS_DIR="$FORENSICS_HOME"
+LUKS_IMG="${FORENSICS_IMG:-$FORENSICS_HOME.img}"
 LUKS_NAME="forensics_crypt"
-LUKS_KEYFILE="${FORENSICS_KEYFILE:-/home/niel/.forensics-keyfile}"
-SIFT_VMX="/home/niel/vmware/SIFT/SIFT.vmx"
-SIFT_HOST="172.16.146.128"
+LUKS_KEYFILE="${FORENSICS_KEYFILE:-$HOME/.forensics-keyfile}"
+SIFT_VMX="${SIFT_VMX:-$HOME/vmware/SIFT/SIFT.vmx}"
+SIFT_HOST="${SIFT_HOST:-172.16.146.128}"
 SIFT_USER="sansforensics"
 SSH_WAIT_MAX=45     # iterations × 4s = 3 min
 SSH_RETRIES=2       # retry cycles if VM doesn't come up

@@ -19,6 +19,9 @@
 #       "BelkaCTF 7 — Memory Dump Analysis" \
 #       "qr9TGBXCGiVoydmccyCq"
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 URL="${1:?Usage: forensics-pipeline.sh URL SHA256 \"Description\" [password]}"
@@ -26,8 +29,8 @@ EXPECTED_SHA256="${2:?}"
 DESCRIPTION="${3:?}"
 ARCHIVE_PASSWORD="${4:-}"
 
-SCRIPTS_DIR="/home/niel/forensics/scripts"
-FORENSICS_DIR="/home/niel/forensics"
+SCRIPTS_DIR="$FORENSICS_HOME/scripts"
+FORENSICS_DIR="$FORENSICS_HOME"
 CASES_DIR="$FORENSICS_DIR/cases"
 
 GREEN='\033[0;32m'

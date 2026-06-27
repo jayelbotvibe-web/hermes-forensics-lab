@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 """
 Generate terminal-style screenshot PNGs from raw tool output files.
 Creates case/raw/screenshots/ with artifact-XX.png images.
@@ -6,7 +9,7 @@ Creates case/raw/screenshots/ with artifact-XX.png images.
 import os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-CASE_DIR = sys.argv[1] if len(sys.argv) > 1 else "/home/niel/forensics/cases/INC-2026-0624-0001"
+CASE_DIR = sys.argv[1] if len(sys.argv) > 1 else "$FORENSICS_HOME/cases/INC-2026-0624-0001"
 RAW_DIR = os.path.join(CASE_DIR, "raw")
 SCREENSHOT_DIR = os.path.join(RAW_DIR, "screenshots")
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)

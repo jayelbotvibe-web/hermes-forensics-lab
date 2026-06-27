@@ -13,9 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # analyzeMFT (Python-based MFT parser — primary tool)
 RUN pip3 install --no-cache-dir analyzemft==2.1.0
 
-# MFTECmd placeholder — Zimmerman tools CDN changed, install manually later
-# RUN wget -q <URL> && unzip ... -d /opt/mftecmd
-
 RUN mkdir -p /evidence /output
 WORKDIR /evidence
 

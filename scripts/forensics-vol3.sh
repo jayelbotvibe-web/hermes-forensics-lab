@@ -19,6 +19,9 @@
 #
 # Output: case/raw/vol3_windows.pslist.PsList.csv (auto-determined extension)
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 CASE_ID="${1:?Usage: forensics-vol3.sh CASE_ID PLUGIN [args...]}"
@@ -26,7 +29,7 @@ PLUGIN="${2:?Usage: forensics-vol3.sh CASE_ID PLUGIN [args...]}"
 shift 2
 PLUGIN_ARGS="$@"
 
-FORENSICS_DIR="/home/niel/forensics"
+FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
 EVIDENCE_DIR="$CASE_DIR/evidence"
 RAW_DIR="$CASE_DIR/raw"

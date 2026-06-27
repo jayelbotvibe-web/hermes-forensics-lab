@@ -6,6 +6,9 @@
 #
 # Confidence: HIGH | MEDIUM | LOW | TENTATIVE
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 CASE_ID="${1:?Usage: forensics-find.sh CASE_ID TITLE CONFIDENCE TOOL COMMAND EVID_REF RAW_OUTPUT FINDING [CROSS_VAL]}"
@@ -18,10 +21,10 @@ RAW_OUTPUT="${7:?}"
 FINDING="${8:?}"
 CROSS_VAL="${9:-}"
 
-FORENSICS_DIR="/home/niel/forensics"
+FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
 FINDINGS_JSON="$CASE_DIR/findings.json"
-EXAMINER="${USER:-niel}"
+EXAMINER="${USER:-examiner}"
 
 if [ ! -d "$CASE_DIR" ]; then
     echo "ERROR: Case directory not found: $CASE_DIR" >&2

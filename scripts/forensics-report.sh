@@ -15,12 +15,15 @@
 #   - PDF output via WeasyPrint (requires: sudo apt install weasyprint)
 #   - Print-friendly via @media print
 # ============================================================================
+# Evidence root (override with env var)
+FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+
 set -uo pipefail
 
 CASE_ID="${1:?Usage: forensics-report.sh CASE_ID [--html|--md|--both]}"
 FORMAT="${2:---both}"
 
-FORENSICS_DIR="/home/niel/forensics"
+FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
 SCRIPTS_DIR="$FORENSICS_DIR/scripts"
 REPORTS_DIR="$CASE_DIR/reports"
@@ -54,7 +57,7 @@ generate_html() {
     local OUT="$REPORTS_DIR/forensic-timeline-report.html"
     local TEMPLATE="$FORENSICS_DIR/../hermes-forensics-lab/reports/templates/timeline-report.html"
     if [ ! -f "$TEMPLATE" ]; then
-        TEMPLATE="/home/niel/hermes-forensics-lab/reports/templates/timeline-report.html"
+        TEMPLATE="$(dirname "$(dirname "$0")")/reports/templates/timeline-report.html"
     fi
 
     # ── Count stats ─────────────────────────────────────────────────────
