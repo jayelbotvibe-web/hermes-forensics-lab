@@ -1,6 +1,6 @@
 # Forensic Tool Catalog — single source of truth
-# All paths ABSOLUTE — profile sandboxes $HOME
-# Agent reads this before ANY tool execution
+# All paths use $FORENSICS_HOME convention. Set FORENSICS_HOME to override.
+# Agent reads this before ANY tool execution and shell-expands paths.
 
 tools:
   # ═══ Memory Forensics Primary (FUSE-based, agent-friendly) ═══
@@ -44,16 +44,6 @@ tools:
     known_issues:
       - "Linux 6.8+ dumps: profile auto-detection may fail — try banners.Banners first"
       - "Windows 11 24H2: some plugins need updated symbols"
-
-  # PENDING: volatility2 Dockerfile not yet built — image tagged but container not created
-  # volatility2:
-  #   runtime: docker
-  #   image: forensics-volatility2:2.6.1
-  #   version: "2.6.1"
-  #   stability: MEDIUM
-  #   fallback: null
-  #   known_issues:
-  #     - "Python 2.7 EOL — security risk. Use only when vol3 can't handle the profile."
 
   plaso:
     runtime: docker
@@ -104,6 +94,10 @@ tools:
     fallback: null
     run: $FORENSICS_HOME/scripts/sift-exec.sh
     pin_command: "fls -V 2>&1 | head -1"
+    examples:
+      - "fls -r -m / evidence.dd > bodyfile.txt"
+      - "fls -o 2048 -r image.dd | grep -i '.exe'"
+      - "icat -o 2048 image.dd 1234 > recovered.dat"
 
   foremost:
     runtime: sift_vm
@@ -111,6 +105,9 @@ tools:
     stability: HIGH
     fallback: photorec
     run: $FORENSICS_HOME/scripts/sift-exec.sh
+    examples:
+      - "foremost -t all -i image.dd -o /output/foremost/"
+      - "foremost -t jpg,png,doc -i evidence.dd"
 
   photorec:
     runtime: sift_vm
@@ -127,6 +124,8 @@ tools:
     run: $FORENSICS_HOME/scripts/sift-exec.sh sudo
     known_issues:
       - "Kernel I/O scheduler: block size may drift on 6.x+ kernels. Verify hash post-image."
+    examples:
+      - "sudo dc3dd if=/dev/sdb of=evidence.dd hash=sha256 log=dc3dd.log"
 
   regripper:
     runtime: sift_vm
@@ -134,6 +133,9 @@ tools:
     stability: HIGH
     fallback: python-registry
     run: $FORENSICS_HOME/scripts/sift-exec.sh
+    examples:
+      - "/usr/lib/regripper/rip.pl -r SYSTEM -p samparse"
+      - "/usr/lib/regripper/rip.pl -r SOFTWARE -p listsoftware"
 
   hashdeep:
     runtime: sift_vm
@@ -148,10 +150,14 @@ tools:
     stability: HIGH
     fallback: tcpdump
     run: $FORENSICS_HOME/scripts/sift-exec.sh
+    examples:
+      - "tshark -r capture.pcap -Y 'http.request' -T fields -e http.host -e http.request.uri"
+      - "tshark -r capture.pcap -z io,stat,1"
+      - "tshark -r capture.pcap -Y 'dns' -T fields -e dns.qry.name | sort -u"
 
 # ═══ Fallback chains ═══
 fallbacks:
-  memory_analysis: [volatility3, volatility2]
+  memory_analysis: [volatility3]  # vol2 removed — Python 2.7 EOL
   mft_parsing: [mft-tools, mft-tools]  # MFTECmd → analyzeMFT (same container)
   timeline: [plaso, sleuthkit]  # plaso → mactime via TSK
   carving: [foremost, photorec]

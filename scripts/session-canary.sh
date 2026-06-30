@@ -40,11 +40,11 @@ done
 
 # 3. MemProcFS
 echo -n "[host:memprocfs] "
-if [ -x "${MEMPROCFS_HOME:-$HOME/memprocfs}/memprocfs" ]; then echo "PASS (v5.17.8)"; ((PASSED++))
+if [ -x "${MEMPROCFS_BIN:-$HOME/memprocfs/memprocfs}" ]; then echo "PASS (v5.17.8)"; ((PASSED++))
 else echo "FAIL"; ((FAILED++)); DEGRADED+=("memprocfs"); fi
 
 # 4. SIFT VM connectivity
-SSH_OPTS="-o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ${SSH_KEY:-$HOME/.ssh/id_rsa}"
+SSH_OPTS="-o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ${SSH_IDENTITY:-$HOME/.ssh/id_rsa}"
 echo -n "[sift:ssh] "
 SSH_OUT=$(ssh $SSH_OPTS sansforensics@${SIFT_HOST:-172.16.146.128} "echo ok" 2>&1)
 if [ $? -eq 0 ]; then echo "PASS (${SIFT_HOST:-172.16.146.128})"; ((PASSED++))
@@ -56,7 +56,14 @@ if [[ ! " ${DEGRADED[*]} " =~ "sift-ssh" ]]; then
     SIFT_EXEC="$FORENSICS_HOME/scripts/sift-exec.sh"
     for tool in "${SIFT_TOOLS[@]}"; do
         echo -n "[sift:${tool##*/}] "
-        if bash "$SIFT_EXEC" "command -v $tool" >/dev/null 2>&1; then echo "PASS"; ((PASSED++))
+        PASS=false
+        for attempt in 1 2; do
+            if bash "$SIFT_EXEC" "command -v $tool" >/dev/null 2>&1; then
+                PASS=true; break
+            fi
+            [ $attempt -lt 2 ] && sleep 2
+        done
+        if $PASS; then echo "PASS"; ((PASSED++))
         else echo "DEGRADED"; DEGRADED+=("sift-${tool##*/}"); fi
     done
 else
