@@ -1,0 +1,8 @@
+# High-Volume Data Exfiltration
+category: Network
+what_you_see: "Large outbound transfer (100MB+) to single external IP over short period; or many small transfers totaling over 1GB over hours"
+interpretation: "Data exfiltration. Attacker staging and extracting collected data. Small-chunk exfil with delays is exfil over C2 channel. Single large transfer is likely separate mechanism."
+mitre_attack: ["TA0010", "T1041"]
+confidence_rule: "HIGH if destination is unknown IP and transfer coincides with access period; LOW if could be cloud backup"
+next_step: "Identify exfiltrated data type. Check destination IP reputation."
+triage_tier: true

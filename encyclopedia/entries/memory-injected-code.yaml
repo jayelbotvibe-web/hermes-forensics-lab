@@ -1,0 +1,8 @@
+# Injected Code Detection
+category: Memory
+what_you_see: "Memory region with PAGE_EXECUTE_READWRITE (RWX) permissions; VAD tag not matching the backing file; MZ header at non-zero offset in a region"
+interpretation: "Code injection. RWX memory is required for dynamically-generated code. Unbacked executable memory with PE header indicates injected DLL or shellcode."
+mitre_attack: ["T1055"]
+confidence_rule: "HIGH for RWX plus unbacked plus PE header combination"
+next_step: "Dump the injected memory region. Analyze the extracted PE file."
+triage_tier: false

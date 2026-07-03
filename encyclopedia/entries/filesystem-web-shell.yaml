@@ -1,0 +1,8 @@
+# Web Shell Indicators
+category: Filesystem
+what_you_see: ".asp, .aspx, .php files in web root (inetpub\\wwwroot) with recent timestamps; web server process (w3wp.exe) spawning cmd.exe or powershell.exe"
+interpretation: "Web shell deployed. Attacker uploaded script-based shell through vulnerable web app. File access plus process creation chain confirms active use."
+mitre_attack: ["T1505.003"]
+confidence_rule: "HIGH for script file plus process chain combination"
+next_step: "Analyze web shell code for capabilities. Check web server access logs for upload request."
+triage_tier: true

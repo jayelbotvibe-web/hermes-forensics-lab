@@ -1,0 +1,8 @@
+# Timestomp (Timestamp Tampering)
+category: Filesystem
+what_you_see: "$STANDARD_INFORMATION timestamps differ from $FILE_NAME timestamps in MFT; file created/modified/accessed timestamps all identical to the second; timestamps predate OS install date"
+interpretation: "Timestomping. Attacker altered file timestamps to blend with system files or mislead timeline analysis. Identical timestamps indicate SetFileTime API was used."
+mitre_attack: ["T1070.006"]
+confidence_rule: "HIGH for SI/FN mismatch; MEDIUM for identical timestamps (some installers do this legitimately)"
+next_step: "Check adjacent MFT entries for normal timestamp patterns. Compare file creation time with surrounding files."
+triage_tier: false

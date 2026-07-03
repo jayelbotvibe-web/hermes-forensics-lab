@@ -1,0 +1,8 @@
+# Prefetch Anomalies
+category: Filesystem
+what_you_see: "Prefetch file for CMD.EXE-hash.pf or POWERSHELL.EXE-hash.pf with run count = 1; prefetch for binary executed from %TEMP%"
+interpretation: "First-time execution of shell from unusual location. Prefetch records every process execution with run count and last-run time."
+mitre_attack: ["T1059"]
+confidence_rule: "HIGH for shell binary from TEMP; MEDIUM for uncommon shell usage in general"
+next_step: "Check prefetch run count. Single execution is more suspicious than repeated use. Correlate with process creation timeline."
+triage_tier: false

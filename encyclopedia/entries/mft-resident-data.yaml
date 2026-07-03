@@ -1,0 +1,8 @@
+# MFT Resident Data Hiding
+category: MFT
+what_you_see: "Small file (under 700 bytes) with data resident inside MFT record; MFT record shows $DATA attribute with Resident flag but file appears empty in Explorer"
+interpretation: "Data hidden in MFT slack. Attacker uses resident data attribute to store information inside the MFT itself, invisible to most forensic tools."
+mitre_attack: ["T1564"]
+confidence_rule: "MEDIUM. Some legitimate tiny files are naturally resident. Check content."
+next_step: "Extract and inspect resident data content. Check if content appears malicious."
+triage_tier: false

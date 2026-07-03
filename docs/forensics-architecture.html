@@ -55,13 +55,13 @@
       <div class="header-row">
         <div class="pulse-dot"></div>
         <h1>Hermes Forensics Agent — System Architecture</h1>
-        <span class="review-badge" style="background:rgba(34,211,153,0.15);border-color:#34d399;color:#34d399">v4.1 CLEAN</span>
+        <span class="review-badge">POST-REVIEW v2</span>
       </div>
-      <p class="subtitle">Docker on Host • SIFT VM (NAT vmnet8) • Host Filesystem • 7 Automation Scripts • v4.1</p>
+      <p class="subtitle">Docker on Host • SIFT VM (VMware, 12GB) via SSH • Evidence on Host LUKS • terminal.backend: local</p>
     </div>
 
     <div class="diagram-container">
-      <svg viewBox="0 0 1200 820" role="img" aria-label="Hermes Forensics System Architecture Diagram: Host machine with LUKS-encrypted evidence volume, Docker containers (volatility3, plaso, mft-tools), SIFT Workstation VM with native forensic tools (sleuthkit, foremost, dc3dd, regripper, hashdeep, tshark), session canary validation, case directories, evidence sources, and human examiner review gate. Flow: hermes -p forensics → session canary → register evidence → execute tools → human review + approve.">
+      <svg viewBox="0 0 1200 820" role="img" aria-label="Hermes Forensics System Architecture Diagram: Host machine with Docker containers, SIFT VM with native tools, session canary, case directories, evidence pipeline, and human-in-the-loop approval workflow.">
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
@@ -90,7 +90,7 @@
 
         <!-- HOST MACHINE -->
         <rect x="20" y="20" width="1160" height="780" rx="10" fill="rgba(251, 191, 36, 0.03)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,3"/>
-        <text x="32" y="38" fill="#fbbf24" font-size="9" font-weight="600">Host Machine — niel@laptop (Ubuntu 26.04, 30GB RAM) — terminal.backend: local</text>
+        <text x="32" y="38" fill="#fbbf24" font-size="9" font-weight="600">Host Machine — niel@laptop (Ubuntu 24.04) — terminal.backend: local</text>
 
         <!-- LUKS VOLUME -->
         <rect x="35" y="370" width="1130" height="185" rx="8" fill="rgba(136, 19, 55, 0.03)" stroke="#fb7185" stroke-width="1" stroke-dasharray="6,3"/>
@@ -111,7 +111,7 @@
         <rect x="50" y="170" width="340" height="100" rx="6" fill="rgba(6, 78, 59, 0.25)" stroke="#34d399" stroke-width="2"/>
         <text x="220" y="193" fill="white" font-size="12" font-weight="600" text-anchor="middle">Hermes Forensics Profile</text>
         <text x="220" y="209" fill="#34d399" font-size="9" text-anchor="middle">forensics  |  terminal.backend: local</text>
-        <text x="220" y="227" fill="#94a3b8" font-size="8" text-anchor="middle">6 forensic skills • dispatched via manager</text>
+        <text x="220" y="227" fill="#94a3b8" font-size="8" text-anchor="middle">8 forensic skills • stability-first persona</text>
         <text x="220" y="243" fill="#94a3b8" font-size="8" text-anchor="middle">session canary • evidence integrity • chain-of-custody</text>
         <text x="220" y="259" fill="#64748b" font-size="7" text-anchor="middle">Can see ~/forensics/ directly — no SSH schism</text>
 
@@ -133,8 +133,8 @@
 
         <!-- SIFT VM -->
         <rect x="430" y="55" width="735" height="245" rx="10" fill="rgba(34, 211, 238, 0.03)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="6,3"/>
-        <text x="442" y="73" fill="#22d3ee" font-size="10" font-weight="600">SIFT Workstation VM — VMware • Bridged (172.16.146.128) • 12GB RAM</text>
-        <text x="442" y="87" fill="#64748b" font-size="7">Ubuntu 22.04  |  SSH 172.16.146.128  |  sansforensics@sift  |  Bridged network, no port forward</text>
+        <text x="442" y="73" fill="#22d3ee" font-size="10" font-weight="600">SIFT Workstation VM — VMware • 12GB RAM • 4 vCPU</text>
+        <text x="442" y="87" fill="#64748b" font-size="7">Ubuntu 22.04  |  SSH :2222  |  sansforensics@sift  |  NFS mount: /cases/ ← host:~/forensics/</text>
 
         <!-- NATIVE TOOLS -->
         <rect x="450" y="100" width="340" height="185" rx="6" fill="rgba(34, 211, 238, 0.04)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="3,3"/>
@@ -196,17 +196,16 @@
 
 
         <!-- CASE DIRECTORIES -->
-        <rect x="50" y="415" width="350" height="145" rx="6" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="1.5"/>
+        <rect x="50" y="415" width="350" height="125" rx="6" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="1.5"/>
         <text x="225" y="435" fill="white" font-size="11" font-weight="600" text-anchor="middle">Case Directories</text>
         <text x="225" y="450" fill="#94a3b8" font-size="8" text-anchor="middle">/cases/INC-YYYY-MMDD-NNNN/</text>
         <line x1="70" y1="456" x2="380" y2="456" stroke="#1e293b" stroke-width="0.5"/>
         <text x="70" y="470" fill="#94a3b8" font-size="7">├── evidence/          (chmod 444)</text>
         <text x="70" y="484" fill="#94a3b8" font-size="7">├── raw/               (stdout/stderr)</text>
-        <text x="70" y="498" fill="#94a3b8" font-size="7">├── reports/           (Data-First HTML/PDF)</text>
+        <text x="70" y="498" fill="#94a3b8" font-size="7">├── reports/           (dark-theme HTML)</text>
         <text x="70" y="512" fill="#94a3b8" font-size="7">├── audit/             (JSONL per backend)</text>
         <text x="70" y="526" fill="#94a3b8" font-size="7">├── findings.json      (DRAFT→APPROVED)</text>
-        <text x="70" y="540" fill="#64748b" font-size="7">├── screenshots/       (evidence PNGs)
-        <text x="70" y="554" fill="#64748b" font-size="7">└── handoff.json       (pentest↔forensics)</text></text>
+        <text x="70" y="540" fill="#64748b" font-size="7">└── handoff.json       (pentest↔forensics)</text>
 
         <!-- FIXTURES -->
         <rect x="420" y="415" width="280" height="125" rx="6" fill="rgba(251, 191, 36, 0.08)" stroke="#fbbf24" stroke-width="1.5"/>
@@ -316,192 +315,6 @@
       </svg>
     </div>
 
-    <!-- ⚡ Automation Banner -->
-    <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.3);border-radius:0.75rem;padding:1.5rem;margin-top:1.5rem">
-      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem">
-        <div style="width:8px;height:8px;border-radius:50%;background:#8b5cf6"></div>
-        <h3 style="font-size:1rem;font-weight:600">⚡ Supervisor Dispatch — 7 Automation Scripts</h3>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;color:#94a3b8;font-size:0.75rem;margin-bottom:0.75rem">
-        <div>
-          <strong style="color:#a78bfa">Core Scripts (4)</strong><br>
-          <code style="color:#c4b5fd">session-canary.sh</code> — Validates all forensic tools across 3 runtimes<br>
-          <code style="color:#c4b5fd">sift-exec.sh</code> — SSH wrapper (HOME sandbox-safe, bridged IP)<br>
-          <code style="color:#c4b5fd">down.sh</code> — Clean shutdown (LUKS, SIFT VM, MemProcFS)<br>
-          <code style="color:#c4b5fd">check-labs</code> — One command, both lab canaries
-        </div>
-        <div>
-          <strong style="color:#a78bfa">Reference</strong><br>
-          <code style="color:#c4b5fd">tool-catalog.yaml</code> — Tool versions, Docker images, pitfalls, fallbacks<br>
-          <code style="color:#c4b5fd">FORENSICS-BUILD-RUNBOOK.md</code> — Step-by-step build guide<br>
-          <code style="color:#c4b5fd">CASE.yaml</code> — Case metadata template (agent-created)
-        </div>
-        <div>
-          <strong style="color:#fbbf24">Supervisor Dispatch</strong><br>
-          <code style="color:#c4b5fd">hermes -z "task" --profile forensics</code><br>
-          <span style="color:#64748b">Manager routes, profiles execute. No manual switching.</span>
-        </div>
-        <div>
-          <strong style="color:#34d399">Folder Structure</strong><br>
-          <span style="color:#64748b">cases/  scripts/  tools/  fixtures/  logs/</span><br>
-          <span style="color:#64748b">Reports live in case dirs (not root)</span><br>
-          <span style="color:#64748b">12 files → 5 files (58% consolidation)</span><br>
-          <span style="color:#64748b">Agent handles what scripts wrapped.</span>
-        </div>
-      </div>
-      <div style="padding-top:0.75rem;border-top:1px solid rgba(139,92,246,0.15)">
-        <span style="color:#64748b;font-size:0.7rem">📄 </span>
-        <a href="FORENSICS-BUILD-RUNBOOK.md" style="color:#8b5cf6;font-size:0.7rem;text-decoration:none">FORENSICS-BUILD-RUNBOOK.md</a>
-        <span style="color:#64748b;font-size:0.7rem"> — Complete build guide · 7 phases · pitfalls documented</span>
-      </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════
-         SAMPLE REPORT — PRIMARY SHOWCASE
-         ═══════════════════════════════════════════════════════ -->
-    <div style="background:linear-gradient(160deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);border:1px solid #2563eb;border-radius:1rem;padding:2rem;margin-top:1.5rem">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-        <div style="width:10px;height:10px;border-radius:2px;background:#2563eb"></div>
-        <h3 style="font-size:1.1rem;font-weight:700;color:white">Forensic Analysis Report — BelkaCTF #7</h3>
-        <span style="font-size:9px;background:rgba(37,99,235,0.2);color:#60a5fa;padding:3px 10px;border-radius:3px;font-weight:600;letter-spacing:1px">DATA-FIRST v4.1</span>
-      </div>
-      
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px">
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
-          <div style="font-size:28px;font-weight:800;color:#dc2626;line-height:1">3</div>
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Critical</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
-          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">4</div>
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Findings</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
-          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">9</div>
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">IOCs</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
-          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">5</div>
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">MITRE ATT&amp;CK</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px 12px;text-align:center">
-          <div style="font-size:28px;font-weight:800;color:#f8fafc;line-height:1">7</div>
-          <div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:2px;margin-top:4px">Timeline Evts</div>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px">
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:8px">Report Features</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;color:#94a3b8">
-            <div>▸ Labeled sections 01–09</div>
-            <div>▸ MITRE ATT&amp;CK mapping</div>
-            <div>▸ Sticky sidebar navigation</div>
-            <div>▸ Remediation per finding</div>
-            <div>▸ Data-table timeline</div>
-            <div>▸ Investigation gaps</div>
-            <div>▸ Finding cards (Obs+Impact)</div>
-            <div>▸ IOC table with tags</div>
-            <div>▸ Executive callout box</div>
-            <div>▸ A4 portrait · print-native</div>
-            <div>▸ Evidence chain of custody</div>
-            <div>▸ System fonts · no deps</div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;justify-content:center">
-          <a href="reports/samples/belkactf7-data-report.html" style="display:block;text-align:center;background:#2563eb;color:white;padding:14px 24px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:0.5px">
-            View HTML Report →
-          </a>
-          <a href="reports/samples/belkactf7-data-report.pdf" style="display:block;text-align:center;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.4);color:#60a5fa;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:600">
-            Download PDF (63KB)
-          </a>
-          
-        </div>
-      </div>
-
-
-    <!-- ═══════════════════════════════════════════════════════
-         REPORT PREVIEWS
-         ═══════════════════════════════════════════════════════ -->
-    <div style="margin-top:24px">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:12px">Report Preview</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-        
-        <!-- EXEC SUMMARY PREVIEW -->
-        <div style="background:#ffffff;border:1px solid #dde1e6;border-radius:8px;overflow:hidden">
-          <div style="background:#f8f9fb;border-bottom:1px solid #dde1e6;padding:8px 12px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px">01.0 Executive Summary</div>
-          <div style="padding:14px">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:10px">
-              <div style="background:#f1f5f9;border-radius:4px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#dc2626">3</div><div style="font-size:7px;color:#64748b;text-transform:uppercase">Critical</div></div>
-              <div style="background:#f1f5f9;border-radius:4px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:#1a1a2e">YES</div><div style="font-size:7px;color:#64748b;text-transform:uppercase">Compromised</div></div>
-            </div>
-            <div style="background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-left:3px solid #2563eb;border-radius:4px;padding:10px">
-              <div style="font-size:8px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Key Findings</div>
-              <div style="font-size:9px;color:#4a4a5e;line-height:1.5">ATC workstation compromised via phishing-delivered trojan within 3 min of login. C2 established to Telegram Bot API. Active radar ops coexisted with malware.</div>
-              <div style="margin-top:6px;padding-top:6px;border-top:1px solid #dde1e6;font-size:7px;color:#64748b"><strong style="color:#1a1a2e">Action:</strong> Isolate host · Escalate to aviation safety</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TIMELINE PREVIEW -->
-        <div style="background:#ffffff;border:1px solid #dde1e6;border-radius:8px;overflow:hidden">
-          <div style="background:#f8f9fb;border-bottom:1px solid #dde1e6;padding:8px 12px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px">02.0 Incident Timeline</div>
-          <div style="padding:10px">
-            <table style="width:100%;border-collapse:collapse;font-size:8px">
-              <tr style="border-bottom:2px solid #c4c9d0;background:#f8f9fb"><th style="text-align:left;padding:4px 6px;color:#6b7280">Time</th><th style="text-align:left;padding:4px 6px;color:#6b7280">Event</th><th style="text-align:left;padding:4px 6px;color:#6b7280">Type</th></tr>
-              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px">18:50:50</td><td style="padding:4px 6px;font-size:7px">User login</td><td style="padding:4px 6px;font-size:7px">USER</td></tr>
-              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px;color:#dc2626">18:53:11</td><td style="padding:4px 6px;font-size:7px;color:#dc2626">epxlorer.exe executed</td><td style="padding:4px 6px;font-size:7px;color:#dc2626">MALWARE</td></tr>
-              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px;color:#2563eb">19:12:33</td><td style="padding:4px 6px;font-size:7px;color:#2563eb">C2 to 104.21.1.247:443</td><td style="padding:4px 6px;font-size:7px;color:#2563eb">C2</td></tr>
-              <tr style="border-bottom:1px solid #dde1e6"><td style="padding:4px 6px;font-family:monospace;font-size:7px">19:15:05</td><td style="padding:4px 6px;font-size:7px">ATC_RADAR active</td><td style="padding:4px 6px;font-size:7px">PROCESS</td></tr>
-              <tr><td style="padding:4px 6px;font-family:monospace;font-size:7px">19:18:53</td><td style="padding:4px 6px;font-size:7px">Dump captured</td><td style="padding:4px 6px;font-size:7px">SYSTEM</td></tr>
-            </table>
-            <div style="font-size:7px;color:#6b7280;margin-top:6px">
-              <span style="display:inline-block;width:6px;height:6px;background:#dc2626;border-radius:1px;vertical-align:middle;margin-right:2px"></span> Malware 
-              <span style="display:inline-block;width:6px;height:6px;background:#2563eb;border-radius:1px;vertical-align:middle;margin:0 2px 0 6px"></span> C2 
-              <span style="display:inline-block;width:6px;height:6px;background:#6b7280;border-radius:1px;vertical-align:middle;margin:0 2px 0 6px"></span> System
-            </div>
-          </div>
-        </div>
-
-        <!-- FINDINGS PREVIEW -->
-        <div style="background:#ffffff;border:1px solid #dde1e6;border-radius:8px;overflow:hidden">
-          <div style="background:#f8f9fb;border-bottom:1px solid #dde1e6;padding:8px 12px;font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px">03.0 Findings</div>
-          <div style="padding:10px">
-            <div style="border:1px solid #dde1e6;border-radius:6px;padding:10px;margin-bottom:8px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                <span style="font-size:7px;color:#6b7280">F-NIEL-001</span>
-                <span style="font-size:7px;font-weight:700;color:#dc2626;background:#fef2f2;padding:1px 5px;border-radius:2px">CRITICAL</span>
-              </div>
-              <div style="font-size:9px;font-weight:600;color:#1a1a2e;margin-bottom:3px">epxlorer.exe Masquerading as explorer.exe</div>
-              <div style="font-size:7px;color:#4a4a5e;line-height:1.4">Spawned 2m21s after login. File at C:\Users\award\Downloads\.</div>
-              <div style="margin-top:6px;display:flex;gap:6px;font-size:7px;color:#6b7280">
-                <span>MITRE: T1036.005</span><span>Tool: vol3 2.7.0</span>
-              </div>
-            </div>
-            <div style="border:1px solid #dde1e6;border-radius:6px;padding:10px">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                <span style="font-size:7px;color:#6b7280">F-NIEL-002</span>
-                <span style="font-size:7px;font-weight:700;color:#dc2626;background:#fef2f2;padding:1px 5px;border-radius:2px">CRITICAL</span>
-              </div>
-              <div style="font-size:9px;font-weight:600;color:#1a1a2e;margin-bottom:3px">C2 via Fraudulent Telegram Bot API</div>
-              <div style="font-size:7px;color:#4a4a5e;line-height:1.4">HTTPS to 104.21.1.247:443, 19 min after execution.</div>
-              <div style="margin-top:6px;display:flex;gap:6px;font-size:7px;color:#6b7280">
-                <span>MITRE: T1102.002</span><span>Tool: vol3 2.7.0</span>
-              </div>
-            </div>
-            <div style="text-align:center;font-size:7px;color:#6b7280;margin-top:6px">+ 2 more findings · 9 IOCs extracted</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-      <div style="padding-top:14px;border-top:1px solid rgba(37,99,235,0.15);font-size:10px;color:#64748b">
-        <code style="color:#93c5fd">forensics-report.sh INC-2026-0624-0001 --html</code> — generates this report from findings.json, timeline.json, evidence.json
-      </div>
-    </div>
-
-    <!-- Info Cards -->
-
-
     <!-- Info Cards -->
     <div class="cards">
       <div class="card">
@@ -550,20 +363,20 @@
       <div class="card">
         <div class="card-header">
           <div class="card-dot violet"></div>
-          <h3>📁 Documentation</h3>
+          <h3>Documents</h3>
         </div>
         <ul>
-          <li>• <a href="docs/AUTOMATION.md" style="color:#a78bfa">AUTOMATION.md</a> — scripts reference, usage, troubleshooting</li>
-          <li>• <a href="SETUP.md" style="color:#a78bfa">SETUP.md</a> — SIFT VM provisioning guide</li>
-          <li>• <a href="README.md" style="color:#a78bfa">README.md</a> — full system documentation</li>
-          <li>• <a href="scripts/" style="color:#a78bfa">scripts/</a> — all 14 automation scripts + 2 Python tools</li>
-          <li>• <a href="skills/" style="color:#a78bfa">skills/</a> — 6 forensics skills</li>
+          <li>• Plan: .hermes/plans/2026-06-23_forensics-*.md</li>
+          <li>• Runbook: ~/forensics/FORENSICS-BUILD-RUNBOOK.md</li>
+          <li>• Diagram: ~/forensics-architecture.html</li>
+          <li>• 4 phases • 20 tasks • ~13 hours</li>
+          <li>• Phase 1 ready to execute</li>
         </ul>
       </div>
     </div>
 
     <p class="footer">
-      Hermes Forensics Agent • v4.1 — Data-First + Evidence Integrity • June 2026 • 7 automation scripts · 13 manual steps eliminated · <a href="docs/AUTOMATION.md" style="color:#8b5cf6">AUTOMATION.md</a>
+      Hermes Forensics Agent • Architecture v4.1 • June 2026 • Runbook: ~/forensics/FORENSICS-BUILD-RUNBOOK.md
     </p>
   </div>
 </body>

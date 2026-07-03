@@ -2,7 +2,7 @@
 # ============================================================================
 # forensics-find.sh — Record a finding to findings.json.
 #
-# Usage:  bash forensics-find.sh CASE_ID "Title" HIGH "volatility3 2.7.0" "windows.pslist" "EVID-001" "raw/vol3_pslist.csv" "Description of finding" [cross-validation]
+# Usage:  bash forensics-find.sh CASE_ID "Title" HIGH "volatility3 2.7.0" "windows.pslist" "EVID-001" "raw/vol3_pslist.csv" "Description of finding"
 #
 # Confidence: HIGH | MEDIUM | LOW | TENTATIVE
 # ============================================================================
@@ -72,7 +72,7 @@ entry = {
     'command': '$COMMAND',
     'evidence_ref': '$EVID_REF',
     'raw_output': '$RAW_OUTPUT',
-    'cross_validation': '$CROSS_VAL',
+    'cross_validation': 'N/A (cross-validation removed in v4.2)',
     'finding': '''$(python3 -c "import json; print(json.dumps('$FINDING'))")'''
 }
 

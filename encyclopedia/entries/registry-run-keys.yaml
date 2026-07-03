@@ -1,0 +1,8 @@
+# Persistence: Run Keys
+category: Registry
+what_you_see: "Entries in HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run, HKCU Run, or RunOnce pointing to suspicious paths (%APPDATA%, %TEMP%, C:\\Users\\Public)"
+interpretation: "Registry-based persistence. Malware will survive reboot because Windows auto-executes these keys at login."
+mitre_attack: ["T1547.001"]
+confidence_rule: "HIGH for paths in user-writable temp directories; MEDIUM for unusual binary names in legitimate paths"
+next_step: "Extract the binary path and hash. Check file creation timestamp against infection timeline."
+triage_tier: true

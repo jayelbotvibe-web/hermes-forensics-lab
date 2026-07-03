@@ -1,0 +1,8 @@
+# Hidden Files in System Directories
+category: Filesystem
+what_you_see: "Files with ATTRIB +H (hidden) or +S (system) attributes in C:\\Windows\\Temp, C:\\ProgramData, C:\\Users\\Public; files matching system file names but in wrong directories"
+interpretation: "Attacker hiding tools and staged data. System+hidden attributes make files invisible to default Explorer view."
+mitre_attack: ["T1564.001"]
+confidence_rule: "HIGH for executables in Temp with system attributes; LOW for log/config files"
+next_step: "List all hidden+system files in user-writable directories. Check file hashes."
+triage_tier: true

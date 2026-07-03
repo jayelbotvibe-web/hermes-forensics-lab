@@ -1,0 +1,8 @@
+# UsnJrnl Anomalies
+category: MFT
+what_you_see: "High volume of USN_RECORD entries for single file (rename then delete then create then rename cycle); DELETE and CLOSE entries for security logs (Security.evtx)"
+interpretation: "File manipulation burst suggests anti-forensic activity. Security log deletion indicates attacker covering tracks. Rename cycles suggest file staging."
+mitre_attack: ["T1070.001", "T1070.004"]
+confidence_rule: "HIGH for security log deletion; MEDIUM for rename cycles (installers do this legitimately)"
+next_step: "Correlate with attacker activity window. Check which account performed the deletions."
+triage_tier: false

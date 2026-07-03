@@ -79,7 +79,6 @@ Pass paths as: `/home/sansforensics/cases/CASE_ID/evidence/FILE`
 | Case template | /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/ |
 | Tool catalog | /home/niel/forensics/tools/tool-catalog.yaml |
 | Session canary | /home/niel/forensics/scripts/session-canary.sh |
-| Cross-validation | /home/niel/forensics/scripts/cross-validate.sh |
 | SSH wrapper | /home/niel/forensics/scripts/sift-exec.sh |
 | Handoff | /home/niel/forensics/scripts/handoff.sh |
 | Validation fixtures | /home/niel/forensics/fixtures/ |
@@ -173,7 +172,7 @@ Every finding MUST include:
 - Cross-validation result
 
 Confidence definitions:
-- HIGH: Canary validated, dual-tool cross-checked, known OS
+- HIGH: Canary validated, encyclopedia match, known OS
 - MEDIUM: Canary validated, single tool, known OS
 - LOW: Canary passed, evidence OS unknown
 - TENTATIVE: Canary failed — triage only
@@ -210,10 +209,7 @@ Confidence definitions:
 
 ## Cross-Validation
 
-For critical artifacts (MFT, registry), run dual-tool verification:
-```bash
-bash /home/niel/forensics/scripts/cross-validate.sh mft /path/to/mft CASE_DIR
-```
+For critical artifacts, consult the artifact encyclopedia for interpretation guidance and run a second tool for manual verification.
 Delta >5% → flag for human review.
 
 ---
@@ -239,3 +235,98 @@ Forensics agent checks for pending handoffs on session start. Look for handoff.j
 6. **SIFT tool paths on VM** — pass as /home/sansforensics/cases/CASE_ID/evidence/FILE.
 7. **Session canary** — DEGRADED tools are triage-only. Do not use for evidentiary analysis.
 8. **Docker images** — never rebuild mid-investigation. If validation fails, flag it.
+# File Carving
+
+## When to Use
+- Recovering deleted files from disk images
+- Extracting files by file signature (headers/footers)
+- Need to run both foremost AND photorec for completeness (different signature databases)
+
+## Pre-flight
+1. Read /home/niel/forensics/tools/tool-catalog.yaml
+2. Both foremost AND photorec must be run — they use different signature DBs
+3. Carving output goes to a subdirectory: /cases/CASE_ID/raw/carved/
+
+## Workflow
+
+### Step 1: Create output directory
+```bash
+mkdir -p /home/niel/forensics/cases/CASE_ID/raw/carved/{foremost,photorec}
+```
+
+### Step 2: Run foremost
+```bash
+bash /home/niel/forensics/scripts/sift-exec.sh "foremost -i /cases/CASE_ID/evidence/DISK_IMAGE -o /cases/CASE_ID/raw/carved/foremost"
+```
+
+### Step 3: Run photorec
+```bash
+bash /home/niel/forensics/scripts/sift-exec.sh "photorec /log /d /cases/CASE_ID/raw/carved/photorec /cases/CASE_ID/evidence/DISK_IMAGE"
+```
+
+### Step 4: Compare results
+Both tools use different file signature databases — files found by one may not be found by the other.
+
+### Step 5: Hash recovered files
+```bash
+bash /home/niel/forensics/scripts/sift-exec.sh "hashdeep -c sha256 -r /cases/CASE_ID/raw/carved/"
+```
+
+### Step 6: Create findings
+For significant recovered files: filename, format, size, hash, and relevance to case.
+
+## Pitfalls
+- NTFS compression: carved files may be incomplete
+- File fragmentation: carvers recover the first fragment only
+- Large images: carving runs for hours — warn user and use background execution
+- False positives: carvers may produce junk files from random byte sequences
+- Space requirement: carved output can exceed source image size
+
+---
+
+# Disk Imaging
+
+## When to Use
+- Creating a forensic image of a disk, partition, or removable media
+- Verifying an existing image's integrity
+- Converting between image formats (raw, E01, AFF)
+
+## Pre-flight
+1. Identify source: `bash /home/niel/forensics/scripts/sift-exec.sh "lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL"`
+2. Verify free space: `df -h /home/niel/forensics/cases/`
+3. Read /home/niel/forensics/tools/tool-catalog.yaml for dc3dd known issues
+4. Confirm NOT mounted: `bash /home/niel/forensics/scripts/sift-exec.sh "mount | grep DEVICE_NAME"`
+
+## Workflow
+
+### Step 1: Hash source (pre-image)
+```bash
+bash /home/niel/forensics/scripts/sift-exec.sh "sudo hashdeep -c sha256 DEVICE > /cases/CASE_ID/raw/source-hash.txt"
+```
+
+### Step 2: Create image (dc3dd primary)
+```bash
+bash /home/niel/forensics/scripts/sift-exec.sh "sudo dc3dd if=DEVICE of=/cases/CASE_ID/evidence/IMAGE_NAME.raw hash=sha256 log=/cases/CASE_ID/raw/dc3dd.log"
+```
+
+### Step 3: If dc3dd fails, fallback to ddrescue
+```bash
+bash /home/niel/forensics/scripts/sift-exec.sh "sudo ddrescue -f DEVICE /cases/CASE_ID/evidence/IMAGE_NAME.raw /cases/CASE_ID/raw/ddrescue.log"
+```
+
+### Step 4: Verify image hash matches source
+Compare source-hash.txt vs image hash.
+
+### Step 5: Set read-only
+```bash
+chmod 444 /home/niel/forensics/cases/CASE_ID/evidence/IMAGE_NAME.raw
+```
+
+### Step 6: Register in evidence.json
+
+## Pitfalls
+- Kernel I/O scheduler: dc3dd block size may drift on 6.x+ kernels — ALWAYS verify hash
+- SSD TRIM: SSDs return zeros for trimmed blocks — image immediately after seizure
+- USB disconnect: always verify hash post-image
+- NEVER image a mounted filesystem — writes happen during imaging
+- Write-blocker: for evidentiary imaging, always use hardware write-blocker

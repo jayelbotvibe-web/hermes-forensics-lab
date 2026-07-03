@@ -1,0 +1,8 @@
+# Process Hollowing Indicators
+category: Process
+what_you_see: "Process with VadS (shared memory) in VAD tree but different image on disk; CreateProcess(SUSPENDED) then NtUnmapViewOfSection then VirtualAllocEx then SetThreadContext then ResumeThread sequence"
+interpretation: "Process hollowing. Attacker starts legitimate process suspended, unmaps its code, injects malware, then resumes. The process appears legitimate in Task Manager but executes malicious code."
+mitre_attack: ["T1055.012"]
+confidence_rule: "HIGH from VAD analysis; TENTATIVE from parent-child alone"
+next_step: "Extract injected memory region for analysis. Check network connections from the hollowed process."
+triage_tier: false

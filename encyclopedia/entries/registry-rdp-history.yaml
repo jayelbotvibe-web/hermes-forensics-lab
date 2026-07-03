@@ -1,0 +1,8 @@
+# RDP Connection History
+category: Registry
+what_you_see: "HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers with external IPs; Default UserName hint"
+interpretation: "Outbound RDP connections from this host. External IPs suggest attacker used this host as jump box for lateral RDP."
+mitre_attack: ["T1021.001"]
+confidence_rule: "HIGH. RDP client caches destination hostnames/IPs automatically."
+next_step: "Check RDP connection timestamps against infection timeline. Investigate destination IPs."
+triage_tier: false

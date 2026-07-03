@@ -1,0 +1,8 @@
+# 32-bit Binary on 64-bit OS (Wow64)
+category: Process
+what_you_see: "Process has Wow64=True in volatility3 pslist output (or Image Type = x86 on 64-bit Windows)"
+interpretation: "32-bit executable running via WoW64 subsystem on 64-bit OS. While many legitimate apps ship 32-bit, modern malware frequently uses 32-bit payloads for maximum compatibility."
+mitre_attack: []
+confidence_rule: "LOW as standalone indicator; MEDIUM when combined with typo-squatted name or suspicious path"
+next_step: "Note in finding metadata. Alone it means nothing. Combined with name/path/parent anomalies, it strengthens the case."
+triage_tier: false

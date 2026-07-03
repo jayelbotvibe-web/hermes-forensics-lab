@@ -1,0 +1,8 @@
+# Beaconing Pattern
+category: Network
+what_you_see: "Regular periodic connections to same external IP, every 30/60/300 seconds with consistent packet size"
+interpretation: "C2 beacon. Malware phoning home on a timer. Period and jitter profile can fingerprint the C2 framework (Cobalt Strike defaults to 60s with 0% jitter; Meterpreter uses 5s default)."
+mitre_attack: ["T1071.001", "T1573"]
+confidence_rule: "HIGH if period is regular and destination has no business purpose; MEDIUM if could be update check"
+next_step: "Check process responsible (netscan then PID then pslist). Extract destination IP, check against threat intel."
+triage_tier: true

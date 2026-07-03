@@ -1,0 +1,8 @@
+# User Activity: Typed URLs / Recent Files
+category: Registry
+what_you_see: "NTUSER.DAT\\Software\\Microsoft\\Internet Explorer\\TypedURLs; RecentDocs key; Shellbags (USRCLASS.DAT ShellBags) showing folders the user browsed"
+interpretation: "User activity profiling. Shows what the user typed, opened, and browsed. Not malicious on its own but establishes user behavior baseline."
+mitre_attack: []
+confidence_rule: "HIGH for shellbags and typed URLs (hard to forge); MEDIUM for RecentDocs (can be cleared)"
+next_step: "Correlate typed URLs with browser history. Shellbags reveal directory enumeration. Check for attacker staging directories."
+triage_tier: false

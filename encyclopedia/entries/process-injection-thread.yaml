@@ -1,0 +1,8 @@
+# Injection via Thread Creation
+category: Process
+what_you_see: "CreateRemoteThread targeting a different process; thread start address in unbacked memory region"
+interpretation: "DLL injection or shellcode injection into a target process (typically explorer.exe, svchost.exe, or browser process)."
+mitre_attack: ["T1055.001", "T1055"]
+confidence_rule: "HIGH if target is unexpected (e.g., notepad.exe receiving threads from word.exe)"
+next_step: "Analyze injected code region. Trace the injecting process."
+triage_tier: false

@@ -1,0 +1,14 @@
+# project-metadata.yaml — Single source of truth for counts and versions.
+# README badges, index.html stats, and docs MUST reference these values.
+# Update here when numbers change — do not edit them inline in multiple files.
+
+tool_count: 12
+script_count: 7        # user-facing automation scripts (what README dir tree lists)
+total_script_files: 16 # 14 .sh + 2 .py in scripts/
+python_helpers: 2      # forensics-screenshots.py, forensics-artifacts.py
+version: "4.1.0"
+sleuthkit_version: "4.11.1"
+artifact_kb_entries: 33
+runtimes: 3            # docker, host_fuse, sift_vm
+canary_checks: 10      # actual checks in session-canary.sh
+skills: 6

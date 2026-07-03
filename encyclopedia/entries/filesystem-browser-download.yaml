@@ -1,0 +1,8 @@
+# Browser Download Artifacts
+category: Filesystem
+what_you_see: "Files with .crdownload extension in user profile directories. Zone.Identifier alternate data stream on downloaded executables. Files in Downloads directory with ZoneId=3 in their ADS."
+interpretation: "Browser-initiated download. .crdownload is Chromium temporary file extension during active downloads. Zone.Identifier:$DATA ADS contains the download source URL and security zone. Proves the file arrived via browser download, not USB or network share. ZoneId=3 means Internet Zone (untrusted source)."
+mitre_attack: ["T1566.001", "T1204.002"]
+confidence_rule: "HIGH. .crdownload extension definitively proves browser download origin. Zone.Identifier ADS with ZoneId=3 proves the file came from the internet."
+next_step: "Extract Zone.Identifier stream to recover download URL. Correlate download timestamp with browser history. Check email security gateway logs for same filename or URL."
+triage_tier: true

@@ -145,12 +145,11 @@ for f in data:
     conf = f.get('confidence', '?')
     tool = f.get('tool', '?')
     evid = f.get('evidence_ref', '?')
-    cross = f.get('cross_validation', 'None')
     badge = {'HIGH':'badge-high','MEDIUM':'badge-medium','LOW':'badge-low'}.get(conf, 'badge-low')
-    print(f\"<tr><td><span class='mono'>{fid}</span></td><td>{title}</td><td><span class='badge-cell {badge}'>{conf}</span></td><td class='mono' style='font-size:11px'>{tool}</td><td>{evid}</td><td style='font-size:11px'>{cross}</td></tr>\")
+    print(f\"<tr><td><span class='mono'>{fid}</span></td><td>{title}</td><td><span class='badge-cell {badge}'>{conf}</span></td><td class='mono' style='font-size:11px'>{tool}</td><td>{evid}</td></tr>\")
 " 2>/dev/null)
     else
-        FINDINGS_ROWS='<tr><td colspan="6" style="color:var(--text-faint)">No findings recorded</td></tr>'
+        FINDINGS_ROWS='<tr><td colspan="5" style="color:var(--text-faint)">No findings recorded</td></tr>'
     fi
 
     # ── Generate IOC table ──────────────────────────────────────────────
@@ -231,12 +230,16 @@ for e in data:
         TOOLS_ROWS=$(python3 -c "
 import json
 data = json.load(open('$TOOL_VERSIONS_JSON'))
+# Infrastructure entries — not forensic tools, skip from tools table
+INFRA_KEYS = {'sift-vm', 'session_canary', 'sift_vm', 'session-canary'}
 for name, info in data.items():
+    if name in INFRA_KEYS:
+        continue
     if isinstance(info, dict):
-        ver = info.get('version', '?')
-        runtime = info.get('runtime', '?')
+        ver = info.get('version', 'N/A')
+        runtime = info.get('runtime', 'N/A')
         ok = '✅' if info.get('validated') else '⚠️ DEGRADED'
-        print(f'<tr><td>{name}</td><td class=\"mono\">{ver}</td><td>{runtime}</td><td>{ok}</td></tr>')
+        print(f\"<tr><td>{name}</td><td class=\\\"mono\\\">{ver}</td><td>{runtime}</td><td>{ok}</td></tr>\")
 " 2>/dev/null)
     else
         TOOLS_ROWS='<tr><td colspan="4" style="color:var(--text-faint)">Tool versions not recorded</td></tr>'
@@ -382,6 +385,30 @@ HTMLEOF
 
 case "$FORMAT" in
     --html)  generate_html ;;
+    --json)  JSON_FILE="$REPORTS_DIR/forensic-report.json"
+             python3 -c "
+import json, os
+case_dir = '$CASE_DIR'
+report = {}
+for fname in ['CASE.yaml', 'findings.json', 'timeline.json', 'evidence.json']:
+    path = os.path.join(case_dir, fname)
+    if os.path.exists(path):
+        if fname.endswith('.yaml'):
+            data = {}
+            with open(path) as fh:
+                for line in fh:
+                    if ':' in line:
+                        k, v = line.split(':', 1)
+                        data[k.strip()] = v.strip().strip('\"')
+            report[fname.replace('.yaml','')] = data
+        else:
+            with open(path) as fh:
+                report[fname.replace('.json','')] = json.load(fh)
+with open('$JSON_FILE', 'w') as fh:
+    json.dump(report, fh, indent=2, default=str)
+print(f'  JSON: $JSON_FILE')
+" 2>/dev/null || echo "  JSON generation failed"
+             echo "  JSON: $JSON_FILE" ;;
     --pdf)   generate_html
              HTML_FILE="$REPORTS_DIR/forensic-timeline-report.html"
              PDF_FILE="$REPORTS_DIR/forensic-timeline-report.pdf"
@@ -403,5 +430,5 @@ case "$FORMAT" in
              echo ""
              echo "Markdown report: $REPORTS_DIR/forensic-report.md" ;;
     --md)    echo "Markdown report: $REPORTS_DIR/forensic-report.md" ;;
-    *)       echo "Usage: forensics-report.sh CASE_ID [--html|--pdf|--md|--all]" >&2; exit 1 ;;
+    *)       echo "Usage: forensics-report.sh CASE_ID [--html|--pdf|--json|--md|--all]" >&2; exit 1 ;;
 esac

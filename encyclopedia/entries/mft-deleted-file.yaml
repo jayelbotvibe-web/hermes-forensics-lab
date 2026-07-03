@@ -1,0 +1,8 @@
+# Deleted File Recovery Indicators
+category: MFT
+what_you_see: "MFT record with IN_USE flag = 0 (free/available) but $DATA attribute still points to valid clusters; filename still readable"
+interpretation: "Recently deleted file. MFT record not yet reused. File content may still be recoverable if clusters have not been overwritten."
+mitre_attack: ["T1070.004"]
+confidence_rule: "Recovery confidence depends on time since deletion and disk activity"
+next_step: "Attempt file recovery via icat or sleuthkit tools. Check UsnJrnl for deletion timestamp."
+triage_tier: false

@@ -83,7 +83,7 @@ tools:
       forensics-mft-tools:1.2.0.0
       python3 -m analyzemft -f /evidence/EVIDENCE_FILE -o /output/CASE_ID/raw/analyzemft.csv
     known_issues:
-      - "Windows 11 24H2 MFT: new $STANDARD_INFORMATION flags — cross-validate with analyzeMFT"
+      - "Windows 11 24H2 MFT: new $STANDARD_INFORMATION flags — verify with analyzeMFT"
 
   # ═══ SIFT VM native (via SSH wrapper) ═══
 
@@ -126,6 +126,15 @@ tools:
       - "Kernel I/O scheduler: block size may drift on 6.x+ kernels. Verify hash post-image."
     examples:
       - "sudo dc3dd if=/dev/sdb of=evidence.dd hash=sha256 log=dc3dd.log"
+
+  ddrescue:
+    runtime: sift_vm
+    version: "1.27"
+    stability: HIGH
+    fallback: null
+    run: $FORENSICS_HOME/scripts/sift-exec.sh
+    examples:
+      - "ddrescue -f /dev/sdb evidence.dd rescue.log"
 
   regripper:
     runtime: sift_vm

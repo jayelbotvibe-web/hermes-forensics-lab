@@ -1,0 +1,8 @@
+# Lateral Movement: SMB to Multiple Hosts
+category: Network
+what_you_see: "Process connecting to port 445 on multiple internal IPs in rapid succession"
+interpretation: "Lateral movement probing. Attacker scanning for open SMB shares or attempting PsExec/wmic remote execution."
+mitre_attack: ["T1021.002", "T1046"]
+confidence_rule: "HIGH from single source process touching 5+ internal hosts"
+next_step: "Identify source process. Check for successful authentications on target hosts."
+triage_tier: false

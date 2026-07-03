@@ -1,0 +1,8 @@
+# Network Connections from Injected Process
+category: Memory
+what_you_see: "netscan shows TCP connection from PID that also has injected memory regions (RWX, VAD anomaly)"
+interpretation: "Active C2 from injected process. The injection enabled network communication. PID on connection plus memory analysis on same PID equals correlated evidence."
+mitre_attack: ["T1055", "T1071"]
+confidence_rule: "HIGH. Correlation of memory artifact with network artifact is strong evidence."
+next_step: "Trace the C2 connection. Extract IOC (IP, domain). Check process timeline for injection timing."
+triage_tier: true
