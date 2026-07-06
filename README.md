@@ -50,13 +50,6 @@ Awaiting examiner approval. All findings held as DRAFT.
 
 A complete forensic analysis report generated from structured case data — **BelkaCTF #7: Compromised Air Traffic Control Workstation**.
 
-| Stat | Value |
-|------|-------|
-| Findings | 4 (3 CRITICAL) |
-| IOCs | 9 (SHA-256, MD5, IP, Domain, Email) |
-| MITRE ATT&CK | 5 techniques (T1036, T1102, T1573, T1566, T1204) |
-| Timeline | 7 events reconstructed from memory forensics |
-
 ![Report Preview](reports/samples/report-preview.png)
 
 **Design:** Data-first · labeled sections 01–09 · sidebar navigation · finding cards · data-table timeline · executive callout · A4 portrait print-native
