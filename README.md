@@ -123,9 +123,15 @@ docker build -t forensics-mft-tools:1.2.0.0 tools/mft-tools/
 
 ### 3. Install MemProcFS
 ```bash
-wget https://github.com/ufrisk/MemProcFS/releases/latest -O memprocfs.tar.gz
-tar xzf memprocfs.tar.gz
-sudo apt install -y libfuse2t64 lz4
+# Fetch the latest MemProcFS Linux release asset dynamically
+MEMPROCFS_URL=$(curl -s https://api.github.com/repos/ufrisk/MemProcFS/releases/latest \
+  | grep browser_download_url \
+  | grep -i 'linux' \
+  | head -n1 \
+  | cut -d '"' -f4)
+curl -L "$MEMPROCFS_URL" -o memprocfs.zip
+unzip memprocfs.zip -d memprocfs
+sudo apt install -y libfuse2t64 lz4 unzip
 ```
 
 ### 4. Set up SIFT VM
