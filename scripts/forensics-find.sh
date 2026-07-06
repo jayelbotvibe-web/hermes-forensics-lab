@@ -24,6 +24,7 @@ CROSS_VAL="${9:-}"
 FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
 FINDINGS_JSON="$CASE_DIR/findings.json"
+# shellcheck disable=SC2034
 EXAMINER="${USER:-examiner}"
 
 if [ ! -d "$CASE_DIR" ]; then
@@ -81,6 +82,7 @@ json.dump(data, open(path, 'w'), indent=2)
 print(finding_id)
 "
 
+# shellcheck disable=SC2034
 FINDING_ID=$?  # python3 prints to stdout so we can't catch easily — let me fix
 
 # Actually let me do this differently — just print the ID

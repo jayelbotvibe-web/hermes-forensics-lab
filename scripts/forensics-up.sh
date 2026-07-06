@@ -61,8 +61,7 @@ else
     # Try keyfile first
     if [ -f "$LUKS_KEYFILE" ]; then
         echo "  Opening LUKS with keyfile..."
-        sudo cryptsetup open "$LUKS_IMG" "$LUKS_NAME" --key-file="$LUKS_KEYFILE" 2>/dev/null
-        if [ $? -eq 0 ]; then
+        if sudo cryptsetup open "$LUKS_IMG" "$LUKS_NAME" --key-file="$LUKS_KEYFILE" 2>/dev/null; then
             sudo mount /dev/mapper/"$LUKS_NAME" "$FORENSICS_DIR" 2>/dev/null && {
                 echo -e "  ${GREEN}✓${NC} Opened and mounted"
                 LUKS_OPENED=true
@@ -109,9 +108,9 @@ fi
 # Wait for SSH — with retry logic
 SSH_READY=false
 for retry in $(seq 1 $SSH_RETRIES); do
-    [ $retry -gt 1 ] && echo "  Retry $retry/$SSH_RETRIES..."
+    [ "$retry" -gt 1 ] && echo "  Retry $retry/$SSH_RETRIES..."
     echo -n "  Waiting for SSH"
-    for i in $(seq 1 $SSH_WAIT_MAX); do
+    for _ in $(seq 1 $SSH_WAIT_MAX); do
         if ssh -o ConnectTimeout=3 -o StrictHostKeyChecking=no \
                -o BatchMode=yes "$SIFT_USER@$SIFT_HOST" 'true' >/dev/null 2>&1; then
             SSH_READY=true
@@ -122,7 +121,7 @@ for retry in $(seq 1 $SSH_RETRIES); do
     done
     echo ""
     # If first attempt failed, try restarting the VM
-    if [ $retry -lt $SSH_RETRIES ] && ! $SSH_READY; then
+    if [ "$retry" -lt "$SSH_RETRIES" ] && ! $SSH_READY; then
         echo -e "  ${YELLOW}⚠${NC}  SSH timeout — restarting VM..."
         vmrun -T ws stop "$SIFT_VMX" hard 2>/dev/null || true
         sleep 5

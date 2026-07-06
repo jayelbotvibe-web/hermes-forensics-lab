@@ -98,7 +98,7 @@ if vmrun list 2>/dev/null | grep -q "SIFT.vmx"; then
     vmrun -T ws stop "$SIFT_VMX" soft 2>/dev/null || true
     # Wait up to 30s for graceful shutdown
     STOPPED=false
-    for i in $(seq 1 15); do
+    for _ in $(seq 1 15); do
         vmrun list 2>/dev/null | grep -q "SIFT.vmx" || { STOPPED=true; break; }
         sleep 2
     done

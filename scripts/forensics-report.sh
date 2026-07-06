@@ -25,6 +25,7 @@ FORMAT="${2:---both}"
 
 FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
+# shellcheck disable=SC2034
 SCRIPTS_DIR="$FORENSICS_DIR/scripts"
 REPORTS_DIR="$CASE_DIR/reports"
 
@@ -283,7 +284,8 @@ if data:
 
     # ── Template substitution ───────────────────────────────────────────
     if [ -f "$TEMPLATE" ]; then
-        local HTML=$(cat "$TEMPLATE")
+        local HTML
+        HTML=$(cat "$TEMPLATE")
         HTML="${HTML//\{\{CASE_ID\}\}/$CASE_ID}"
         HTML="${HTML//\{\{CASE_TITLE\}\}/$DESCRIPTION}"
         HTML="${HTML//\{\{EXAMINER\}\}/$EXAMINER}"

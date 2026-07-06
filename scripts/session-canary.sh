@@ -54,9 +54,14 @@ else echo "FAIL"; DEGRADED+=("memprocfs"); fi
 SSH_OPTS="-o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -i ${SSH_IDENTITY:-$HOME/.ssh/id_rsa}"
 echo -n "[sift:ssh] "
 TOOLS_TOTAL=$((TOOLS_TOTAL + 1))
-SSH_OUT=$(ssh $SSH_OPTS sansforensics@${SIFT_HOST:-172.16.146.128} "echo ok" 2>&1)
-if [ $? -eq 0 ]; then echo "PASS (${SIFT_HOST:-172.16.146.128})"; TOOLS_PASSED=$((TOOLS_PASSED + 1))
-else echo "DEGRADED ($SSH_OUT)"; DEGRADED+=("sift-ssh"); fi
+# shellcheck disable=SC2086
+SSH_OUT=$(ssh $SSH_OPTS sansforensics@"${SIFT_HOST:-172.16.146.128}" "echo ok" 2>&1) && {
+    TOOLS_PASSED=$((TOOLS_PASSED + 1))
+    echo "PASS (${SIFT_HOST:-172.16.146.128})"
+} || {
+    echo "DEGRADED ($SSH_OUT)"
+    DEGRADED+=("sift-ssh")
+}
 
 # 5. SIFT VM native tools (6 individual forensic tools)
 if [[ ! " ${DEGRADED[*]} " =~ "sift-ssh" ]]; then
