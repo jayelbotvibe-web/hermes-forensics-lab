@@ -3,8 +3,6 @@
 > **AI-assisted digital forensics system built on Hermes Agent + SIFT Workstation**
 >
 > 12 forensic tools • 3 runtimes • 33-interpretation artifact encyclopedia • automated validation • human-in-the-loop
->
-> **[→ View sample investigation report (no setup required)](https://htmlpreview.github.io/?https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-data-report.html)** — BelkaCTF #7: Compromised ATC Workstation
 
 This is a **reproducible personal DFIR lab** and artifact-interpretation skill library. The full stack assumes a pre-built SIFT Workstation VM at a known IP, SSH key auth, Docker, and a Hermes Agent install. The artifact encyclopedia and skill library work standalone — use them without the tool runtime if you only need interpretation guidance.
 
