@@ -126,7 +126,7 @@ bash /home/niel/forensics/scripts/forensics-down.sh
 | `/home/niel/forensics/scripts/forensics-pipeline.sh` | End-to-end pipeline |
 | `/home/niel/forensics/scripts/forensics-screenshots.py` | Evidence screenshots (terminal PNGs) |
 | `/home/niel/forensics/scripts/forensics-artifacts.py` | Artifacts appendix generator |
-| `/home/niel/forensics/scripts/session-canary.sh` | Tool validation (9 checks) |
+| `/home/niel/forensics/scripts/session-canary.sh` | Tool validation (12 tools, 6 env) |
 | `/home/niel/forensics/scripts/sift-exec.sh` | SSH wrapper for SIFT VM |
 
 ### Evidence Integrity Workflow

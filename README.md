@@ -8,7 +8,7 @@
 
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
-[![Canary](https://img.shields.io/badge/canary-10/10-brightgreen)](scripts/session-canary.sh)
+[![Canary](https://img.shields.io/badge/canary-12_tools_+_6_env-brightgreen)](scripts/session-canary.sh)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
 [![Automation](https://img.shields.io/badge/automation-7_scripts-8b5cf6)](docs/AUTOMATION.md)
 
@@ -24,7 +24,11 @@ $ hermes -p forensics
 [sift:sleuthkit] PASS       [sift:foremost] PASS   [sift:dc3dd] PASS
 [sift:photorec] PASS        [sift:ddrescue] PASS   [sift:regripper] PASS
 [sift:hashdeep] PASS        [sift:tshark] PASS
-All checks passed ✓
+
+=== Canary Results ===
+Tools:       12/12 operational
+Environment: 6/6 ready
+✓ All runtimes operational — ready for investigation
 
 Agent: Mounting memory dump...
 /mnt/mem/sys/proc/  → 97 processes
@@ -260,8 +264,10 @@ Output:
 [sift:regripper] PASS
 [sift:hashdeep] PASS
 [sift:tshark] PASS
-=== Results: All checks passed ===
-✓ All tools operational
+=== Canary Results ===
+Tools:       12/12 operational
+Environment: 6/6 ready
+✓ All runtimes operational — ready for investigation
 ```
 
 Failed tools are marked **DEGRADED** — triage-only, not for evidentiary analysis.

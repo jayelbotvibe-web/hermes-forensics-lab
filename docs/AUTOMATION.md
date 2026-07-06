@@ -52,8 +52,9 @@ bash ~/forensics/scripts/forensics-down.sh
   ✓ Docker running — 6 forensic images
 
 [4/4] Session Canary
-=== Results: All checks passed ===
-✓ All tools operational
+=== Canary Results ===
+Tools:       12/12 operational
+Environment: 6/6 ready
 
 ╔══════════════════════════════════════════════╗
 ║   ✓ FORENSICS SYSTEM READY                   ║

@@ -8,7 +8,7 @@
 #   1. Opens and mounts the LUKS evidence volume (if not already mounted)
 #   2. Starts the SIFT Workstation VM (if not running) and waits for SSH
 #   3. Verifies Docker is running
-#   4. Runs session canary (validates all 9 tools)
+#   4. Runs session canary (validates all tools + environment)
 #   5. Reports full system status
 #
 # After this, the forensics system is ready for any investigation.
