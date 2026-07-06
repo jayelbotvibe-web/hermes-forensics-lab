@@ -165,7 +165,7 @@ Maps common forensic artifacts to interpretation, attacker behavior, and MITRE A
 
 **Interpretation**: DNS tunneling or DNS-based C2. Long subdomains encode exfiltrated data. TXT queries carry commands.
 
-**MITRE ATT&CK**: T1071.004, T1048.001
+**MITRE ATT&CK**: T1071.004, T1048.003
 
 **Confidence**: HIGH for subdomains over 50 chars or containing base64-like patterns
 
@@ -201,7 +201,7 @@ Maps common forensic artifacts to interpretation, attacker behavior, and MITRE A
 
 **Interpretation**: 4444 is Metasploit/Meterpreter default. 8080/8443 are common HTTP/S C2 alternatives. Port 53 non-DNS is DNS tunneling. Port 443 without TLS is raw TCP C2 through firewall-friendly port.
 
-**MITRE ATT&CK**: T1572, T1043
+**MITRE ATT&CK**: T1572, T1571 (Non-Standard Port)
 
 **Confidence**: MEDIUM. Port alone is not conclusive. Examine traffic content.
 
