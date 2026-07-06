@@ -46,6 +46,16 @@ Awaiting examiner approval. All findings held as DRAFT.
 
 ---
 
+## Architecture
+
+![Forensics System Architecture](architecture.png?v=2)
+
+**[→ Full interactive version](https://jayelbotvibe-web.github.io/hermes-forensics-lab/)**
+
+> **TODO:** Record a terminal session demo (asciinema or GIF) showing a real run of `forensics-case.sh` through to report generation. This would be the strongest zero-setup proof of capability for visitors who can't install the full stack.
+
+---
+
 ## 📊 Sample Report
 
 A complete forensic analysis report generated from structured case data — **BelkaCTF #7: Compromised Air Traffic Control Workstation**.
@@ -160,16 +170,6 @@ bash scripts/forensics-down.sh
 opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs session canary → reports ready
 
 **See [AUTOMATION.md](docs/AUTOMATION.md) for troubleshooting common issues** (VM unreachable, LUKS mount failure, Docker down, canary failures).
-
----
-
-## Architecture
-
-![Forensics System Architecture](architecture.png?v=2)
-
-**[→ Full interactive version](https://jayelbotvibe-web.github.io/hermes-forensics-lab/)**
-
-> **TODO:** Record a terminal session demo (asciinema or GIF) showing a real run of `forensics-case.sh` through to report generation. This would be the strongest zero-setup proof of capability for visitors who can't install the full stack.
 
 ---
 
