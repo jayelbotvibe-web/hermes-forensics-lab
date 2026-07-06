@@ -1,0 +1,8 @@
+# svchost.exe Running Outside services.exe
+category: Process
+what_you_see: "svchost.exe instance not parented by services.exe (PID ~500-700)"
+interpretation: "Malware masquerading as service host. Legitimate svchost.exe always has services.exe as parent."
+mitre_attack: ["T1569.002", "T1036.005"]
+confidence_rule: "HIGH. This is a definitive indicator."
+next_step: "Check the binary path and hash. Legitimate svchost.exe from non-services parent is extremely rare."
+triage_tier: true

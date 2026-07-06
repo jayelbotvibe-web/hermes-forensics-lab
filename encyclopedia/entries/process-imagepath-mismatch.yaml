@@ -1,0 +1,8 @@
+# ImagePath Mismatch
+category: Process
+what_you_see: "Process name (lsass.exe) running from non-standard path (C:\\Windows\\Temp\\lsass.exe instead of C:\\Windows\\System32\\lsass.exe)"
+interpretation: "Process masquerading. Attacker placed malware named after a legitimate system binary in a writable directory to evade process-list inspection."
+mitre_attack: ["T1036.005"]
+confidence_rule: "HIGH if path is writable by user; MEDIUM if system-owned alternate path"
+next_step: "Check parent process. If parent is not wininit.exe, confidence increases. Compare file hash against known-good."
+triage_tier: true

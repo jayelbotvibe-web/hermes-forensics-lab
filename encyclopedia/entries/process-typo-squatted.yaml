@@ -1,0 +1,8 @@
+# Typo-Squatted Process Name
+category: Process
+what_you_see: "Process name one character off from legitimate system binary: epxlorer.exe (vs explorer.exe), svhost.exe (vs svchost.exe), lsasss.exe (vs lsass.exe); character substitution (l-to-1, o-to-0, s-to-5)"
+interpretation: "Name-based process masquerading. Attacker named malware to resemble a legitimate process so it blends into Task Manager and process lists."
+mitre_attack: ["T1036.005"]
+confidence_rule: "HIGH for single-char substitution of well-known system process name; HIGH if binary path is user-writable (Downloads, Temp, AppData); MEDIUM if binary is in System32 with suspicious name"
+next_step: "Cross-reference with filescan for full binary path. Check parent process. Compare binary hash against legitimate system binary. Check digital signature."
+triage_tier: true

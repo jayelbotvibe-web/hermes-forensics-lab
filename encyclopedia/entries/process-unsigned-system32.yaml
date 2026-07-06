@@ -1,0 +1,8 @@
+# Unsigned Process in System32
+category: Process
+what_you_see: "Executable in System32 or SysWOW64 without a valid digital signature from Microsoft"
+interpretation: "Malware planted in system directory to blend in. Legitimate Microsoft binaries are ALWAYS signed."
+mitre_attack: ["T1036"]
+confidence_rule: "HIGH. Microsoft signs every binary in System32."
+next_step: "Extract binary, submit hash to VirusTotal or internal threat intel."
+triage_tier: true

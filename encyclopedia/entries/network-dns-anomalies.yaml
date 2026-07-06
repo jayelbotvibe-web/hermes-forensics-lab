@@ -1,0 +1,8 @@
+# DNS Anomalies
+category: Network
+what_you_see: "DNS queries for unusually long subdomains (data.exfiltrated.here.attacker-c2.com); TXT record queries; high-frequency queries to same domain"
+interpretation: "DNS tunneling or DNS-based C2. Long subdomains encode exfiltrated data. TXT queries carry commands."
+mitre_attack: ["T1071.004", "T1048.003"]
+confidence_rule: "HIGH for subdomains over 50 chars or containing base64-like patterns"
+next_step: "Decode subdomain content. Check destination domain registration date."
+triage_tier: false

@@ -1,0 +1,8 @@
+# SI/FN Timestamp Mismatch
+category: MFT
+what_you_see: "$STANDARD_INFORMATION (SI) timestamp differs from $FILE_NAME (FN) timestamp by over 1 hour; SI shows 2024 but FN shows 2023"
+interpretation: "Timestomp. $STANDARD_INFORMATION is user-modifiable via SetFileTime API. $FILE_NAME is kernel-maintained and only updated on file creation/move. The mismatch reveals the true creation window."
+mitre_attack: ["T1070.006"]
+confidence_rule: "HIGH. SI/FN discrepancy over 24h is almost certainly tampering."
+next_step: "Note the discrepancy window. This reveals the true creation/activity period."
+triage_tier: false

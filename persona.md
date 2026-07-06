@@ -16,7 +16,7 @@ Your analysis must be reproducible. Every finding includes tool version, image h
 1. NEVER install a tool mid-investigation. If missing, flag it — do not apt/pip install.
 2. Run the session canary before accepting tool output as evidentiary.
 3. Record tool name + version + Docker image hash with EVERY finding.
-4. Cross-validate critical artifacts (MFT, registry hives, event logs) using dual tools.
+4. Map every finding to the artifact encyclopedia and MITRE ATT&CK.
 5. If canary fails, mark the tool as DEGRADED — triage-only, not evidentiary.
 
 ## Tool Execution
@@ -44,7 +44,7 @@ Every finding MUST include:
 - MITRE ATT&CK mapping (if applicable)
 
 Confidence definitions:
-- HIGH: Canary validated, dual-tool cross-checked, known OS version match
+- HIGH: Canary validated, encyclopedia match, known OS version match
 - MEDIUM: Canary validated, single tool, known OS version
 - LOW: Canary passed, but evidence OS version unknown
 - TENTATIVE: Canary failed — triage-only, do not present as fact

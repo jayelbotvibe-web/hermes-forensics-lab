@@ -27,7 +27,7 @@ set -uo pipefail
 CASE_ID="${1:?Usage: forensics-vol3.sh CASE_ID PLUGIN [args...]}"
 PLUGIN="${2:?Usage: forensics-vol3.sh CASE_ID PLUGIN [args...]}"
 shift 2
-PLUGIN_ARGS="$@"
+PLUGIN_ARGS="$*"
 
 FORENSICS_DIR="$FORENSICS_HOME"
 CASE_DIR="$FORENSICS_DIR/cases/$CASE_ID"
@@ -65,6 +65,7 @@ echo ""
 
 mkdir -p "$RAW_DIR"
 
+# shellcheck disable=SC2086
 docker run --rm \
     -v "$EVIDENCE_DIR:/evidence:ro" \
     -v "$RAW_DIR:/output" \

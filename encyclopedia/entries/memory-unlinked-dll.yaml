@@ -1,0 +1,8 @@
+# Unlinked DLL
+category: Memory
+what_you_see: "DLL loaded in process memory (InLoadOrderModuleList in PEB) but NOT listed in VAD tree; or vice versa"
+interpretation: "Hidden DLL. Attacker manually mapped DLL into process without using LoadLibrary, evading module-listing tools."
+mitre_attack: ["T1055.001", "T1574.002"]
+confidence_rule: "HIGH. Legitimate software uses LoadLibrary which updates both lists."
+next_step: "Dump the hidden DLL for analysis. Check export table for suspicious function names."
+triage_tier: false

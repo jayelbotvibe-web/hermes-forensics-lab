@@ -1,0 +1,8 @@
+# Mutex Objects Indicating Malware
+category: Memory
+what_you_see: "Named mutex matching known malware families: Global random guid, Local SM0 prefix, MicrosoftUpdate (Ursnif), _AVIRA_2109 (Emotet)"
+interpretation: "Malware infection marker. Many families create named mutexes for single-instance enforcement. The mutex name can fingerprint the family."
+mitre_attack: []
+confidence_rule: "HIGH if mutex matches known IOC; LOW if generic name"
+next_step: "Search for mutex name in threat intel databases. Identify the malware family."
+triage_tier: true

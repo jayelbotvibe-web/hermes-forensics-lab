@@ -2,28 +2,40 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [ master, main ]
   pull_request:
-    branches: [master]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: './scripts'
-          format: tty
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
-      - name: Python lint (ruff)
+      - name: Validate YAML
         run: |
-          pip install ruff
-          ruff check scripts/ --ignore E501
+          pip install yamllint
+          yamllint -d relaxed tools/ .github/
+
+      - name: Validate JSON
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            if python3 -m json.tool "$f" > /dev/null 2>&1; then
+              echo "OK   $f"
+            else
+              echo "FAIL $f"
+              fail=1
+            fi
+          done < <(find . -type f -name '*.json' -not -path './.git/*')
+          exit $fail

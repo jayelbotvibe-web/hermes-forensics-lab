@@ -1,0 +1,8 @@
+# Persistence: Services
+category: Registry
+what_you_see: "New Windows service with Start = 2 (auto-start), ImagePath pointing to suspicious path, or service name mimicking legitimate service (WinDefend to WinDefender)"
+interpretation: "Service-based persistence. Service runs as SYSTEM on boot. Typo-squatting evades casual inspection."
+mitre_attack: ["T1543.003"]
+confidence_rule: "HIGH for suspicious image paths; MEDIUM for typo-squat names (verify binary hash)"
+next_step: "Check the service binary hash and digital signature. Verify ImagePath points to expected location."
+triage_tier: true

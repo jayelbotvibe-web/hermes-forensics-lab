@@ -1,0 +1,8 @@
+# Alternate Data Streams (ADS)
+category: Filesystem
+what_you_see: "NTFS ADS on file: file.txt:hidden.exe with executable content; ADS on directory"
+interpretation: "Data hiding. Attacker stored malware or data in ADS to evade directory listing (dir shows only primary stream). Common after dropper execution."
+mitre_attack: ["T1564.004"]
+confidence_rule: "HIGH. ADS with executable content has no legitimate use on modern Windows."
+next_step: "Extract ADS content. Check the hidden file hash against threat intel."
+triage_tier: false

@@ -9,7 +9,7 @@ category: forensics
 
 ## Tool Strategy
 - **Primary: MemProcFS v5.17.8** — mounts dump as virtual filesystem at /mnt/mem
-- **Fallback: volatility3 2.7.0** — for Linux dumps, malware analysis, cross-validation
+- **Fallback: volatility3 2.7.0** — for Linux dumps and malware analysis
 - **Rule:** Always try MemProcFS first. If dump is non-Windows, use volatility3.
 
 ## Pre-flight

@@ -2,12 +2,16 @@
 
 > **AI-assisted digital forensics system built on Hermes Agent + SIFT Workstation**
 >
-> 12 forensic tools • 3 runtimes • 25-interpretation artifact encyclopedia • automated validation • human-in-the-loop
+> 12 forensic tools • 3 runtimes • 33-interpretation artifact encyclopedia • automated validation • human-in-the-loop
+>
+> **[→ View sample investigation report (no setup required)](https://htmlpreview.github.io/?https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-data-report.html)** — BelkaCTF #7: Compromised ATC Workstation
+
+This is a **reproducible personal DFIR lab** and artifact-interpretation skill library. The full stack assumes a pre-built SIFT Workstation VM at a known IP, SSH key auth, Docker, and a Hermes Agent install. The artifact encyclopedia and skill library work standalone — use them without the tool runtime if you only need interpretation guidance.
 
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
-[![Canary](https://img.shields.io/badge/canary-12/12-brightgreen)](scripts/session-canary.sh)
-[![Artifacts](https://img.shields.io/badge/artifact_KB-25_entries-f59e0b)](#-artifact-knowledge-base-new)
+[![Canary](https://img.shields.io/badge/canary-12_tools_+_6_env-brightgreen)](scripts/session-canary.sh)
+[![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
 [![Automation](https://img.shields.io/badge/automation-7_scripts-8b5cf6)](docs/AUTOMATION.md)
 
 ---
@@ -22,7 +26,11 @@ $ hermes -p forensics
 [sift:sleuthkit] PASS       [sift:foremost] PASS   [sift:dc3dd] PASS
 [sift:photorec] PASS        [sift:ddrescue] PASS   [sift:regripper] PASS
 [sift:hashdeep] PASS        [sift:tshark] PASS
-12/12 tools operational ✓
+
+=== Canary Results ===
+Tools:       12/12 operational
+Environment: 6/6 ready
+✓ All runtimes operational — ready for investigation
 
 Agent: Mounting memory dump...
 /mnt/mem/sys/proc/  → 97 processes
@@ -33,7 +41,7 @@ Agent: Cross-validating with volatility3 malfind...
 
 [DRAFT] F-niel-001  |  Cobalt Strike Beacon detected in lsass.exe
 Confidence: HIGH  |  Tool: MemProcFS 5.17.8 + volatility3 2.7.0
-Evidence: EVID-003  |  Cross-validated: dual-tool corroborated
+Evidence: EVID-003
 
 Awaiting examiner approval. All findings held as DRAFT.
 ```
@@ -121,9 +129,15 @@ docker build -t forensics-mft-tools:1.2.0.0 tools/mft-tools/
 
 ### 3. Install MemProcFS
 ```bash
-wget https://github.com/ufrisk/MemProcFS/releases/latest -O memprocfs.tar.gz
-tar xzf memprocfs.tar.gz
-sudo apt install -y libfuse2t64 lz4
+# Fetch the latest MemProcFS Linux release asset dynamically
+MEMPROCFS_URL=$(curl -s https://api.github.com/repos/ufrisk/MemProcFS/releases/latest \
+  | grep browser_download_url \
+  | grep -i 'linux' \
+  | head -n1 \
+  | cut -d '"' -f4)
+curl -L "$MEMPROCFS_URL" -o memprocfs.zip
+unzip memprocfs.zip -d memprocfs
+sudo apt install -y libfuse2t64 lz4 unzip
 ```
 
 ### 4. Set up SIFT VM
@@ -136,7 +150,7 @@ hermes -p forensics
 
 ---
 
-## ⚡ One-Command Automation (New in v2.0)
+## ⚡ One-Command Automation (New in v4.1)
 
 > **Three commands replace the entire runbook.** Full docs: [AUTOMATION.md](docs/AUTOMATION.md)
 
@@ -164,6 +178,8 @@ opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs sessi
 
 **[→ Full interactive version](https://jayelbotvibe-web.github.io/hermes-forensics-lab/)**
 
+> **TODO:** Record a terminal session demo (asciinema or GIF) showing a real run of `forensics-case.sh` through to report generation. This would be the strongest zero-setup proof of capability for visitors who can't install the full stack.
+
 ---
 
 ## Tool Inventory
@@ -171,7 +187,7 @@ opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs sessi
 | # | Tool | Runtime | Version | Primary Use |
 |---|------|---------|---------|-------------|
 | 1 | **MemProcFS** | 💻 Host | 5.17.8 | Memory analysis (filesystem mount) |
-| 2 | volatility3 | 🐳 Docker | 2.7.0 | Memory analysis (Linux dumps, cross-val) |
+| 2 | volatility3 | 🐳 Docker | 2.7.0 | Memory analysis (Linux dumps) |
 | 3 | plaso | 🐳 Docker | 20240512 | Super timeline generation |
 | 4 | mft-tools | 🐳 Docker | 1.2.0.0 | MFT parsing (analyzeMFT) |
 | 5 | sleuthkit | 🖥️ SIFT | 4.11.1 | Filesystem forensics |
@@ -189,11 +205,16 @@ opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs sessi
 
 ## Hermes Agent Integration
 
-This system runs as a **Hermes Agent profile** (`forensics`). The profile includes:
+This system runs as a **Hermes Agent profile** (`forensics`). 
+
+- **`persona.md`** — The agent's identity and behavioral rules. Defines how the forensics agent thinks: evidence-sovereign, verification-obsessed, methodical. Sets the tone for all analysis output.
+- **`hermes-forensics.profile/`** — Hermes profile configuration directory. Contains `config.yaml` which sets the terminal backend (local, so the agent can see host files), the model, approval mode (manual — human-in-the-loop), and delegation limits.
+
+The profile includes:
 
 - **Persona**: Stability-first DFIR analyst — evidence-sovereign, verification-obsessed
-- **10 Skills**: evidence-handling, memory-forensics, filesystem-forensics, mft-analysis, registry-analysis, timeline-analysis, file-carving, disk-imaging, system-context, **forensic-artifacts (NEW)**
-- **Session canary**: Auto-validates all 12 tools on every session start
+- **6 Skills**: evidence-handling, memory-forensics, filesystem-forensics, timeline-analysis, system-context (includes file-carving + disk-imaging), **forensic-artifacts (includes MFT + registry analysis)**
+- **Session canary**: Auto-validates all tools on every session start
 - **Tool catalog**: Version-pinned, fallback chains, known issues documented
 - **Human-in-the-loop**: All findings DRAFT until examiner approves
 
@@ -201,16 +222,12 @@ This system runs as a **Hermes Agent profile** (`forensics`). The profile includ
 
 | Skill | Loads | Description |
 |-------|-------|-------------|
-| [system-context](skills/system-context/SKILL.md) | ⚡ Always | Full architecture map, tool locations, operational procedures |
-| [forensic-artifacts](skills/forensic-artifacts/SKILL.md) | 🔍 Per-task | **NEW** Artifact interpretation encyclopedia — 25 entries across 6 categories. Maps raw output → attacker behavior → MITRE ATT&CK |
+| [system-context](skills/system-context/SKILL.md) | ⚡ Always | Full architecture map, tool locations, operational procedures, file carving + disk imaging workflows |
+| [forensic-artifacts](skills/forensic-artifacts/SKILL.md) | 🔍 Per-task | **NEW** Artifact interpretation encyclopedia — 33 entries across 6 categories. Maps raw output → attacker behavior → MITRE ATT&CK. Also covers MFT + registry analysis workflows. |
 | [evidence-handling](skills/evidence-handling/SKILL.md) | 📋 Per-case | Chain of custody, case creation, evidence registration |
 | [memory-forensics](skills/memory-forensics/SKILL.md) | 🔍 Per-task | MemProcFS-first memory analysis + volatility3 fallback |
 | [filesystem-forensics](skills/filesystem-forensics/SKILL.md) | 🔍 Per-task | Sleuth Kit — file listing, inode extraction, mactime |
-| [mft-analysis](skills/mft-analysis/SKILL.md) | 🔍 Per-task | MFT parsing with analyzeMFT, timestomping detection |
-| [registry-analysis](skills/registry-analysis/SKILL.md) | 🔍 Per-task | Registry hive analysis, persistence detection |
 | [timeline-analysis](skills/timeline-analysis/SKILL.md) | 🔍 Per-task | Super timeline with plaso, fallback to mactime |
-| [file-carving](skills/file-carving/SKILL.md) | 🔍 Per-task | foremost + photorec dual-tool carving |
-| [disk-imaging](skills/disk-imaging/SKILL.md) | 🔍 Per-task | dc3dd/ddrescue imaging with hash verification |
 
 ⚡ Always = loaded every session &nbsp; 📋 Per-case = loaded on case open/close &nbsp; 🔍 Per-task = loaded on demand
 
@@ -245,14 +262,14 @@ Output:
 [sift:connectivity] PASS
 [sift:sleuthkit] PASS
 [sift:foremost] PASS
-[sift:photorec] PASS
 [sift:dc3dd] PASS
-[sift:ddrescue] PASS
 [sift:regripper] PASS
 [sift:hashdeep] PASS
 [sift:tshark] PASS
-=== Results: 12 passed, 0 failed ===
-✓ All tools operational
+=== Canary Results ===
+Tools:       12/12 operational
+Environment: 6/6 ready
+✓ All runtimes operational — ready for investigation
 ```
 
 Failed tools are marked **DEGRADED** — triage-only, not for evidentiary analysis.
@@ -264,9 +281,9 @@ Failed tools are marked **DEGRADED** — triage-only, not for evidentiary analys
 | Principle | How |
 |-----------|-----|
 | Immutable tools | Docker images version-pinned, no `latest` tags |
-| Session canary | All 12 tools validated before every investigation |
+| Session canary | All tools validated before every investigation |
 | Artifact knowledge base | 25-interpretation encyclopedia maps raw output → meaning + MITRE ATT&CK |
-| Dual-tool cross-validation | Critical artifacts checked with 2 tools, delta >5% flagged |
+
 | Evidence read-only | `chmod 444` after registration, chain of custody logged |
 | Human-in-the-loop | All findings DRAFT until examiner approves |
 | Never install mid-case | Missing tools flagged, not installed — no surprises |
@@ -283,7 +300,7 @@ cat /mnt/mem/sys/net/tcp.txt    # Network connections
 cat /mnt/mem/forensic/findevil.txt  # Auto-detected malware
 ```
 
-volatility3 remains as fallback for Linux dumps and cross-validation.
+volatility3 remains as fallback for Linux dumps.
 
 ---
 
@@ -302,21 +319,16 @@ hermes-forensics-lab/
 │   ├── forensics-up.sh                ← ⚡ one-command system bring-up
 │   ├── forensics-down.sh              ← ⚡ clean system shutdown
 │   ├── forensics-case.sh              ← ⚡ rapid case initialization
-│   ├── session-canary.sh              ← validates all 9 tools on startup
-│   ├── cross-validate.sh              ← dual-tool MFT verification
+│   ├── session-canary.sh              ← validates all tools on startup
 │   ├── sift-exec.sh                   ← SSH wrapper for SIFT VM tools
 │   └── handoff.sh                     ← pentest → forensics evidence transfer
 ├── skills/
 │   ├── system-context/SKILL.md        ← full architecture map (loaded always)
-│   ├── forensic-artifacts/SKILL.md    ← 🆕 artifact encyclopedia — 25 interpretations
+│   ├── forensic-artifacts/SKILL.md    ← 🆕 artifact encyclopedia — 33 interpretations + MFT/registry workflows
 │   ├── evidence-handling/SKILL.md     ← chain of custody, case creation
 │   ├── memory-forensics/SKILL.md      ← MemProcFS + volatility3 workflow
 │   ├── filesystem-forensics/SKILL.md  ← Sleuth Kit analysis
-│   ├── mft-analysis/SKILL.md          ← MFT parsing, timestomping detection
-│   ├── registry-analysis/SKILL.md     ← registry hive analysis
-│   ├── timeline-analysis/SKILL.md     ← super timeline with plaso
-│   ├── file-carving/SKILL.md          ← foremost + photorec recovery
-│   └── disk-imaging/SKILL.md          ← dc3dd/ddrescue acquisition
+│   └── timeline-analysis/SKILL.md     ← super timeline with plaso
 ├── tools/
 │   ├── tool-catalog.yaml              ← version pins, fallback chains, known issues
 │   ├── volatility/
@@ -350,7 +362,7 @@ Evidence Registration → Tool Execution → Cross-Validation → DRAFT Finding 
 | Tool + version | `volatility3 2.7.0` | Reproducible |
 | Exact command | `vol -f dump.mem windows.pslist` | Verifiable |
 | Evidence ref | `EVID-003` | Chain of custody |
-| Confidence | `HIGH` (dual-tool) / `MEDIUM` / `LOW` / `TENTATIVE` | Reliability signal |
+| Confidence | `HIGH` / `MEDIUM` / `LOW` / `TENTATIVE` | Encyclopedia match + canary status |
 | Cross-validation | `analyzeMFT ↔ MFTECmd, delta 2.1%` | Corroboration |
 | MITRE ATT&CK | `T1055.001` (if applicable) | Threat context |
 
@@ -369,10 +381,9 @@ Every status change is logged to the case audit trail.
 
 | Aspect | Traditional DFIR | Hermes Forensics |
 |--------|-----------------|------------------|
-| Tool validation | Manual — hope tools still work | Session canary — auto-validates all 12 tools |
+| Tool validation | Manual — hope tools still work | Session canary — auto-validates all tools |
 | Artifact interpretation | Analyst memorizes artifact behavior patterns | 25-entry encyclopedia — maps output → meaning + MITRE ATT&CK |
 | Memory analysis | Memorize 200+ volatility3 plugin names | Mount dump as filesystem, browse like a directory |
-| Cross-validation | Manual — copy-paste between tools | `cross-validate.sh` — dual-tool, delta >5% flagged |
 | Findings | Word doc, copy-paste screenshots | Structured DRAFT → APPROVED pipeline |
 | Chain of custody | Separate log, often forgotten | Auto-logged to JSONL audit trail |
 | Version tracking | "I think I used volatility3 2.something" | Tool + version + image hash on every finding |

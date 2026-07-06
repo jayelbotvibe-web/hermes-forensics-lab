@@ -1,0 +1,8 @@
+# Persistence: Scheduled Tasks
+category: Registry
+what_you_see: "Scheduled task with trigger AtLogon or Daily executing from %APPDATA%\\malware.exe; task named to blend in (GoogleUpdateTaskMachineUA, OneDrive Standalone Update)"
+interpretation: "Scheduled task persistence. Attacker uses common update task names to evade detection."
+mitre_attack: ["T1053.005"]
+confidence_rule: "HIGH if binary path is user-writable; MEDIUM if path is unusual for the task name"
+next_step: "Check the task XML for full command line and triggers. Extract binary hash."
+triage_tier: false

@@ -20,7 +20,7 @@ examiner: ${EXAMINER:-niel}
 description: "${DESCRIPTION}"
 EOF
 
-echo '{"case_id": "'${CASE_ID}'", "action": "case_open", "timestamp": "'$(date -Iseconds)'"}' \
+echo '{"case_id": "'${CASE_ID}'", "action": "case_open", "timestamp": "'"$(date -Iseconds)"'"}' \
   >> "${CASE_DIR}/audit/actions.jsonl"
 
 echo "[]" > "${CASE_DIR}/evidence.json"
