@@ -73,7 +73,7 @@ for mp in $FORENSICS_HOME/mounts/*/; do
     if mountpoint -q "$mp" 2>/dev/null; then
         fusermount -u "$mp" 2>/dev/null && {
             echo -e "  ${GREEN}✓${NC} Unmounted $mp"
-            ((UNMOUNTED++))
+            UNMOUNTED=$((UNMOUNTED + 1))
         } || echo -e "  ${RED}✗${NC} Failed to unmount $mp"
     fi
 done
@@ -81,7 +81,7 @@ done
 if mountpoint -q /mnt/mem 2>/dev/null; then
     fusermount -u /mnt/mem 2>/dev/null && {
         echo -e "  ${GREEN}✓${NC} Unmounted /mnt/mem"
-        ((UNMOUNTED++))
+        UNMOUNTED=$((UNMOUNTED + 1))
     } || echo -e "  ${RED}✗${NC} Failed to unmount /mnt/mem"
 fi
 [ $UNMOUNTED -eq 0 ] && echo "  (no MemProcFS mounts found)"
