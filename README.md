@@ -6,6 +6,8 @@
 >
 > **[→ View sample investigation report (no setup required)](https://htmlpreview.github.io/?https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-data-report.html)** — BelkaCTF #7: Compromised ATC Workstation
 
+This is a **reproducible personal DFIR lab** and artifact-interpretation skill library. The full stack assumes a pre-built SIFT Workstation VM at a known IP, SSH key auth, Docker, and a Hermes Agent install. The artifact encyclopedia and skill library work standalone — use them without the tool runtime if you only need interpretation guidance.
+
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
 [![Canary](https://img.shields.io/badge/canary-12_tools_+_6_env-brightgreen)](scripts/session-canary.sh)
