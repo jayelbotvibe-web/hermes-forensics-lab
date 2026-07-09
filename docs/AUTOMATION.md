@@ -54,7 +54,7 @@ bash ~/forensics/scripts/forensics-down.sh
 [4/4] Session Canary
 === Canary Results ===
 Tools:       12/12 operational
-Environment: 6/6 ready
+Environment: 8/8 ready
 
 ╔══════════════════════════════════════════════╗
 ║   ✓ FORENSICS SYSTEM READY                   ║

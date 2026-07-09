@@ -8,7 +8,7 @@ This is a **reproducible personal DFIR lab** and artifact-interpretation skill l
 
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
-[![Canary](https://img.shields.io/badge/canary-12_tools_+_6_env-brightgreen)](scripts/session-canary.sh)
+[![Canary](https://img.shields.io/badge/canary-12_tools_+_8_env-brightgreen)](scripts/session-canary.sh)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
 [![Automation](https://img.shields.io/badge/automation-7_scripts-8b5cf6)](docs/AUTOMATION.md)
 
@@ -20,14 +20,16 @@ This is a **reproducible personal DFIR lab** and artifact-interpretation skill l
 $ hermes -p forensics
 
 === Forensics Session Canary ===
-[docker:volatility3] PASS   [docker:plaso] PASS   [docker:mft-tools] PASS
-[sift:sleuthkit] PASS       [sift:foremost] PASS   [sift:dc3dd] PASS
-[sift:photorec] PASS        [sift:ddrescue] PASS   [sift:regripper] PASS
+[env:docker-daemon] PASS    [env:luks] PASS        [env:sift-ssh] PASS
+[docker:volatility3] PASS   [docker:plaso] PASS    [docker:mft-tools] PASS
+[host:memprocfs] PASS (v5.17.8)
+[sift:sleuthkit] PASS       [sift:foremost] PASS   [sift:photorec] PASS
+[sift:dc3dd] PASS           [sift:ddrescue] PASS   [sift:regripper] PASS
 [sift:hashdeep] PASS        [sift:tshark] PASS
 
 === Canary Results ===
 Tools:       12/12 operational
-Environment: 6/6 ready
+Environment: 8/8 ready
 ✓ All runtimes operational — ready for investigation
 
 Agent: Mounting memory dump...
@@ -247,19 +249,25 @@ bash scripts/session-canary.sh
 Output:
 ```
 === Forensics Session Canary ===
-[docker:volatility3] PASS
-[docker:plaso] PASS
-[docker:mft-tools] PASS
-[sift:connectivity] PASS
+[env:docker-daemon] PASS
+[env:luks] PASS (mounted)
+[env:sift-ssh] PASS (172.16.146.128)
+[env:dir-cases] PASS ... [env:dir-logs] PASS
+[docker:forensics-volatility3:2.7.0] PASS
+[docker:forensics-plaso:20240512] PASS
+[docker:forensics-mft-tools:1.2.0.0] PASS
+[host:memprocfs] PASS (v5.17.8)
 [sift:sleuthkit] PASS
 [sift:foremost] PASS
+[sift:photorec] PASS
 [sift:dc3dd] PASS
+[sift:ddrescue] PASS
 [sift:regripper] PASS
 [sift:hashdeep] PASS
 [sift:tshark] PASS
 === Canary Results ===
 Tools:       12/12 operational
-Environment: 6/6 ready
+Environment: 8/8 ready
 ✓ All runtimes operational — ready for investigation
 ```
 

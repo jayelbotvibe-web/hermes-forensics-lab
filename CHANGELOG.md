@@ -2,6 +2,25 @@
 
 All notable changes to the Hermes Forensics Lab.
 
+## [4.2.0] — 2026-07-09
+
+### Fixed
+- session-canary.sh: now probes all 8 SIFT tools from the Tool Inventory — photorec and ddrescue were previously never checked despite README claiming 12/12 validation
+- session-canary.sh: MemProcFS version is now read from the actual binary and compared against the catalog pin (was a hardcoded "v5.17.8" string that would never detect an upgrade/downgrade)
+- session-canary.sh: SIFT tool labels now match Tool Inventory names (sleuthkit, not fls)
+- session-canary.sh: when the SIFT VM is unreachable, its 8 tools are counted as DEGRADED in the totals instead of silently disappearing (4/12, not 4/4)
+- session-canary.sh: LUKS vault and SIFT SSH reclassified from TOOLS to ENVIRONMENT — tool count now maps 1:1 to the 12-tool inventory
+- mft-tools/validate.sh: MFTECmd invoked via dotnet (was mono, which was never installed); validation failures now exit non-zero instead of warning and passing
+- README + AUTOMATION.md: canary example outputs now match what the script actually prints
+
+### Added
+- mft-tools Dockerfile: MFTECmd (Eric Zimmerman, .NET 9) is now actually installed — previously referenced in validate.sh, tool-catalog.yaml, and the README cross-validation example but absent from the image. Archive is SHA256-pinned so a silent upstream release change fails the build loudly; version recorded at build time in /opt/mftecmd/VERSION
+- session-canary.sh: MEMPROCFS_EXPECTED_VERSION env override for catalog version pin
+
+### Changed
+- project-metadata.yaml: canary_checks corrected to 20 (12 tools + 8 environment)
+- Canary badge: 12 tools + 8 env
+
 ## [4.1.0] — 2026-07-03
 
 ### Fixed

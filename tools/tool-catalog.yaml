@@ -68,14 +68,15 @@ tools:
     version: "1.2.0.0"
     stability: MEDIUM
     fallback: null
-    note: "analyzeMFT primary; MFTECmd pending — Zimmerman CDN URL changed"
+    note: "analyzeMFT primary; MFTECmd (net9, SHA256-pinned at build) for cross-validation — see Dockerfile"
+    # MFTECmd version is recorded at image build time in /opt/mftecmd/VERSION
     # validation_fixture: user-provided (place in $FORENSICS_HOME/fixtures/)
     run_mftecmd: >
       docker run --rm
       -v $FORENSICS_HOME/cases:/output
       -v EVIDENCE_DIR:/evidence:ro
       forensics-mft-tools:1.2.0.0
-      mono /opt/mftecmd/MFTECmd.dll -f /evidence/EVIDENCE_FILE --csv /output/CASE_ID/raw --csvf mftecmd.csv
+      dotnet /opt/mftecmd/MFTECmd.dll -f /evidence/EVIDENCE_FILE --csv /output/CASE_ID/raw --csvf mftecmd.csv
     run_analyzemft: >
       docker run --rm
       -v $FORENSICS_HOME/cases:/output
