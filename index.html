@@ -27,6 +27,19 @@
 
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
+  /* ---------- correlation spotlight ---------- */
+  .spotlight{background:linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(16,185,129,0.02) 100%);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:32px 36px;margin:0 0 40px}
+  .spotlight .eyebrow{color:var(--emerald,#34d399);margin-bottom:6px;font-size:10px;letter-spacing:.2em}
+  .spotlight h3{font-size:1.4rem;font-weight:700;color:var(--bone);margin:0 0 10px}
+  .spotlight .lead{color:var(--muted);font-size:.9rem;line-height:1.55;margin-bottom:22px;max-width:680px}
+  .verdict-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ink-3);border:1px solid var(--ink-3);border-radius:8px;overflow:hidden;margin-bottom:16px}
+  .vcell{background:var(--ink-2);padding:16px 12px;text-align:center}
+  .vcell .n{font-family:var(--mono);font-size:1.6rem;font-weight:700;display:block;line-height:1}
+  .vcell .l{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:6px;display:block}
+  .vcell.corro .n{color:#34d399} .vcell.single .n{color:#fbbf24} .vcell.contr .n{color:#fb7185} .vcell.unver .n{color:#64748b}
+  .spotlight .note{font-size:10px;color:var(--faint);margin-top:4px}
+  .spotlight .note a{color:var(--emerald,#34d399)}
+  @media (max-width:640px){.verdict-grid{grid-template-columns:repeat(2,1fr)}}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
   body{
@@ -253,6 +266,19 @@
   /* ---------- reveal ---------- */
   .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
   .reveal.in{opacity:1;transform:none}
+  /* ---------- correlation spotlight ---------- */
+  .spotlight{background:linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(16,185,129,0.02) 100%);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:32px 36px;margin:0 0 40px}
+  .spotlight .eyebrow{color:var(--emerald,#34d399);margin-bottom:6px;font-size:10px;letter-spacing:.2em}
+  .spotlight h3{font-size:1.4rem;font-weight:700;color:var(--bone);margin:0 0 10px}
+  .spotlight .lead{color:var(--muted);font-size:.9rem;line-height:1.55;margin-bottom:22px;max-width:680px}
+  .verdict-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ink-3);border:1px solid var(--ink-3);border-radius:8px;overflow:hidden;margin-bottom:16px}
+  .vcell{background:var(--ink-2);padding:16px 12px;text-align:center}
+  .vcell .n{font-family:var(--mono);font-size:1.6rem;font-weight:700;display:block;line-height:1}
+  .vcell .l{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:6px;display:block}
+  .vcell.corro .n{color:#34d399} .vcell.single .n{color:#fbbf24} .vcell.contr .n{color:#fb7185} .vcell.unver .n{color:#64748b}
+  .spotlight .note{font-size:10px;color:var(--faint);margin-top:4px}
+  .spotlight .note a{color:var(--emerald,#34d399)}
+  @media (max-width:640px){.verdict-grid{grid-template-columns:repeat(2,1fr)}}
   @media (prefers-reduced-motion:reduce){
     .reveal{opacity:1;transform:none;transition:none}
     .dot{animation:none}
@@ -513,6 +539,24 @@
         <h3>Chain of custody</h3>
         <p>Every action is logged. Findings stay <b>DRAFT until an examiner approves</b>; the agent has no path to self-approve.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SPOTLIGHT: Correlation Pass ===== -->
+<section>
+  <div class="wrap">
+    <div class="spotlight reveal">
+      <p class="eyebrow">NEW IN v4.2.1</p>
+      <h3>Every finding, independently verified</h3>
+      <p class="lead">After analysis, the <b>correlation pass</b> extracts every entity — IPs, hashes, filenames, domains — from each DRAFT finding and checks whether a <b>different tool</b> independently saw the same artifact. Four verdicts, one per finding, rendered right in the report.</p>
+      <div class="verdict-grid">
+        <div class="vcell corro"><span class="n">▲</span><span class="l">Corroborated</span></div>
+        <div class="vcell single"><span class="n">●</span><span class="l">Single-Source</span></div>
+        <div class="vcell contr"><span class="n">■</span><span class="l">Contradicted</span></div>
+        <div class="vcell unver"><span class="n">◇</span><span class="l">Unverified</span></div>
+      </div>
+      <p class="note">Read-only · advisory only · examiner decides · <a href="reports/samples/belkactf7-timeline-report.html" target="_blank">see it in the sample report →</a></p>
     </div>
   </div>
 </section>
