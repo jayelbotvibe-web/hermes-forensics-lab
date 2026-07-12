@@ -18,6 +18,8 @@ This is a **reproducible personal DFIR lab** and artifact-interpretation skill l
 > **🆕 v4.2.1 — Correlation Pass**
 > Every finding is now cross-referenced against **independent sources** before the report is generated. The correlation engine extracts entities (IPs, hashes, filenames, domains) and proposes one of four verdicts: **CORROBORATED**, **SINGLE-SOURCE**, **CONTRADICTED**, or **UNVERIFIED**. Verdict badges render inline in both report templates. [See it in the sample report →](reports/samples/belkactf7-timeline-report.html)
 
+[![Correlation Pass — four verdicts](assets/correlation-pass-showcase.png)](assets/correlation-pass-showcase.png)
+
 ---
 
 ## What It Looks Like
