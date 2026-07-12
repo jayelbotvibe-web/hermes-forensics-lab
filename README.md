@@ -2,7 +2,7 @@
 
 > **AI-assisted digital forensics system built on Hermes Agent + SIFT Workstation**
 >
-> 12 forensic tools • 3 runtimes • 33-interpretation artifact encyclopedia • automated validation • human-in-the-loop
+> 12 forensic tools • 3 runtimes • 33-interpretation artifact encyclopedia • automated validation • cross-source correlation • human-in-the-loop
 
 This is a **reproducible personal DFIR lab** and artifact-interpretation skill library. The full stack assumes a pre-built SIFT Workstation VM at a known IP, SSH key auth, Docker, and a Hermes Agent install. The artifact encyclopedia and skill library work standalone — use them without the tool runtime if you only need interpretation guidance.
 
@@ -10,7 +10,7 @@ This is a **reproducible personal DFIR lab** and artifact-interpretation skill l
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
 [![Canary](https://img.shields.io/badge/canary-12_tools_+_8_env-brightgreen)](scripts/session-canary.sh)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
-[![Automation](https://img.shields.io/badge/automation-7_scripts-8b5cf6)](docs/AUTOMATION.md)
+[![Automation](https://img.shields.io/badge/automation-8_scripts-8b5cf6)](docs/AUTOMATION.md)
 
 ---
 
@@ -349,10 +349,14 @@ hermes-forensics-lab/
 ## 📊 Finding Pipeline
 
 ```
-Evidence Registration → Tool Execution → Cross-Validation → DRAFT Finding → Examiner Approval
-       ↓                    ↓                  ↓                ↓                ↓
-   hash + chmod         tool + version    delta check      F-niel-NNN     status → approved
-   evidence.json        exact command      >5% flagged     confidence     audit trail
+Evidence Registration → Tool Execution → Correlation Pass → DRAFT Finding → Examiner Approval
+       ↓                    ↓                  ↓                  ↓                ↓
+   hash + chmod         tool + version    cross-source       F-niel-NNN     status → approved
+   evidence.json        exact command     verdict check      confidence     audit trail
+                                      CORROBORATED /
+                                      SINGLE-SOURCE /
+                                      CONTRADICTED /
+                                      UNVERIFIED
 ```
 
 ### What every finding includes:
@@ -364,7 +368,7 @@ Evidence Registration → Tool Execution → Cross-Validation → DRAFT Finding 
 | Exact command | `vol -f dump.mem windows.pslist` | Verifiable |
 | Evidence ref | `EVID-003` | Chain of custody |
 | Confidence | `HIGH` / `MEDIUM` / `LOW` / `TENTATIVE` | Encyclopedia match + canary status |
-| Cross-validation | `analyzeMFT ↔ MFTECmd, delta 2.1%` | Corroboration |
+| Correlation verdict | `CORROBORATED` / `SINGLE-SOURCE` / `CONTRADICTED` / `UNVERIFIED` | Independent source verification |
 | MITRE ATT&CK | `T1055.001` (if applicable) | Threat context |
 
 ### Finding statuses:
@@ -375,6 +379,39 @@ Evidence Registration → Tool Execution → Cross-Validation → DRAFT Finding 
 
 All findings remain DRAFT until a human examiner approves them.
 Every status change is logged to the case audit trail.
+
+---
+
+## 🔍 Correlation Pass (NEW in v4.2.1)
+
+After findings are drafted, a **read-only cross-reference check** verifies each one against independent sources in the timeline and evidence registry. The correlation engine extracts entities (IPs, hashes, filenames, domains) from every finding and checks whether a **different tool** independently saw the same artifact.
+
+### Four advisory verdicts
+
+| Verdict | Means | Suggested Confidence |
+|---|---|---|
+| **CORROBORATED** | A different tool independently references the same entity | HIGH |
+| **SINGLE-SOURCE** | Entity only appears in the finding's own tool output | LOW — examiner review |
+| **CONTRADICTED** | Same filename carries two different SHA-256 hashes | REVIEW — possible substitution error |
+| **UNVERIFIED** | No checkable entity could be extracted | Honest default |
+
+### Key properties
+
+- **Read-only** — never modifies findings, timeline, evidence, or the report
+- **No REFUTED** — never deletes or dismisses a finding
+- **Advisory only** — verdicts are proposals; the examiner decides
+- **Independence required** — same tool twice is not corroboration
+- **Renders in the report** — verdict badges appear inline in the findings table and a tally grid shows the full picture
+
+```bash
+# Run after analysis, before reporting
+python3 scripts/forensics-verify.py /path/to/case_dir
+
+# Reads:  findings.json + timeline.json + evidence.json
+# Writes: correlation-proposals.json + correlation-summary.txt
+```
+
+Both report templates (timeline + data-first) render the correlation results automatically.
 
 ---
 
