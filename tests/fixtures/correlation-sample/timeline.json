@@ -1,0 +1,9 @@
+[
+  {"id":"TL-001","timestamp":"2025-07-22T18:55:00Z","event":"System boot","source":"volatility3 2.7.0"},
+  {"id":"TL-002","timestamp":"2025-07-22T19:05:00Z","event":"User 'award' logs in — explorer.exe (PID 5116) starts","source":"volatility3 2.7.0"},
+  {"id":"TL-003","timestamp":"2025-07-22T19:10:00Z","event":"Microsoft Edge establishes HTTPS connection (browsing activity begins)","source":"plaso 20240512"},
+  {"id":"TL-004","timestamp":"2025-07-22T19:11:00Z","event":"MALWARE EXECUTION: epxlorer.exe (PID 9920) spawned by explorer.exe","source":"plaso 20240512"},
+  {"id":"TL-005","timestamp":"2025-07-22T19:12:33Z","event":"C2 ESTABLISHED: epxlorer.exe to 104.21.1.247:443 (Telegram Bot API)","source":"tshark 4.0"},
+  {"id":"TL-006","timestamp":"2025-07-22T19:15:05Z","event":"ATC_RADAR.exe active — malware coexisting with aviation operations software","source":"volatility3 2.7.0"},
+  {"id":"TL-007","timestamp":"2025-07-22T19:18:53Z","event":"Memory dump captured — evidence acquisition point","source":"MemProcFS 5.17.8"}
+]

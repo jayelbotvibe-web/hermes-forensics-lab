@@ -1,0 +1,3 @@
+[
+  {"evidence_id":"EVID-001","filename":"epxlorer.exe","sha256":"3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35","md5":"75ea94b54420c39dcd3d8ce574ba9d34","source":"memory dump belkactf7.mem","timestamp":"2025-07-22T19:18:53Z"}
+]

@@ -2,6 +2,20 @@
 
 All notable changes to the Hermes Forensics Lab.
 
+## [4.2.1] — 2026-07-12
+
+### Added
+- **Correlation pass**: read-only advisory layer (`forensics-verify.py`) that cross-references
+  each DRAFT finding against independent sources in the timeline and evidence JSON, proposing
+  one of four verdicts: CORROBORATED (HIGH confidence), SINGLE-SOURCE (LOW), CONTRADICTED
+  (REVIEW), or UNVERIFIED (honest default). Writes `correlation-proposals.json` and
+  `correlation-summary.txt` — never modifies findings, timeline, evidence, or the report.
+  Advisory only; the examiner decides.
+- Seeded acceptance test (`test_forensics_verify.py`) asserting all four verdicts plus
+  read-only invariants (findings.json byte-for-byte unchanged after run).
+- Agent-facing correlation skill (`skills/correlation/SKILL.md`) loaded during investigations
+  after findings are drafted, before reporting.
+
 ## [4.2.0] — 2026-07-09
 
 ### Fixed

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "F-niel-001",
+    "title": "Malware Execution: epxlorer.exe Masquerading as explorer.exe",
+    "confidence": "HIGH",
+    "tool": "MemProcFS 5.17.8",
+    "command": "ls /mnt/mem/sys/proc/ ; cat /mnt/mem/sys/proc/9920/info.txt",
+    "evidence_ref": "EVID-001",
+    "raw_output": "epxlorer.exe PID 9920 PPID 5116 Wow64=True Path=C:\\Users\\award\\Downloads\\epxlorer.exe",
+    "finding": "Typo-squatted process epxlorer.exe (single-char substitution of explorer.exe) spawned by explorer.exe PID 5116. MITRE T1036.005."
+  },
+  {
+    "id": "F-niel-002",
+    "title": "Command and Control via Fraudulent Telegram Bot API",
+    "confidence": "HIGH",
+    "tool": "MemProcFS 5.17.8",
+    "command": "cat /mnt/mem/sys/net/tcp.txt",
+    "evidence_ref": "EVID-001",
+    "raw_output": "104.21.1.247:443 ESTABLISHED pid 9920 host api-telegram-org.ctf.do",
+    "finding": "Outbound C2 from epxlorer.exe (PID 9920) to 104.21.1.247:443, masquerading as a Telegram Bot API endpoint. MITRE T1102.002 / T1573."
+  },
+  {
+    "id": "F-niel-003",
+    "title": "Phishing Delivery Vector: Browser Download of Malicious Executable",
+    "confidence": "HIGH",
+    "tool": "mft-tools 1.2.0.0",
+    "command": "analyzeMFT.py -f $MFT",
+    "evidence_ref": "EVID-001",
+    "raw_output": "epxlorer.exe435568.crdownload Zone.Identifier sha256 3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35 sender ktso.sec@mailforce.net",
+    "finding": "Chromium .crdownload marker proves browser-origin delivery; phishing sender ktso.sec@mailforce.net. MITRE T1566.001 / T1204.002."
+  },
+  {
+    "id": "F-niel-004",
+    "title": "Critical Asset Compromised: Air Traffic Control Workstation",
+    "confidence": "HIGH",
+    "tool": "MemProcFS 5.17.8",
+    "command": "ls /mnt/mem/sys/proc/",
+    "evidence_ref": "EVID-001",
+    "raw_output": "ATC_RADAR.exe active alongside epxlorer.exe on host 172.17.4.12",
+    "finding": "Aviation operations software ATC_RADAR.exe running on the same compromised workstation (172.17.4.12) as the malware."
+  }
+]
