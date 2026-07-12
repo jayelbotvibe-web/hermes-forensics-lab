@@ -318,12 +318,14 @@ hermes-forensics-lab/
 │   ├── forensics-up.sh                ← ⚡ one-command system bring-up
 │   ├── forensics-down.sh              ← ⚡ clean system shutdown
 │   ├── forensics-case.sh              ← ⚡ rapid case initialization
+│   ├── forensics-verify.py            ← 🆕 correlation pass — read-only cross-reference advisor
 │   ├── session-canary.sh              ← validates all tools on startup
 │   ├── sift-exec.sh                   ← SSH wrapper for SIFT VM tools
 │   └── handoff.sh                     ← pentest → forensics evidence transfer
 ├── skills/
 │   ├── system-context/SKILL.md        ← full architecture map (loaded always)
 │   ├── forensic-artifacts/SKILL.md    ← 🆕 artifact encyclopedia — 33 interpretations + MFT/registry workflows
+│   ├── correlation/SKILL.md           ← 🆕 correlation pass — cross-reference findings against independent sources
 │   ├── evidence-handling/SKILL.md     ← chain of custody, case creation
 │   ├── memory-forensics/SKILL.md      ← MemProcFS + volatility3 workflow
 │   ├── filesystem-forensics/SKILL.md  ← Sleuth Kit analysis
