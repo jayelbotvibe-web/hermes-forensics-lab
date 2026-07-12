@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forensic Analysis Report — INC-2026-0624-0001</title>
+<title>Forensic Analysis Report — </title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -97,6 +97,17 @@
   .section-dot.amber   { background: var(--amber); }
   .section-dot.cyan    { background: var(--cyan); }
   .section-dot.rose    { background: var(--rose); }
+.section-dot.emerald { background: var(--emerald); }
+/* correlation tally grid */
+.correlation-tally { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 16px 0; }
+.correlation-tally .cell { background: var(--bg-card); padding: 14px; text-align: center; }
+.correlation-tally .count { font-size: 22px; font-weight: 700; display: block; }
+.correlation-tally .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-faint); margin-top: 4px; }
+.correlation-tally .corroborated .count { color: var(--emerald); }
+.correlation-tally .single-source .count { color: var(--amber); }
+.correlation-tally .contradicted .count { color: var(--rose); }
+.correlation-tally .unverified .count { color: var(--text-faint); }
+.desc { color: var(--text-dim); font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
   .section-dot.violet  { background: var(--violet); }
   .section-dot.emerald { background: var(--emerald); }
   .section-dot.slate   { background: var(--slate); }
@@ -154,6 +165,10 @@
   .badge-high   { background: rgba(251,113,133,0.15); color: var(--rose); }
   .badge-medium { background: rgba(251,191,36,0.15); color: var(--amber); }
   .badge-low    { background: rgba(34,211,238,0.15); color: var(--cyan); }
+.badge-corroborated  { background: rgba(52,211,153,0.20); color: var(--emerald); }
+.badge-single-source { background: rgba(251,191,36,0.15); color: var(--amber); }
+.badge-contradicted  { background: rgba(251,113,133,0.20); color: var(--rose); font-weight: 700; }
+.badge-unverified    { background: rgba(148,163,184,0.12); color: var(--text-faint); }
   .badge-critical { background: rgba(251,113,133,0.25); color: var(--rose); font-weight: 700; }
 
   /* ── IOC Tags ─────────────────────────────────────────── */
@@ -456,13 +471,13 @@
 <div class="report-header">
   <div class="left">
     <div class="badge">DIGITAL FORENSICS REPORT</div>
-    <h1>BelkaCTF #7 — Compromised Air Traffic Control Workstation</h1>
-    <p class="meta">Case INC-2026-0624-0001 · Examiner: niel · 2026-06-24 21:50 UTC</p>
+    <h1>BelkaCTF #7 'Stranger Dfings' — forensic analysis of provided artifacts</h1>
+    <p class="meta">Case  · Examiner: niel · 2026-07-12 11:54 +08</p>
   </div>
   <div class="right">
     <div class="stat"><span class="num">4</span><span class="lbl">Findings</span></div>
     <div class="stat"><span class="num">1</span><span class="lbl">Evidence Items</span></div>
-    <div class="stat"><span class="num">9</span><span class="lbl">IOCs</span></div>
+    <div class="stat"><span class="num">6</span><span class="lbl">IOCs</span></div>
   </div>
 </div>
 
@@ -476,22 +491,22 @@
   <div class="summary-grid">
     <div class="summary-card">
       <div class="label">Classification</div>
-      <div class="value critical">CONFIDENTIAL — AVIATION SAFETY IMPLICATIONS</div>
+      <div class="value critical">CONFIDENTIAL</div>
     </div>
     <div class="summary-card">
       <div class="label">Target System</div>
-      <div class="value info">TSO-ATC-CT412 (Windows 10 build 19041 (19041.1.amd64fre.vb_releas)</div>
+      <div class="value info">Unknown</div>
     </div>
     <div class="summary-card">
       <div class="label">Compromise Detected</div>
-      <div class="value critical">YES — 3 CRITICAL severity findings, active C2 established</div>
+      <div class="value critical">YES — 4 HIGH-confidence findings</div>
     </div>
     <div class="summary-card">
       <div class="label">Investigation Window</div>
-      <div class="value high">2025-07-22 18:50 – 19:18 UTC (28 minutes)</div>
+      <div class="value high">2025-07-22 → 2025-07-22</div>
     </div>
   </div>
-  <p style="color:var(--text-dim);line-height:1.7">On 2025-07-22, an air traffic control workstation (TSO-ATC-CT412, user 'award') was compromised within 3 minutes of user login. A phishing email from ktso.sec@mailforce.net delivered a trojan (epxlorer.exe) masquerading as the Windows shell process explorer.exe. The malware established command-and-control to an attacker-operated Telegram Bot API behind Cloudflare infrastructure within 19 minutes of execution. At the time of compromise, ATC_RADAR.exe — an aviation radar processing application — was actively running, meaning unauthorized code coexisted with live air traffic operations. This constitutes a potential aviation safety incident with possible regulatory reporting obligations under ICAO Annex 17. Immediate network isolation of the affected workstation and escalation to the aviation safety officer are required.</p>
+  <p style="color:var(--text-dim);line-height:1.7">A forensic investigation was conducted on evidence from the target system. Analysis identified 4 HIGH-confidence findings indicating malicious activity. The investigation utilized the Hermes Forensics Agent platform with multi-runtime tool validation (session canary: 9/9 PASS).</p>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -505,14 +520,90 @@
   </p>
 
   <div class="timeline">
-    <div class="tl-event"><div class="tl-dot system"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:50:46 UTC</span></div><div class="tl-card system"><div class="tl-title"><span class="tl-tag tl-tag-system">SYSTEM</span> System boot</div><div class="tl-desc"><span class="tl-source">volatility3 windows.info</span></div></div></div>
-<div class="tl-event"><div class="tl-dot user"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:50:50 UTC</span></div><div class="tl-card user"><div class="tl-title"><span class="tl-tag tl-tag-user">USER</span> User 'award' logs in — explorer.exe (PID 5116) starts</div><div class="tl-desc"><span class="tl-source">volatility3 windows.pslist</span></div></div></div>
-<div class="tl-event"><div class="tl-dot user"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:51:58 UTC</span></div><div class="tl-card user"><div class="tl-title"><span class="tl-tag tl-tag-user">USER</span> Microsoft Edge establishes HTTPS connection (browsing activity begins)</div><div class="tl-desc"><span class="tl-source">volatility3 windows.netscan</span></div></div></div>
-<div class="tl-event"><div class="tl-dot malware"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:53:11 UTC</span></div><div class="tl-card malware"><div class="tl-title"><span class="tl-tag tl-tag-malware">MALWARE</span> MALWARE EXECUTION: epxlorer.exe (PID 9920) spawned by explorer.exe <span class="tl-finding-ref">F-niel-001</span></div><div class="tl-desc"><span class="tl-source">volatility3 windows.pslist + MemProcFS</span></div></div></div>
-<div class="tl-event"><div class="tl-dot network"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">19:12:33 UTC</span></div><div class="tl-card network"><div class="tl-title"><span class="tl-tag tl-tag-network">C2</span> C2 ESTABLISHED: epxlorer.exe → 104.21.1.247:443 (Telegram Bot API) <span class="tl-finding-ref">F-niel-002</span></div><div class="tl-desc"><span class="tl-source">volatility3 windows.netscan</span></div></div></div>
-<div class="tl-event"><div class="tl-dot process"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">19:15:05 UTC</span></div><div class="tl-card process"><div class="tl-title"><span class="tl-tag tl-tag-process">PROCESS</span> ATC_RADAR.exe active — malware coexisting with aviation operations software <span class="tl-finding-ref">F-niel-004</span></div><div class="tl-desc"><span class="tl-source">volatility3 windows.pslist + MemProcFS</span></div></div></div>
-<div class="tl-event"><div class="tl-dot system"></div><div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">19:18:53 UTC</span></div><div class="tl-card system"><div class="tl-title"><span class="tl-tag tl-tag-system">SYSTEM</span> Memory dump captured — evidence acquisition point</div><div class="tl-desc"><span class="tl-source">volatility3 windows.info</span></div></div></div>
-
+        <div class="tl-event">
+      <div class="tl-dot system"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:50:46 UTC</span></div>
+      <div class="tl-card system">
+        <div class="tl-title">
+          System boot
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.info</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-event">
+      <div class="tl-dot process"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:50:50 UTC</span></div>
+      <div class="tl-card process">
+        <div class="tl-title">
+          User 'award' logs in — explorer.exe (PID 5116) starts
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.pslist</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-event">
+      <div class="tl-dot network"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:51:58 UTC</span></div>
+      <div class="tl-card network">
+        <div class="tl-title">
+          Microsoft Edge establishes HTTPS connection (browsing activity begins)
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.netscan</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-event">
+      <div class="tl-dot malware"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">18:53:11 UTC</span></div>
+      <div class="tl-card malware">
+        <div class="tl-title">
+          MALWARE EXECUTION: epxlorer.exe (PID 9920) spawned by explorer.exe
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.pslist + MemProcFS</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-event">
+      <div class="tl-dot malware"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">19:12:33 UTC</span></div>
+      <div class="tl-card malware">
+        <div class="tl-title">
+          C2 ESTABLISHED: epxlorer.exe → 104.21.1.247:443 (Telegram Bot API)
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.netscan</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-event">
+      <div class="tl-dot malware"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">19:15:05 UTC</span></div>
+      <div class="tl-card malware">
+        <div class="tl-title">
+          ATC_RADAR.exe active — malware coexisting with aviation operations software
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.pslist + MemProcFS</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-event">
+      <div class="tl-dot system"></div>
+      <div class="tl-time"><span class="date">2025-07-22</span> <span class="ms">19:18:53 UTC</span></div>
+      <div class="tl-card system">
+        <div class="tl-title">
+          Memory dump captured — evidence acquisition point
+        </div>
+        <div class="tl-desc">
+          <span class="tl-source">volatility3 windows.info</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div style="display:flex;gap:16px;margin-top:20px;flex-wrap:wrap;font-size:11px;color:var(--text-faint)">
@@ -523,6 +614,21 @@
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--amber);margin-right:4px"></span> System Event</span>
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--slate);margin-right:4px"></span> User Activity</span>
   </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CORRELATION REVIEW
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="section-dot emerald"></span> Correlation Review</div>
+  <p class="desc">Advisory-only cross-reference check. Each DRAFT finding is verified against independent sources in the timeline and evidence registry. Verdicts are proposals — the examiner confirms before findings are finalized.</p>
+  <div class="correlation-tally">
+      <div class="cell corroborated"><span class="count">0</span><span class="label">Corroborated</span></div>
+      <div class="cell single-source"><span class="count">4</span><span class="label">Single-Source</span></div>
+      <div class="cell contradicted"><span class="count">0</span><span class="label">Contradicted</span></div>
+      <div class="cell unverified"><span class="count">0</span><span class="label">Unverified</span></div>
+    </div>
+    <p style="font-size:10px;color:var(--text-faint);margin-top:8px">4 finding(s) reviewed. Advisory only — examiner confirms. Findings remain DRAFT.</p>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -543,11 +649,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td><span class="mono">F-niel-001</span></td><td><strong style="color:white">Malware Execution: epxlorer.exe Masquerading as explorer.exe</strong><br><span style="font-size:11px;color:var(--text-dim)">Process epxlorer.exe (PID 9920) was spawned by explorer.exe (PID 5116) at 2025-07-22 18:53:11 UTC, just 2 minutes 21 seconds after user login. The binary was executed from C:\Users\award\Downloads\epxlorer.exe.</span></td><td><span class="badge-cell badge-critical">CRITICAL</span><br><span class="badge-cell badge-high" style="font-size:9px">HIGH conf</span></td><td style="font-size:11px"><span class="tl-source">T1036.005</span> <span class="tl-source">T1204.002</span></td><td class="mono" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</td><td>EVID-001</td></tr>
-<tr><td><span class="mono">F-niel-002</span></td><td><strong style="color:white">Command and Control via Fraudulent Telegram Bot API</strong><br><span style="font-size:11px;color:var(--text-dim)">epxlorer.exe established an outbound HTTPS connection to 104.21.1.247:443 at 2025-07-22 19:12:33 UTC — 19 minutes after execution. The destination IP is a Cloudflare edge node fronting the attacker-controlled domain api-telegram-org.ctf.do. The malware uses Telegram Bot API (token: <REDACTED_TELEGRAM_BOT_TOKEN>) as its C2 channel, abusing legitimate cloud infrastructure to blend with normal HTTPS traffic.</span></td><td><span class="badge-cell badge-critical">CRITICAL</span><br><span class="badge-cell badge-high" style="font-size:9px">HIGH conf</span></td><td style="font-size:11px"><span class="tl-source">T1102.002</span> <span class="tl-source">T1573</span></td><td class="mono" style="font-size:10px">volatility3 2.7.0</td><td>EVID-001</td></tr>
-<tr><td><span class="mono">F-niel-003</span></td><td><strong style="color:white">Phishing Delivery Vector: Browser Download of Malicious Executable</strong><br><span style="font-size:11px;color:var(--text-dim)">epxlorer.exe was discovered at three virtual addresses in the memory filescan, including a partial browser download artifact (epxlorer.exe435568.crdownload). The .crdownload extension is specific to Chromium-based browsers (Microsoft Edge in this environment — confirmed by extensive Edge artifacts throughout the filescan). Per CTF intelligence, the phishing email originated from ktso.sec@mailforce.net.</span></td><td><span class="badge-cell badge-high">HIGH</span><br><span class="badge-cell badge-high" style="font-size:9px">HIGH conf</span></td><td style="font-size:11px"><span class="tl-source">T1566.001</span> <span class="tl-source">T1204.002</span></td><td class="mono" style="font-size:10px">volatility3 2.7.0</td><td>EVID-001</td></tr>
-<tr><td><span class="mono">F-niel-004</span></td><td><strong style="color:white">Critical Asset Compromised: Air Traffic Control Workstation</strong><br><span style="font-size:11px;color:var(--text-dim)">The compromised host (TSO-ATC-CT412, user 'award') runs ATC_RADAR.exe — an air traffic control radar application with multiple active processes and network connections to 8.8.8.8 (Google DNS-over-HTTPS). The workstation name (ATC-CT412) and application context confirm this is not a standard enterprise endpoint — it is an aviation operations system. Multiple ATC_RADAR.exe instances ran concurrently with epxlorer.exe, meaning the malware coexisted with active ATC operations.</span></td><td><span class="badge-cell badge-critical">CRITICAL</span><br><span class="badge-cell badge-high" style="font-size:9px">HIGH conf</span></td><td style="font-size:11px"><span class="tl-source">T1003.001</span></td><td class="mono" style="font-size:10px">volatility3 2.7.0 + MemProcFS 5.17.8</td><td>EVID-001</td></tr>
-
+        <tr><td><span class="mono">F-niel-001</span></td><td>Malware Execution: epxlorer.exe Masquerading as explorer.exe</td><td><span class="badge-cell badge-high">HIGH</span></td><td class="mono" style="font-size:11px">volatility3 2.7.0 + MemProcFS 5.17.8</td><td>EVID-001</td><td><span class="badge-cell badge-single-source">SINGLE SOURCE</span></td></tr>
+<tr><td><span class="mono">F-niel-002</span></td><td>Command and Control via Fraudulent Telegram Bot API</td><td><span class="badge-cell badge-high">HIGH</span></td><td class="mono" style="font-size:11px">volatility3 2.7.0</td><td>EVID-001</td><td><span class="badge-cell badge-single-source">SINGLE SOURCE</span></td></tr>
+<tr><td><span class="mono">F-niel-003</span></td><td>Phishing Delivery Vector: Browser Download of Malicious Executable</td><td><span class="badge-cell badge-high">HIGH</span></td><td class="mono" style="font-size:11px">volatility3 2.7.0</td><td>EVID-001</td><td><span class="badge-cell badge-single-source">SINGLE SOURCE</span></td></tr>
+<tr><td><span class="mono">F-niel-004</span></td><td>Critical Asset Compromised: Air Traffic Control Workstation</td><td><span class="badge-cell badge-high">HIGH</span></td><td class="mono" style="font-size:11px">volatility3 2.7.0 + MemProcFS 5.17.8</td><td>EVID-001</td><td><span class="badge-cell badge-single-source">SINGLE SOURCE</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -564,16 +669,12 @@
         <tr><th>Type</th><th>Indicator</th><th>Context</th><th>Finding</th></tr>
       </thead>
       <tbody>
-        <tr><td><span class="ioc-tag hash">SHA-256</span></td><td class="mono" style="font-size:11px">3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35</td><td style="font-size:12px">Evidence archive</td><td class="mono" style="font-size:11px">EVID-001</td></tr>
-<tr><td><span class="ioc-tag hash">SHA-256</span></td><td class="mono" style="font-size:11px">7b45e797acabaf592784bf7efceb979e3f036d5b9dd47f52280c17e38864c2dd</td><td style="font-size:12px">Memory dump</td><td class="mono" style="font-size:11px">EVID-001</td></tr>
-<tr><td><span class="ioc-tag hash">MD5</span></td><td class="mono" style="font-size:11px">75ea94b54420c39dcd3d8ce574ba9d34</td><td style="font-size:12px">epxlorer.exe hash</td><td class="mono" style="font-size:11px">F-niel-001</td></tr>
-<tr><td><span class="ioc-tag file">Filename</span></td><td class="mono" style="font-size:11px">epxlorer.exe</td><td style="font-size:12px">Malware binary</td><td class="mono" style="font-size:11px">F-niel-001</td></tr>
-<tr><td><span class="ioc-tag file">File Path</span></td><td class="mono" style="font-size:11px">C:\Users\award\Downloads\epxlorer.exe</td><td style="font-size:12px">Execution path</td><td class="mono" style="font-size:11px">F-niel-001</td></tr>
-<tr><td><span class="ioc-tag ip">IP</span></td><td class="mono" style="font-size:11px">104.21.1.247</td><td style="font-size:12px">C2 (Cloudflare)</td><td class="mono" style="font-size:11px">F-niel-002</td></tr>
-<tr><td><span class="ioc-tag domain">Domain</span></td><td class="mono" style="font-size:11px">api-telegram-org.ctf.do</td><td style="font-size:12px">C2 domain</td><td class="mono" style="font-size:11px">F-niel-002</td></tr>
-<tr><td><span class="ioc-tag email">Email</span></td><td class="mono" style="font-size:11px">ktso.sec@mailforce.net</td><td style="font-size:12px">Phishing sender</td><td class="mono" style="font-size:11px">F-niel-003</td></tr>
-<tr><td><span class="ioc-tag ip">IP</span></td><td class="mono" style="font-size:11px">172.17.4.12</td><td style="font-size:12px">Compromised host</td><td class="mono" style="font-size:11px">F-niel-004</td></tr>
-
+        <tr><td><span class='ioc-tag file'>File Path</span></td><td class='mono' style='font-size:11px'>C:\Users\award\Downloads\epxlorer.exe</td><td style='font-size:12px'>Malware path</td><td class='mono' style='font-size:11px'>F-niel-001</td></tr>
+<tr><td><span class='ioc-tag ip'>IP</span></td><td class='mono' style='font-size:11px'>104.21.1.247</td><td style='font-size:12px'>Network indicator</td><td class='mono' style='font-size:11px'>F-niel-002</td></tr>
+<tr><td><span class='ioc-tag domain'>Domain</span></td><td class='mono' style='font-size:11px'>api-telegram-org.ctf.do</td><td style='font-size:12px'>C2 / phishing domain</td><td class='mono' style='font-size:11px'>F-niel-002</td></tr>
+<tr><td><span class='ioc-tag domain'>Domain</span></td><td class='mono' style='font-size:11px'>mailforce.net</td><td style='font-size:12px'>C2 / phishing domain</td><td class='mono' style='font-size:11px'>F-niel-003</td></tr>
+<tr><td><span class='ioc-tag email'>Email</span></td><td class='mono' style='font-size:11px'>ktso.sec@mailforce.net</td><td style='font-size:12px'>Phishing address</td><td class='mono' style='font-size:11px'>F-niel-003</td></tr>
+<tr><td><span class='ioc-tag ip'>IP</span></td><td class='mono' style='font-size:11px'>8.8.8.8</td><td style='font-size:12px'>Network indicator</td><td class='mono' style='font-size:11px'>F-niel-004</td></tr>
       </tbody>
     </table>
   </div>
@@ -584,8 +685,13 @@
      ═══════════════════════════════════════════════════════════ -->
 <div class="section">
   <div class="section-title"><span class="section-dot emerald"></span> Evidence Registry</div>
-  <div class="evidence-item"><div class="ev-header"><span class="ev-id">EVID-001 — BelkaCTF_7_CASE250722_KTSOAERO.zip</span></div><div class="ev-hash">SHA-256: 3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35</div><div style="font-size:11px;color:var(--text-faint);margin-top:4px">Source: https://dl.ctf.do/BelkaCTF_7_CASE250722_KTSOAERO.zip</div></div>
-
+  <div class="evidence-item">
+      <div class="ev-header">
+        <span class="ev-id">EVID-001 — BelkaCTF_7_CASE250722_KTSOAERO.zip</span>
+      </div>
+      <div class="ev-hash">SHA-256: 3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-top:4px">Source: https://dl.ctf.do/BelkaCTF_7_CASE250722_KTSOAERO.zip</div>
+    </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -599,31 +705,13 @@
         <tr><th>Tool</th><th>Version</th><th>Runtime</th><th>Validated</th></tr>
       </thead>
       <tbody>
-        <tr><td>volatility3</td><td class="mono">2.7.0</td><td>docker</td><td><span class="badge-cell badge-high">Validated</span></td></tr>
-<tr><td>memprocfs</td><td class="mono">5.17.8</td><td>host_fuse</td><td><span class="badge-cell badge-high">Validated</span></td></tr>
-<tr><td>plaso</td><td class="mono">20240512</td><td>docker</td><td><span class="badge-cell badge-high">Validated</span></td></tr>
-<tr><td>mft-tools</td><td class="mono">1.2.0.0</td><td>docker</td><td><span class="badge-cell badge-high">Validated</span></td></tr>
-<tr><td>sift-vm</td><td class="mono">?</td><td>?</td><td><span class="badge-cell badge-high">Validated</span></td></tr>
-<tr><td>session_canary</td><td class="mono">?</td><td>?</td><td><span class="badge-cell badge-critical">DEGRADED</span></td></tr>
-
+        <tr><td>volatility3</td><td class="mono">2.7.0</td><td>docker</td><td>✅</td></tr>
+<tr><td>memprocfs</td><td class="mono">5.17.8</td><td>host_fuse</td><td>✅</td></tr>
+<tr><td>plaso</td><td class="mono">20240512</td><td>docker</td><td>✅</td></tr>
+<tr><td>mft-tools</td><td class="mono">1.2.0.0</td><td>docker</td><td>✅</td></tr>
       </tbody>
     </table>
   </div>
-</div>
-
-
-<div class="section"><div class="section-title"><span class="section-dot cyan"></span> System Profile</div><div class="table-wrap"><table><tr><th style="width:200px">Property</th><th>Value</th></tr><tr><td style="color:var(--text-faint)">Hostname</td><td class="mono" style="font-size:12px">TSO-ATC-CT412</td></tr><tr><td style="color:var(--text-faint)">Username</td><td class="mono" style="font-size:12px">award</td></tr><tr><td style="color:var(--text-faint)">Os</td><td class="mono" style="font-size:12px">Windows 10 build 19041 (19041.1.amd64fre.vb_release.1912)</td></tr><tr><td style="color:var(--text-faint)">Architecture</td><td class="mono" style="font-size:12px">x64</td></tr><tr><td style="color:var(--text-faint)">Processors</td><td class="mono" style="font-size:12px">4</td></tr><tr><td style="color:var(--text-faint)">Host Ip</td><td class="mono" style="font-size:12px">172.17.4.12</td></tr><tr><td style="color:var(--text-faint)">Dump Time</td><td class="mono" style="font-size:12px">2025-07-22 19:18:53 UTC</td></tr><tr><td style="color:var(--text-faint)">Kernel Base</td><td class="mono" style="font-size:12px">0xf80617e00000</td></tr><tr><td style="color:var(--text-faint)">Nt Product Type</td><td class="mono" style="font-size:12px">NtProductWinNt</td></tr><tr><td style="color:var(--text-faint)">Source Tool</td><td class="mono" style="font-size:12px">volatility3 2.7.0 windows.info.Info</td></tr></table></div><p style="color:var(--text-faint);font-size:10px;margin-top:8px">Source: volatility3 2.7.0 windows.info.Info</p></div>
-<div class="section"><div class="section-title"><span class="section-dot rose"></span> Remediation Actions</div><p style="color:var(--text-dim);font-size:13px;margin-bottom:20px">Immediate containment and eradication steps per finding. Prioritize CRITICAL severity items first.</p><div class="tl-card" style="border-left-color:var(--rose);margin-bottom:16px"><div class="tl-title"><span class="badge-cell badge-critical" style="margin-right:8px">CRITICAL</span> F-niel-001: Malware Execution: epxlorer.exe Masquerading as explorer.exe</div><div class="tl-desc">Immediately isolate TSO-ATC-CT412 from all networks. Kill PID 9920. Quarantine C:\Users\award\Downloads\epxlorer.exe. Do NOT reboot before capturing full disk image — volatile evidence in memory will be lost.</div></div>
-<div class="tl-card" style="border-left-color:var(--rose);margin-bottom:16px"><div class="tl-title"><span class="badge-cell badge-critical" style="margin-right:8px">CRITICAL</span> F-niel-002: Command and Control via Fraudulent Telegram Bot API</div><div class="tl-desc">Block outbound HTTPS to api-telegram-org.ctf.do at network perimeter. Block Telegram Bot API endpoints if not business-justified. Deploy SSL inspection for traffic to unknown Cloudflare IPs. Check firewall logs for additional connections from 172.17.4.12 in the 18:50-19:18 UTC window.</div></div>
-<div class="tl-card" style="border-left-color:var(--rose);margin-bottom:16px"><div class="tl-title"><span class="badge-cell badge-high" style="margin-right:8px">HIGH</span> F-niel-003: Phishing Delivery Vector: Browser Download of Malicious Executable</div><div class="tl-desc">Search mail server for emails from ktso.sec@mailforce.net — identify all recipients. Purge the phishing email from all inboxes. Block mailforce.net at email gateway. Initiate user awareness training for 'award' and ATC personnel. Review Edge browser security policies — consider disabling automatic execution of downloaded files.</div></div>
-<div class="tl-card" style="border-left-color:var(--rose);margin-bottom:16px"><div class="tl-title"><span class="badge-cell badge-critical" style="margin-right:8px">CRITICAL</span> F-niel-004: Critical Asset Compromised: Air Traffic Control Workstation</div><div class="tl-desc">Escalate to aviation safety officer and CISO immediately. This may require mandatory reporting to the national aviation authority. Ground the workstation — do not allow it to process live radar data until forensic imaging is complete and the system is rebuilt from trusted media. Engage the ATC software vendor (ATC_RADAR.exe) to verify software integrity. Review separation requirements between administrative workstations and operational ATC systems.</div></div>
-</div>
-<div class="section"><div class="section-title"><span class="section-dot amber"></span> Investigation Gaps &amp; Limitations</div><p style="color:var(--text-dim);font-size:13px;margin-bottom:20px">The following areas were not examined and represent uncertainty in the assessment. Each gap should be addressed before finalizing conclusions.</p><div class="evidence-item"><div class="ev-header"><span class="ev-id" style="color:var(--amber)">GAP — Disk Image Not Analyzed</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px">Without filesystem forensics, persistence mechanisms, additional dropped files, and full file-system timeline cannot be confirmed.</div></div>
-<div class="evidence-item"><div class="ev-header"><span class="ev-id" style="color:var(--amber)">GAP — Network Capture Unavailable</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px">Encrypted C2 traffic cannot be analyzed for data exfiltration. Lateral movement cannot be assessed.</div></div>
-<div class="evidence-item"><div class="ev-header"><span class="ev-id" style="color:var(--amber)">GAP — Registry Hives Not Examined</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px">User activity artifacts and malware persistence locations (Run keys, scheduled tasks, services) remain unexamined.</div></div>
-<div class="evidence-item"><div class="ev-header"><span class="ev-id" style="color:var(--amber)">GAP — Malware Not Reverse-Engineered</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px">Full capability assessment of epxlorer.exe (keylogging, screen capture, lateral movement, exfiltration) is pending.</div></div>
-<div class="evidence-item"><div class="ev-header"><span class="ev-id" style="color:var(--amber)">GAP — Supplementary Evidence Not Analyzed</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px">The 5.6 GB supplementary file (SHA-256: e42f5254...) containing Android artifacts was not analyzed.</div></div>
-<div class="evidence-item"><div class="ev-header"><span class="ev-id" style="color:var(--amber)">GAP — Single Host Analysis Only</span></div><div style="font-size:12px;color:var(--text-dim);margin-top:4px">Compromise of additional systems on the network cannot be ruled out without broader endpoint telemetry.</div></div>
 </div>
 
 </div><!-- /container -->
@@ -633,8 +721,8 @@
      ═══════════════════════════════════════════════════════════ -->
 <div class="report-footer">
   <div class="sig-line"></div>
-  <p>Examiner: niel · Case INC-2026-0624-0001</p>
-  <p style="margin-top:8px">Hermes Forensics Agent · Report generated 2026-06-24 21:50 UTC</p>
+  <p>Examiner: niel · Case </p>
+  <p style="margin-top:8px">Hermes Forensics Agent · Report generated 2026-07-12 11:54 +08</p>
   <p style="font-size:10px;margin-top:4px">This report is auto-generated from structured case data. All findings require human review before finalization.</p>
 </div>
 

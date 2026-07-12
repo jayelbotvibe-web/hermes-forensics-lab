@@ -97,6 +97,17 @@
   .section-dot.amber   { background: var(--amber); }
   .section-dot.cyan    { background: var(--cyan); }
   .section-dot.rose    { background: var(--rose); }
+.section-dot.emerald { background: var(--emerald); }
+/* correlation tally grid */
+.correlation-tally { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 16px 0; }
+.correlation-tally .cell { background: var(--bg-card); padding: 14px; text-align: center; }
+.correlation-tally .count { font-size: 22px; font-weight: 700; display: block; }
+.correlation-tally .label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-faint); margin-top: 4px; }
+.correlation-tally .corroborated .count { color: var(--emerald); }
+.correlation-tally .single-source .count { color: var(--amber); }
+.correlation-tally .contradicted .count { color: var(--rose); }
+.correlation-tally .unverified .count { color: var(--text-faint); }
+.desc { color: var(--text-dim); font-size: 13px; line-height: 1.6; margin-bottom: 8px; }
   .section-dot.violet  { background: var(--violet); }
   .section-dot.emerald { background: var(--emerald); }
   .section-dot.slate   { background: var(--slate); }
@@ -154,6 +165,10 @@
   .badge-high   { background: rgba(251,113,133,0.15); color: var(--rose); }
   .badge-medium { background: rgba(251,191,36,0.15); color: var(--amber); }
   .badge-low    { background: rgba(34,211,238,0.15); color: var(--cyan); }
+.badge-corroborated  { background: rgba(52,211,153,0.20); color: var(--emerald); }
+.badge-single-source { background: rgba(251,191,36,0.15); color: var(--amber); }
+.badge-contradicted  { background: rgba(251,113,133,0.20); color: var(--rose); font-weight: 700; }
+.badge-unverified    { background: rgba(148,163,184,0.12); color: var(--text-faint); }
   .badge-critical { background: rgba(251,113,133,0.25); color: var(--rose); font-weight: 700; }
 
   /* ── IOC Tags ─────────────────────────────────────────── */
@@ -516,6 +531,15 @@
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--amber);margin-right:4px"></span> System Event</span>
     <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--slate);margin-right:4px"></span> User Activity</span>
   </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CORRELATION REVIEW
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="section-dot emerald"></span> Correlation Review</div>
+  <p class="desc">Advisory-only cross-reference check. Each DRAFT finding is verified against independent sources in the timeline and evidence registry. Verdicts are proposals — the examiner confirms before findings are finalized.</p>
+  {{CORRELATION_SECTION}}
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════

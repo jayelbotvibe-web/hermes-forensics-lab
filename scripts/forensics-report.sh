@@ -61,6 +61,36 @@ generate_html() {
         TEMPLATE="$(dirname "$(dirname "$0")")/reports/templates/timeline-report.html"
     fi
 
+    # ── Generate correlation section ─────────────────────────────────────
+    local CORR_SECTION=""
+    CORR_PATH="$CASE_DIR/correlation-proposals.json"
+    if [ -f "$CORR_PATH" ]; then
+        CORR_SECTION=$(python3 -c "
+import json
+proposals = json.load(open('$CORR_PATH'))
+tally = {}
+for p in proposals:
+    tally[p['verdict']] = tally.get(p['verdict'], 0) + 1
+corr = tally.get('CORROBORATED', 0)
+single = tally.get('SINGLE-SOURCE', 0)
+contr = tally.get('CONTRADICTED', 0)
+unver = tally.get('UNVERIFIED', 0)
+total = len(proposals)
+if total == 0:
+    print('<p style=\"color:var(--text-faint)\">No correlation proposals generated. Run forensics-verify.py first.</p>')
+else:
+    print(f'''<div class=\"correlation-tally\">
+      <div class=\"cell corroborated\"><span class=\"count\">{corr}</span><span class=\"label\">Corroborated</span></div>
+      <div class=\"cell single-source\"><span class=\"count\">{single}</span><span class=\"label\">Single-Source</span></div>
+      <div class=\"cell contradicted\"><span class=\"count\">{contr}</span><span class=\"label\">Contradicted</span></div>
+      <div class=\"cell unverified\"><span class=\"count\">{unver}</span><span class=\"label\">Unverified</span></div>
+    </div>
+    <p style=\"font-size:10px;color:var(--text-faint);margin-top:8px\">{total} finding(s) reviewed. Advisory only — examiner confirms. Findings remain DRAFT.</p>''')
+" 2>/dev/null)
+    else
+        CORR_SECTION='<p style="color:var(--text-faint)">No correlation data. Run: python3 /home/niel/forensics/scripts/forensics-verify.py <case_dir></p>'
+    fi
+
     # ── Count stats ─────────────────────────────────────────────────────
     local FINDING_COUNT=0 HIGH_COUNT=0 EVIDENCE_COUNT=0 IOC_COUNT=0
     [ -f "$FINDINGS_JSON" ] && FINDING_COUNT=$(python3 -c "import json;d=json.load(open('$FINDINGS_JSON'));print(len(d))" 2>/dev/null || echo 0)
@@ -137,9 +167,22 @@ PYEOF
     # ── Generate findings table ─────────────────────────────────────────
     local FINDINGS_ROWS=""
     if [ -f "$FINDINGS_JSON" ] && [ -s "$FINDINGS_JSON" ]; then
-        FINDINGS_ROWS=$(python3 -c "
-import json
-data = json.load(open('$FINDINGS_JSON'))
+        # Write Python script to temp file to avoid shell escaping hell
+        cat > "$CASE_DIR/.gen_findings.py" << 'GENFINDINGS'
+import json, os, sys
+
+case_dir = sys.argv[1]
+findings_path = os.path.join(case_dir, 'findings.json')
+
+data = json.load(open(findings_path))
+
+corr_by_id = {}
+corr_path = os.path.join(case_dir, 'correlation-proposals.json')
+if os.path.exists(corr_path):
+    corr = json.load(open(corr_path))
+    for p in corr:
+        corr_by_id[p.get('finding_id', '?')] = p
+
 for f in data:
     fid = f.get('id', '?')
     title = f.get('title', 'Untitled')
@@ -147,10 +190,20 @@ for f in data:
     tool = f.get('tool', '?')
     evid = f.get('evidence_ref', '?')
     badge = {'HIGH':'badge-high','MEDIUM':'badge-medium','LOW':'badge-low'}.get(conf, 'badge-low')
-    print(f\"<tr><td><span class='mono'>{fid}</span></td><td>{title}</td><td><span class='badge-cell {badge}'>{conf}</span></td><td class='mono' style='font-size:11px'>{tool}</td><td>{evid}</td></tr>\")
-" 2>/dev/null)
+    cv = corr_by_id.get(fid, {})
+    verdict = cv.get('verdict', '')
+    v_badge = {
+        'CORROBORATED': 'badge-corroborated',
+        'SINGLE-SOURCE': 'badge-single-source',
+        'CONTRADICTED': 'badge-contradicted',
+        'UNVERIFIED': 'badge-unverified',
+    }.get(verdict, '')
+    v_label = verdict.replace('-', ' ') if verdict else '—'
+    print(f'<tr><td><span class="mono">{fid}</span></td><td>{title}</td><td><span class="badge-cell {badge}">{conf}</span></td><td class="mono" style="font-size:11px">{tool}</td><td>{evid}</td><td><span class="badge-cell {v_badge}">{v_label}</span></td></tr>')
+GENFINDINGS
+        FINDINGS_ROWS=$(python3 "$CASE_DIR/.gen_findings.py" "$CASE_DIR" 2>/dev/null)
     else
-        FINDINGS_ROWS='<tr><td colspan="5" style="color:var(--text-faint)">No findings recorded</td></tr>'
+        FINDINGS_ROWS='<tr><td colspan="6" style="color:var(--text-faint)">No findings recorded</td></tr>'
     fi
 
     # ── Generate IOC table ──────────────────────────────────────────────
@@ -325,37 +378,75 @@ print('TEMPLATE_LOADED')
         }
 
         # Now inject the large content blocks via Python
-        python3 << PYEOF2 > "$OUT"
-import json, os
+        export CASE_DIR REPORT_OUT="$OUT" REPORT_TEMPLATE="$TEMPLATE"
+        export DESCRIPTION="$DESCRIPTION" EXAMINER="$EXAMINER" REPORT_DATE="$REPORT_DATE"
+        export FINDING_COUNT="$FINDING_COUNT" EVIDENCE_COUNT="$EVIDENCE_COUNT" IOC_COUNT="$IOC_COUNT"
+        export CLASSIFICATION="$CLASS" TARGET_SYSTEM="$TARGET"
+        export COMPROMISE_DETECTED="$COMPROMISE" INVESTIGATION_WINDOW="$WINDOW" EXECUTIVE_SUMMARY="$EXEC_SUMMARY"
+        # Write content blocks to temp files for Python to read
+        printf '%s' "$CORR_SECTION" > "$CASE_DIR/.corr_section.html"
+        printf '%s' "$TL_HTML" > "$CASE_DIR/.tl_events.html"
+        printf '%s' "$FINDINGS_ROWS" > "$CASE_DIR/.findings_rows.html"
+        printf '%s' "$IOC_ROWS" > "$CASE_DIR/.ioc_rows.html"
+        printf '%s' "$EVIDENCE_ITEMS" > "$CASE_DIR/.evidence_items.html"
+        printf '%s' "$TOOLS_ROWS" > "$CASE_DIR/.tools_rows.html"
+        # Write vars to temp JSON via Python with stdin to avoid shell quoting
+        python3 - "$CASE_DIR/.report_vars.json" << 'VARSJSON'
+import json, sys, os
+
+# Read vars from environment (set by caller) and write JSON
+vars = {}
+for key in ['CASE_ID','DESCRIPTION','EXAMINER','REPORT_DATE','FINDING_COUNT',
+            'EVIDENCE_COUNT','IOC_COUNT','CLASSIFICATION','TARGET_SYSTEM',
+            'COMPROMISE_DETECTED','INVESTIGATION_WINDOW','EXECUTIVE_SUMMARY']:
+    vars[key] = os.environ.get(key, '')
+
+with open(sys.argv[1], 'w') as f:
+    json.dump(vars, f)
+VARSJSON
+        python3 << 'PYEOF2' > "$OUT"
+import json, os, re
+
+case_dir = os.environ.get('CASE_DIR', '')
+tpl_path = os.environ.get('REPORT_TEMPLATE', '')
+out_path = os.environ.get('REPORT_OUT', '')
+
+# Read metadata from temp JSON
+with open(os.path.join(case_dir, '.report_vars.json')) as f:
+    vars = json.load(f)
 
 # Read template
-with open('$TEMPLATE') as f:
+with open(tpl_path) as f:
     html = f.read()
 
-# Simple metadata substitutions
-subs = {
-    '{{CASE_ID}}': '$CASE_ID',
-    '{{CASE_TITLE}}': json.dumps('$DESCRIPTION')[1:-1],  
-    '{{EXAMINER}}': '$EXAMINER',
-    '{{REPORT_DATE}}': '$REPORT_DATE',
-    '{{FINDING_COUNT}}': '$FINDING_COUNT',
-    '{{EVIDENCE_COUNT}}': '$EVIDENCE_COUNT',
-    '{{IOC_COUNT}}': '$IOC_COUNT',
-    '{{CLASSIFICATION}}': '$CLASS',
-    '{{TARGET_SYSTEM}}': json.dumps('$TARGET')[1:-1],
-    '{{COMPROMISE_DETECTED}}': json.dumps('$COMPROMISE')[1:-1],
-    '{{INVESTIGATION_WINDOW}}': '$WINDOW',
-    '{{EXECUTIVE_SUMMARY}}': json.dumps('$EXEC_SUMMARY')[1:-1],
-    '{{TIMELINE_EVENTS}}': '''$TL_HTML''',
-    '{{FINDINGS_ROWS}}': '''$FINDINGS_ROWS''',
-    '{{IOC_ROWS}}': '''$IOC_ROWS''',
-    '{{EVIDENCE_ITEMS}}': '''$EVIDENCE_ITEMS''',
-    '{{TOOLS_ROWS}}': '''$TOOLS_ROWS''',
-}
-for k, v in subs.items():
-    html = html.replace(k, v)
+# Simple subs
+for key in ['CASE_ID','DESCRIPTION','EXAMINER','REPORT_DATE','FINDING_COUNT',
+            'EVIDENCE_COUNT','IOC_COUNT','CLASSIFICATION','TARGET_SYSTEM',
+            'COMPROMISE_DETECTED','INVESTIGATION_WINDOW','EXECUTIVE_SUMMARY']:
+    html = html.replace('{{' + key + '}}', str(vars.get(key, '')))
 
-with open('$OUT', 'w') as f:
+html = html.replace('{{CASE_TITLE}}', vars.get('DESCRIPTION', ''))
+
+# Load generated content from case files
+def read_file(path):
+    if path and os.path.exists(path):
+        with open(path) as f:
+            return f.read()
+    return ''
+
+# These are written to temp files by the bash script
+content_files = {
+    '{{CORRELATION_SECTION}}': os.path.join(case_dir, '.corr_section.html'),
+    '{{TIMELINE_EVENTS}}':     os.path.join(case_dir, '.tl_events.html'),
+    '{{FINDINGS_ROWS}}':       os.path.join(case_dir, '.findings_rows.html'),
+    '{{IOC_ROWS}}':            os.path.join(case_dir, '.ioc_rows.html'),
+    '{{EVIDENCE_ITEMS}}':      os.path.join(case_dir, '.evidence_items.html'),
+    '{{TOOLS_ROWS}}':          os.path.join(case_dir, '.tools_rows.html'),
+}
+for placeholder, fpath in content_files.items():
+    html = html.replace(placeholder, read_file(fpath))
+
+with open(out_path, 'w') as f:
     f.write(html)
 PYEOF2
     else
