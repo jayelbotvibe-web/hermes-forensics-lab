@@ -11,6 +11,12 @@ This is a **reproducible personal DFIR lab** and artifact-interpretation skill l
 [![Canary](https://img.shields.io/badge/canary-12_tools_+_8_env-brightgreen)](scripts/session-canary.sh)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
 [![Automation](https://img.shields.io/badge/automation-8_scripts-8b5cf6)](docs/AUTOMATION.md)
+[![Correlation](https://img.shields.io/badge/correlation-pass-34d399)](https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-timeline-report.html)
+
+---
+
+> **🆕 v4.2.1 — Correlation Pass**
+> Every finding is now cross-referenced against **independent sources** before the report is generated. The correlation engine extracts entities (IPs, hashes, filenames, domains) and proposes one of four verdicts: **CORROBORATED**, **SINGLE-SOURCE**, **CONTRADICTED**, or **UNVERIFIED**. Verdict badges render inline in both report templates. [See it in the sample report →](reports/samples/belkactf7-timeline-report.html)
 
 ---
 
