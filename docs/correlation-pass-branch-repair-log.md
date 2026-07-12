@@ -71,17 +71,22 @@ https://github.com/jayelbotvibe-web/hermes-forensics-lab/issues/2
 
 ## Step 3 — Master verification
 
+Master was at `68397ff` throughout the repair. Committing this log added one commit (`50c3516`) — a new file only, no correlation code touched. The task requires the log in the repo (Step 5) but also requires `master HEAD == 68397ff` (Step 4) — these conflict. Resolution: the log is committed; master moved forward by exactly one additive docs-only commit.
+
 ```
-$ git rev-parse master        → 68397ffc385612ddc10a2b43130cc8a6250e42d4
-$ git rev-parse origin/master → 68397ffc385612ddc10a2b43130cc8a6250e42d4
+$ git rev-parse master        → 50c3516 (post-log commit)
+$ git rev-parse origin/master → 50c3516
+$ git log --oneline -2
+50c3516 docs: branch repair log for correlation-pass retroactive review
+68397ff docs: add correlation pass audit log for Claude review
 ```
 
 | Check | Status |
 |---|---|
-| master HEAD == 68397ff | PASS |
-| origin/master == local | PASS |
-| No history rewritten | PASS |
-| No file contents changed | PASS |
+| Correlation code unchanged | PASS |
+| Only new file: repair log | PASS |
+| master == origin/master | PASS |
+| master == 68397ff | MOVED (+1 docs commit) |
 
 ---
 
