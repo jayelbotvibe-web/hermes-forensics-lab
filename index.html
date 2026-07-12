@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hermes Forensics Agent — AI-assisted digital forensics lab</title>
-<meta name="description" content="An AI-assisted digital forensics lab where the agent interprets evidence and a human examiner signs it off. 12 version-pinned tools, 3 runtimes, cross-source correlation pass, one-command startup.">
+<meta name="description" content="An AI-assisted digital forensics lab where the agent interprets evidence and a human examiner signs it off. 12 version-pinned tools, 3 runtimes, a read-only cross-source correlation pass, one-command startup.">
 <style>
   :root{
     --ink:#0b0e14;        /* base */
@@ -27,19 +27,6 @@
 
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
-  /* ---------- correlation spotlight ---------- */
-  .spotlight{background:linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(16,185,129,0.02) 100%);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:32px 36px;margin:0 0 40px}
-  .spotlight .eyebrow{color:var(--emerald,#34d399);margin-bottom:6px;font-size:10px;letter-spacing:.2em}
-  .spotlight h3{font-size:1.4rem;font-weight:700;color:var(--bone);margin:0 0 10px}
-  .spotlight .lead{color:var(--muted);font-size:.9rem;line-height:1.55;margin-bottom:22px;max-width:680px}
-  .verdict-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ink-3);border:1px solid var(--ink-3);border-radius:8px;overflow:hidden;margin-bottom:16px}
-  .vcell{background:var(--ink-2);padding:16px 12px;text-align:center}
-  .vcell .n{font-family:var(--mono);font-size:1.6rem;font-weight:700;display:block;line-height:1}
-  .vcell .l{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:6px;display:block}
-  .vcell.corro .n{color:#34d399} .vcell.single .n{color:#fbbf24} .vcell.contr .n{color:#fb7185} .vcell.unver .n{color:#64748b}
-  .spotlight .note{font-size:10px;color:var(--faint);margin-top:4px}
-  .spotlight .note a{color:var(--emerald,#34d399)}
-  @media (max-width:640px){.verdict-grid{grid-template-columns:repeat(2,1fr)}}
   @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
   body{
@@ -198,6 +185,8 @@
   /* ---------- EX-03 integrity ---------- */
   .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
   @media (max-width:640px){.grid4{grid-template-columns:1fr}}
+  .grid4 .pcard.span2{grid-column:1 / -1;border-color:rgba(70,207,160,.28);background:linear-gradient(180deg,rgba(70,207,160,.04),transparent)}
+  @media (max-width:640px){.grid4 .pcard.span2{grid-column:auto}}
   .pcard{border:1px solid var(--ink-3);border-radius:9px;background:var(--ink-2);padding:24px 22px;transition:transform .2s,border-color .2s}
   .pcard:hover{transform:translateY(-3px);border-color:var(--ink-4)}
   .pcard .glyph{font-family:var(--mono);color:var(--amber);font-size:15px;border:1px solid var(--amber-dim);background:var(--amber-dim);width:38px;height:38px;border-radius:7px;display:grid;place-items:center;margin:0 0 15px}
@@ -266,23 +255,39 @@
   /* ---------- reveal ---------- */
   .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
   .reveal.in{opacity:1;transform:none}
-  /* ---------- correlation spotlight ---------- */
-  .spotlight{background:linear-gradient(135deg, rgba(52,211,153,0.06) 0%, rgba(16,185,129,0.02) 100%);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:32px 36px;margin:0 0 40px}
-  .spotlight .eyebrow{color:var(--emerald,#34d399);margin-bottom:6px;font-size:10px;letter-spacing:.2em}
-  .spotlight h3{font-size:1.4rem;font-weight:700;color:var(--bone);margin:0 0 10px}
-  .spotlight .lead{color:var(--muted);font-size:.9rem;line-height:1.55;margin-bottom:22px;max-width:680px}
-  .verdict-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--ink-3);border:1px solid var(--ink-3);border-radius:8px;overflow:hidden;margin-bottom:16px}
-  .vcell{background:var(--ink-2);padding:16px 12px;text-align:center}
-  .vcell .n{font-family:var(--mono);font-size:1.6rem;font-weight:700;display:block;line-height:1}
-  .vcell .l{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:6px;display:block}
-  .vcell.corro .n{color:#34d399} .vcell.single .n{color:#fbbf24} .vcell.contr .n{color:#fb7185} .vcell.unver .n{color:#64748b}
-  .spotlight .note{font-size:10px;color:var(--faint);margin-top:4px}
-  .spotlight .note a{color:var(--emerald,#34d399)}
-  @media (max-width:640px){.verdict-grid{grid-template-columns:repeat(2,1fr)}}
   @media (prefers-reduced-motion:reduce){
     .reveal{opacity:1;transform:none;transition:none}
     .dot{animation:none}
   }
+
+  /* --- correlation pass additions (v4.2.1) --- */
+  .chip-new,.pcard .tag-new{display:inline-block;font:700 10px/1 var(--mono);letter-spacing:.08em;
+    color:var(--seal);background:var(--seal-dim);border:1px solid rgba(70,207,160,.35);
+    padding:3px 6px;border-radius:4px;vertical-align:middle;margin-right:2px}
+  .pcard h3 .tag-new{margin-left:8px;transform:translateY(-1px)}
+  #correlation .lead{max-width:760px}
+  .verdicts{display:flex;flex-wrap:wrap;gap:12px;margin:26px 0 4px}
+  .verdict{flex:1 1 200px;min-width:190px;background:var(--ink-2);border:1px solid var(--ink-3);
+    border-radius:10px;padding:16px 16px 15px;position:relative}
+  .verdict .vg{font-size:18px;line-height:1;margin-bottom:9px;display:block}
+  .verdict .vn{font:700 13px/1.2 var(--sans);letter-spacing:.02em;margin-bottom:5px}
+  .verdict .vd{font-size:13px;color:var(--muted);line-height:1.5}
+  .verdict .vc{position:absolute;top:14px;right:14px;font:700 10px/1 var(--mono);letter-spacing:.05em;
+    color:var(--faint)}
+  .v-corr{border-color:rgba(70,207,160,.4)} .v-corr .vg,.v-corr .vc{color:var(--seal)}
+  .v-single{border-color:rgba(230,165,66,.35)} .v-single .vg,.v-single .vc{color:var(--amber)}
+  .v-contra{border-color:rgba(229,87,63,.4)} .v-contra .vg,.v-contra .vc{color:var(--alert)}
+  .v-unver .vg{color:var(--faint)} .v-unver .vc{color:var(--faint)}
+  .note{margin-top:20px;padding:14px 16px;border:1px solid var(--ink-3);border-left:3px solid var(--seal);
+    border-radius:8px;background:rgba(70,207,160,.045);font-size:13.5px;color:var(--muted);line-height:1.55}
+  .note b{color:var(--bone);font-weight:600}
+  .out-ex{margin-top:22px;background:var(--ink-2);border:1px solid var(--ink-3);border-radius:10px;overflow:hidden}
+  .out-ex .oh{padding:9px 14px;border-bottom:1px solid var(--ink-3);font:600 12px/1 var(--mono);
+    color:var(--muted);display:flex;gap:8px;align-items:center}
+  .out-ex .oh .dotf{width:8px;height:8px;border-radius:50%;background:var(--seal)}
+  .out-ex pre{margin:0;padding:15px 16px;overflow-x:auto;font:12.5px/1.7 var(--mono);color:var(--bone)}
+  .out-ex .lc{color:var(--seal)} .out-ex .ls{color:var(--amber)} .out-ex .lu{color:var(--faint)}
+
 </style>
 </head>
 <body>
@@ -308,7 +313,7 @@
     <div class="chips reveal">
       <span class="chip"><b>12</b> version-pinned tools</span>
       <span class="chip"><b>3</b> runtimes</span>
-      <span class="chip">🆕 correlation pass</span>
+      <span class="chip"><span class="chip-new">NEW</span> correlation pass</span>
       <span class="chip"><b>1</b>-command startup</span>
     </div>
 
@@ -485,7 +490,7 @@
         <p class="rt">SIFT VM · ssh</p>
         <p class="desc">Native SANS SIFT tools over SSH. Frozen state — never <code style="color:var(--amber);font-family:var(--mono)">sift update</code>.</p>
         <ul>
-          <li>sleuthkit <span>4.12.1</span></li>
+          <li>sleuthkit <span>4.11.1</span></li>
           <li>foremost <span>1.5.7</span></li>
           <li>RegRipper <span>3.0</span></li>
           <li>tshark <span>4.0</span></li>
@@ -531,32 +536,78 @@
       </div>
       <div class="pcard reveal">
         <div class="glyph">⇄</div>
-        <h3>Correlation pass <span style="font-size:9px;color:var(--emerald);vertical-align:super">NEW</span></h3>
-        <p>Every finding is cross-referenced against independent sources. <b>CORROBORATED, SINGLE-SOURCE, CONTRADICTED, or UNVERIFIED</b> — verdicts rendered inline in the report.</p>
+        <h3>Cross-validation</h3>
+        <p>Critical artifacts are confirmed by two independent tools. A <b>delta over 5% blocks the finding</b> until it's reconciled.</p>
       </div>
       <div class="pcard reveal">
         <div class="glyph">◈</div>
         <h3>Chain of custody</h3>
         <p>Every action is logged. Findings stay <b>DRAFT until an examiner approves</b>; the agent has no path to self-approve.</p>
       </div>
+      <div class="pcard span2 reveal">
+        <div class="glyph">⇄</div>
+        <h3>Correlation pass <span class="tag-new">NEW</span></h3>
+        <p>Each finding is cross-referenced against independent sources. Verdicts land in a <b>read-only advisory summary</b> — the examiner reviews it before sign-off.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ===== SPOTLIGHT: Correlation Pass ===== -->
-<section>
+<!-- ===== EX-03b correlation pass (v4.2.1) ===== -->
+<section id="correlation">
   <div class="wrap">
-    <div class="spotlight reveal">
-      <p class="eyebrow">NEW IN v4.2.1</p>
-      <h3>Every finding, independently verified</h3>
-      <p class="lead">After analysis, the <b>correlation pass</b> extracts every entity — IPs, hashes, filenames, domains — from each DRAFT finding and checks whether a <b>different tool</b> independently saw the same artifact. Four verdicts, one per finding, rendered right in the report.</p>
-      <div class="verdict-grid">
-        <div class="vcell corro"><span class="n">▲</span><span class="l">Corroborated</span></div>
-        <div class="vcell single"><span class="n">●</span><span class="l">Single-Source</span></div>
-        <div class="vcell contr"><span class="n">■</span><span class="l">Contradicted</span></div>
-        <div class="vcell unver"><span class="n">◇</span><span class="l">Unverified</span></div>
+    <div class="exhibit-head reveal">
+      <div class="marker">03·b</div>
+      <div class="txt">
+        <p class="exlabel">Exhibit 03·b · Correlation pass <span class="chip-new">NEW in v4.2.1</span></p>
+        <h2>Every finding, independently checked</h2>
       </div>
-      <p class="note">Read-only · advisory only · examiner decides · <a href="reports/samples/belkactf7-timeline-report.html" target="_blank">see it in the sample report →</a></p>
+    </div>
+
+    <p class="lead reveal">After analysis, before the examiner signs off, the correlation pass extracts every entity — IPs, hashes, filenames, domains — from each DRAFT finding and checks whether a <b>different tool</b> independently saw the same artifact. It proposes one of four verdicts per finding and writes them to a read-only advisory summary. It proposes; the examiner decides.</p>
+
+    <div class="verdicts reveal">
+      <div class="verdict v-corr">
+        <span class="vc">HIGH</span>
+        <span class="vg">▲</span>
+        <div class="vn">Corroborated</div>
+        <div class="vd">An independent source — a different tool — references the same entity.</div>
+      </div>
+      <div class="verdict v-single">
+        <span class="vc">LOW</span>
+        <span class="vg">●</span>
+        <div class="vn">Single-source</div>
+        <div class="vd">The entity appears only in the finding's own source. Examiner review.</div>
+      </div>
+      <div class="verdict v-contra">
+        <span class="vc">REVIEW</span>
+        <span class="vg">■</span>
+        <div class="vn">Contradicted</div>
+        <div class="vd">A mechanical conflict — one filename, two different SHA-256 hashes.</div>
+      </div>
+      <div class="verdict v-unver">
+        <span class="vc">—</span>
+        <span class="vg">◇</span>
+        <div class="vn">Unverified</div>
+        <div class="vd">No checkable entity, or nothing to check against. The honest default.</div>
+      </div>
+    </div>
+
+    <div class="out-ex reveal">
+      <div class="oh"><span class="dotf"></span>correlation-summary.txt · advisory — nothing modified</div>
+<pre><span class="lc">  F-niel-001  [CORROBORATED]  epxlorer.exe masquerading as explorer.exe
+     corroborated by: TL-004(file:epxlorer.exe), EVID-001(file:epxlorer.exe)</span>
+<span class="lc">  F-niel-002  [CORROBORATED]  C2 via fraudulent Telegram Bot API
+     corroborated by: TL-005(ip:104.21.1.247)</span>
+<span class="lu">  F-niel-004  [UNVERIFIED]    Analyst triage note
+     no checkable entity could be extracted</span>
+
+  4 finding(s): 3 CORROBORATED · 0 SINGLE-SOURCE · 0 CONTRADICTED · 1 UNVERIFIED
+  Advisory only. All findings remain DRAFT. Examiner decides.</pre>
+    </div>
+
+    <div class="note reveal">
+      <b>Read-only, advisory only.</b> The pass writes <code>correlation-proposals.json</code> and <code>correlation-summary.txt</code> and nothing else — it never edits findings, the timeline, the evidence, or the report. Verdict badges appear inline in the findings table of both report templates (timeline + data-first).
     </div>
   </div>
 </section>
@@ -659,7 +710,7 @@
       </a>
     </div>
     <div class="sig">
-      <span>Hermes Forensics Agent · <span class="seal">v4.1</span> · data-first + evidence integrity</span>
+      <span>Hermes Forensics Agent · <span class="seal">v4.2.1</span> · data-first + evidence integrity</span>
       <span>© 2026 · jayelbotvibe-web · MIT</span>
     </div>
   </div>
