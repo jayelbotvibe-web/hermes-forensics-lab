@@ -64,10 +64,21 @@ echo '[]' > "$CASE_DIR/evidence.json"
 echo '[]' > "$CASE_DIR/findings.json"
 echo '[]' > "$CASE_DIR/timeline.json"
 
-# Audit trail
-cat > "$CASE_DIR/audit/actions.jsonl" << EOF
-{"case_id": "$CASE_ID", "action": "case_open", "timestamp": "$TIMESTAMP", "examiner": "$EXAMINER", "description": "$DESCRIPTION"}
-EOF
+# Audit trail — tamper-evident hash-chained append
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+AUDIT_LOG="$CASE_DIR/audit/actions.jsonl"
+AUDIT_RECORD=$(python3 -c "
+import json, sys
+rec = {
+    'case_id': sys.argv[1],
+    'action': 'case_open',
+    'timestamp': sys.argv[2],
+    'examiner': sys.argv[3],
+    'description': sys.argv[4]
+}
+print(json.dumps(rec, separators=(',', ':')))
+" "$CASE_ID" "$TIMESTAMP" "$EXAMINER" "$DESCRIPTION")
+bash "$SCRIPT_DIR/audit-append.sh" "$AUDIT_LOG" "$AUDIT_RECORD" >&2
 
 # Banner → stderr so $(...) capture stays clean
 {

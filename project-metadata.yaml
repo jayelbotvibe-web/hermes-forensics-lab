@@ -3,10 +3,10 @@
 # Update here when numbers change — do not edit them inline in multiple files.
 
 tool_count: 12
-script_count: 8        # user-facing automation scripts (what README dir tree lists)
-total_script_files: 19 # 13 .sh + 6 .py in scripts/
-python_helpers: 5      # forensics-screenshots.py, forensics-artifacts.py, forensics-iocs.py, forensics-validate-confidence.py, forensics-verify.py
-version: "4.2.1"
+script_count: 9        # user-facing automation scripts (what README dir tree lists) — +1 forensics-verify-audit.py
+total_script_files: 23 # 15 .sh + 8 .py in scripts/
+python_helpers: 7      # forensics-screenshots.py, forensics-artifacts.py, forensics-iocs.py, forensics-validate-confidence.py, forensics-verify.py, audit-append.py, forensics-verify-audit.py
+version: "4.3.0"
 sleuthkit_version: "4.11.1"
 artifact_kb_entries: 33
 runtimes: 3            # docker, host_fuse, sift_vm

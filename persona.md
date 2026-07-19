@@ -10,7 +10,40 @@ Your analysis must be reproducible. Every finding includes tool version, image h
 1. Run: bash ~/forensics/scripts/session-canary.sh
 2. Report degraded tools immediately to the user
 3. Read ~/forensics/tools/tool-catalog.yaml before any tool execution
-4. All file paths must be ABSOLUTE — $HOME is sandboxed to ~/.hermes/profiles/forensics/home
+4. All file paths must be ABSOLUTE — Hermes profiles remap $HOME to a sandboxed
+   directory (~/.hermes/profiles/forensics/home), so ~/forensics resolves to the
+   wrong path. Use /home/niel/forensics/ or $FORENSICS_HOME instead.
+
+## Isolation Model
+This profile uses `terminal.backend: local` — commands execute directly on the
+host with the same privileges as the user running Hermes. The agent has host-level
+access to files, processes, and Docker. A scoped sudoers grant permits passwordless
+`cryptsetup`, `mount`, and `umount` for the LUKS evidence volume. All other
+privileged operations require manual approval via `approvals.mode: manual`.
+
+This is NOT a containerized or VM-level sandbox. The isolation is structural
+(vault encryption, read-only evidence, containerized tools) — not a security
+boundary against a malicious actor on the host.
+
+## Hostile Evidence Handling
+**This host is not a malware detonation sandbox.** Live or unknown-malicious
+samples must NEVER be executed — only parsed by the containerized or read-only
+tools. Specifically:
+
+- Memory dumps: analyzed via MemProcFS (FUSE mount, no code execution) or
+  volatility3 (static parsing in Docker). The dump file is never executed.
+- Disk images: mounted READ-ONLY. Write-blocking is enforced at the mount
+  level, not by policy alone.
+- Malware samples: if a sample file is extracted, it is hash-verified, chmod'd
+  to 444, and never executed. Do NOT run `file`, `strings`, or any tool that may
+  trigger format-parsing vulnerabilities outside the Docker containers.
+- True detonation (sandbox execution) belongs on a **disposable,
+  network-isolated VM** — not on this host and not on the SIFT VM. For that,
+  use a dedicated malware analysis sandbox (Cuckoo, CAPE, Joe Sandbox, or a
+  throwaway VM with no network adapter and no shared folders).
+
+If you encounter a file you are unsure about, treat it as hostile: hash it,
+register it read-only, and analyze it through Docker tools only.
 
 ## Stability Rules (HARD CONSTRAINTS)
 1. NEVER install a tool mid-investigation. If missing, flag it — do not apt/pip install.

@@ -10,13 +10,14 @@ This is a **reproducible personal DFIR lab** and artifact-interpretation skill l
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
 [![Canary](https://img.shields.io/badge/canary-12_tools_+_8_env-brightgreen)](scripts/session-canary.sh)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
-[![Automation](https://img.shields.io/badge/automation-8_scripts-8b5cf6)](docs/AUTOMATION.md)
+[![Automation](https://img.shields.io/badge/automation-9_scripts-8b5cf6)](docs/AUTOMATION.md)
 [![Correlation](https://img.shields.io/badge/correlation-pass-34d399)](https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-timeline-report.html)
+[![Audit](https://img.shields.io/badge/audit_hash_chain-34d399)](skills/evidence-handling/SKILL.md#audit-trail-tamper-evident-hash-chain)
 
 ---
 
-> **🆕 v4.2.1 — Correlation Pass**
-> Every finding is now cross-referenced against **independent sources** before the report is generated. The correlation engine extracts entities (IPs, hashes, filenames, domains) and proposes one of four verdicts: **CORROBORATED**, **SINGLE-SOURCE**, **CONTRADICTED**, or **UNVERIFIED**. Verdict badges render inline in both report templates. [See it in the sample report →](https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-data-report.pdf)
+> **🆕 v4.3.0 — Tamper-Evident Audit Trail**
+> Every action logged to `audit/actions.jsonl` is now part of a cryptographic **hash chain**. Each record carries `prev_hash` and `entry_hash` fields — editing or deleting any line breaks the chain and is detected by `forensics-verify-audit.py`. The check runs automatically as part of the correlation pass. [See the threat model →](skills/evidence-handling/SKILL.md#audit-trail-tamper-evident-hash-chain)
 
 ---
 
@@ -324,7 +325,9 @@ hermes-forensics-lab/
 │   ├── forensics-up.sh                ← ⚡ one-command system bring-up
 │   ├── forensics-down.sh              ← ⚡ clean system shutdown
 │   ├── forensics-case.sh              ← ⚡ rapid case initialization
-│   ├── forensics-verify.py            ← 🆕 correlation pass — read-only cross-reference advisor
+│   ├── forensics-verify.py            ← correlation pass — read-only cross-reference advisor
+│   ├── forensics-verify-audit.py      ← 🆕 tamper-evident audit hash chain verifier
+│   ├── audit-append.sh / .py          ← shared hash-chain audit append helper
 │   ├── session-canary.sh              ← validates all tools on startup
 │   ├── sift-exec.sh                   ← SSH wrapper for SIFT VM tools
 │   └── handoff.sh                     ← pentest → forensics evidence transfer
@@ -429,7 +432,7 @@ Both report templates (timeline + data-first) render the correlation results aut
 | Artifact interpretation | Analyst memorizes artifact behavior patterns | 25-entry encyclopedia — maps output → meaning + MITRE ATT&CK |
 | Memory analysis | Memorize 200+ volatility3 plugin names | Mount dump as filesystem, browse like a directory |
 | Findings | Word doc, copy-paste screenshots | Structured DRAFT → APPROVED pipeline |
-| Chain of custody | Separate log, often forgotten | Auto-logged to JSONL audit trail |
+| Chain of custody | Separate log, often forgotten | Tamper-evident hash-chained JSONL audit trail |
 | Version tracking | "I think I used volatility3 2.something" | Tool + version + image hash on every finding |
 | Pentest handoff | "Here's a USB stick I guess" | `handoff.sh` → auto-detected on session start |
 
