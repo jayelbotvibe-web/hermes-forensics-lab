@@ -20,8 +20,18 @@ examiner: ${EXAMINER:-niel}
 description: "${DESCRIPTION}"
 EOF
 
-echo '{"case_id": "'${CASE_ID}'", "action": "case_open", "timestamp": "'"$(date -Iseconds)"'"}' \
-  >> "${CASE_DIR}/audit/actions.jsonl"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+TIMESTAMP=$(date -Iseconds)
+AUDIT_RECORD=$(python3 -c "
+import json, sys
+rec = {
+    'case_id': sys.argv[1],
+    'action': 'case_open',
+    'timestamp': sys.argv[2]
+}
+print(json.dumps(rec, separators=(',', ':')))
+" "${CASE_ID}" "${TIMESTAMP}")
+bash "${SCRIPT_DIR}/audit-append.sh" "${CASE_DIR}/audit/actions.jsonl" "${AUDIT_RECORD}" >&2
 
 echo "[]" > "${CASE_DIR}/evidence.json"
 

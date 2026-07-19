@@ -40,6 +40,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 
@@ -280,6 +281,25 @@ def main() -> int:
     args = ap.parse_args()
 
     case = os.path.abspath(args.case_dir)
+
+    # ── Audit chain integrity check ──────────────────────────────────────
+    audit_log = os.path.join(case, "audit", "actions.jsonl")
+    if os.path.exists(audit_log):
+        verify_script = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "forensics-verify-audit.py"
+        )
+        r = subprocess.run([sys.executable, verify_script, audit_log],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            print("AUDIT CHAIN BROKEN — correlation pass aborted:", file=sys.stderr)
+            print(r.stdout.strip(), file=sys.stderr)
+            print("\nACTION: The audit log hash chain is broken. This must be "
+                  "resolved before the case can proceed to report. "
+                  "See skills/evidence-handling/SKILL.md for tamper-response "
+                  "procedures.", file=sys.stderr)
+            return 2  # distinct exit code: audit-chain-broken
+        # else: chain intact, proceed silently
+
     findings = load(os.path.join(case, "findings.json"))
     if findings is None:
         print(f"Error: findings.json not found or unreadable in {case}", file=sys.stderr)

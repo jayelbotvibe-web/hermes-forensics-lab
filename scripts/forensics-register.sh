@@ -147,8 +147,21 @@ json.dump(data, open(path, 'w'), indent=2)
 print('done', end='')
 "
 
-# Audit trail
-echo "{\"case_id\": \"$CASE_ID\", \"action\": \"evidence_registered\", \"timestamp\": \"$TIMESTAMP\", \"evidence_id\": \"$EVIDENCE_ID\", \"filename\": \"$FILENAME\", \"sha256\": \"$SHA256\"}" >> "$AUDIT_LOG"
+# Audit trail — tamper-evident hash-chained append
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+AUDIT_RECORD=$(python3 -c "
+import json, sys
+rec = {
+    'case_id': sys.argv[1],
+    'action': 'evidence_registered',
+    'timestamp': sys.argv[2],
+    'evidence_id': sys.argv[3],
+    'filename': sys.argv[4],
+    'sha256': sys.argv[5]
+}
+print(json.dumps(rec, separators=(',', ':')))
+" "$CASE_ID" "$TIMESTAMP" "$EVIDENCE_ID" "$FILENAME" "$SHA256")
+bash "$SCRIPT_DIR/audit-append.sh" "$AUDIT_LOG" "$AUDIT_RECORD" >&2
 
 echo ""
 
