@@ -1,0 +1,21 @@
+# yamllint configuration for the Hermes Forensics Lab.
+#
+# Based on the relaxed preset, with one deliberate change: the default
+# 80-character line limit is unworkable here. tools/tool-catalog.yaml holds
+# tool descriptions and provenance URLs that read worse wrapped, and the CI
+# workflow embeds shell blocks whose natural width exceeds 80. Warning on
+# every one of those trains people to ignore the linter.
+#
+# 120 is wide enough for those cases and still catches genuinely runaway lines.
+
+extends: relaxed
+
+rules:
+  line-length:
+    max: 120
+    level: warning
+  # Comments explaining a pinned version often sit directly above the value
+  # they explain; requiring a blank line above them hurts more than it helps.
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 1

@@ -3,7 +3,7 @@
 # Usage: init-case.sh "Case description"
 set -euo pipefail
 
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 DESCRIPTION="${1:-Untitled investigation}"
 DATE=$(date +%Y-%m%d)
 TIME=$(date +%H%M)

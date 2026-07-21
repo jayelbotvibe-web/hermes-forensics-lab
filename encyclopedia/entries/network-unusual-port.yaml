@@ -2,7 +2,7 @@
 category: Network
 what_you_see: "Outbound connections on ports 4444, 8080, 8443, 53 (non-DNS), 443 (non-TLS handshake)"
 interpretation: "4444 is Metasploit/Meterpreter default. 8080/8443 are common HTTP/S C2 alternatives. Port 53 non-DNS is DNS tunneling. Port 443 without TLS is raw TCP C2 through firewall-friendly port."
-mitre_attack: ["T1572", "T1571"]
+mitre_attack: ["T1572", "T1571 (Non-Standard Port)"]
 confidence_rule: "MEDIUM. Port alone is not conclusive. Examine traffic content."
 next_step: "Check process and traffic content. Correlate with process list and timeline."
 triage_tier: false

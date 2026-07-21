@@ -10,6 +10,16 @@ evidence/
 # LUKS
 *.img
 
+# Local configuration — machine-specific, never committed.
+# Ships as forensics.conf.example instead.
+forensics.conf
+forensics.conf.bak
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
 # Temp
 *.tmp
 /tmp/

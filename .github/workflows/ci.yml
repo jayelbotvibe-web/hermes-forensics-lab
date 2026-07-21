@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -18,15 +18,22 @@ jobs:
           scandir: './scripts'
           severity: warning
 
+      - name: Bash syntax (scripts, lib, installer)
+        run: |
+          for f in scripts/*.sh scripts/lib/*.sh install.sh; do
+            bash -n "$f" || exit 1
+          done
+          echo "All shell scripts parse."
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
       - name: Validate YAML
         run: |
           pip install yamllint
-          yamllint -d relaxed tools/ .github/
+          yamllint -c .yamllint.yml tools/ .github/
 
       - name: Validate JSON
         run: |
@@ -40,3 +47,87 @@ jobs:
             fi
           done < <(find . -type f -name '*.json' -not -path './.git/*')
           exit $fail
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      # These suites use only the standard library, by design — they must stay
+      # runnable on a machine with none of the forensic tooling installed.
+      - name: Correlation verification suite
+        run: python3 scripts/test_forensics_verify.py
+
+      - name: Audit hash-chain suite
+        run: python3 tests/test_forensics_verify_audit.py
+
+      - name: Encyclopedia is up to date
+        run: |
+          pip install pyyaml
+          python3 encyclopedia/generate.py --check
+
+  portability:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # The lab used to be unusable by anyone but its author, because absolute
+      # paths and one specific VM address were baked into the docs the agent
+      # reads. Fail the build if either creeps back in.
+      #
+      # Two exclusions, both historical records rather than live config:
+      #   reports/      completed case reports describe the real environment
+      #                 an investigation actually ran in
+      #   CHANGELOG.md  quotes the old values while documenting their removal
+      - name: No hardcoded home directories
+        run: |
+          if grep -rn '/home/[a-z][a-z0-9_-]*/' \
+               --exclude-dir=.git --exclude-dir=reports \
+               --exclude=CHANGELOG.md . ; then
+            echo "::error::Hardcoded home directory found. Use \$FORENSICS_HOME or \$HOME."
+            exit 1
+          fi
+          echo "No hardcoded home directories."
+
+      - name: No hardcoded VM addresses
+        run: |
+          if grep -rnE '\b(172\.16\.146\.[0-9]+|192\.168\.88\.[0-9]+)\b' \
+               --exclude-dir=.git --exclude-dir=reports \
+               --exclude=CHANGELOG.md . ; then
+            echo "::error::Hardcoded VM address found. Use \$SIFT_HOST."
+            exit 1
+          fi
+          echo "No hardcoded VM addresses."
+
+      - name: Config loader resolves with no config file present
+        run: |
+          source scripts/lib/common.sh
+          test -n "$FORENSICS_HOME" || { echo "FORENSICS_HOME unset"; exit 1; }
+          test -n "$IMAGE_VOLATILITY3" || { echo "IMAGE_VOLATILITY3 unset"; exit 1; }
+          if sift_configured; then echo "sift_configured true with no SIFT_HOST"; exit 1; fi
+          forensics_print_config
+
+      - name: Config loader refuses to execute config files
+        run: |
+          mkdir -p "$HOME/.config/hermes-forensics"
+          printf 'FORENSICS_HOME="$HOME/ok"\nEVIL=$(touch /tmp/pwned)\n' \
+            > "$HOME/.config/hermes-forensics/forensics.conf"
+          source scripts/lib/common.sh
+          test ! -f /tmp/pwned || { echo "::error::loader executed a subshell"; exit 1; }
+          test "$FORENSICS_HOME" = "$HOME/ok" || { echo "::error::valid line not applied"; exit 1; }
+          echo "Loader refused the unsafe line and kept the safe one."
+
+      - name: Installer dry-run changes nothing
+        run: |
+          git status --porcelain > /tmp/before
+          ./install.sh --dry-run --yes
+          git status --porcelain > /tmp/after
+          diff /tmp/before /tmp/after || { echo "::error::--dry-run modified the tree"; exit 1; }
+          echo "Dry run is clean."

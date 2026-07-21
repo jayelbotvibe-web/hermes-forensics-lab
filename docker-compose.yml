@@ -1,0 +1,62 @@
+# ============================================================================
+# Hermes Forensics Lab — tool images
+#
+# These are one-shot analysis tools, not long-running services. Nothing here
+# is meant to be `docker compose up`-ed. The file exists so the three images
+# build with a single reproducible command:
+#
+#     docker compose build              # build all three
+#     docker compose build volatility3  # build just one
+#
+# To actually run a tool, use `docker compose run --rm`, which mounts the
+# current case read-only and writes derived artifacts to its raw/ directory:
+#
+#     CASE=INC-2026-0721-0001 docker compose run --rm volatility3 \
+#         -f /evidence/evidence/memory.raw windows.pslist
+#
+#     CASE=INC-2026-0721-0001 docker compose run --rm plaso \
+#         --storage-file /output/timeline.plaso /evidence
+#
+#     CASE=INC-2026-0721-0001 docker compose run --rm mft-tools \
+#         analyzeMFT.py -f /evidence/evidence/\$MFT -o /output/mft.csv
+#
+# FORENSICS_HOME and CASE come from your environment. Load them with:
+#     set -a; . ~/.config/hermes-forensics/forensics.conf; set +a
+#
+# The evidence mount is read-only by design — original evidence is never
+# writable from a container. Only raw/ is writable.
+# ============================================================================
+
+services:
+  volatility3:
+    build:
+      context: ./tools/volatility
+    image: ${IMAGE_VOLATILITY3:-forensics-volatility3:2.7.0}
+    volumes:
+      - ${FORENSICS_HOME:-~/forensics}/cases/${CASE:-_none}:/evidence:ro
+      - ${FORENSICS_HOME:-~/forensics}/cases/${CASE:-_none}/raw:/output
+    working_dir: /evidence
+    # Analysis containers need no network — keep evidence off the wire.
+    network_mode: none
+
+  plaso:
+    build:
+      context: ./tools/plaso
+    image: ${IMAGE_PLASO:-forensics-plaso:20240512}
+    volumes:
+      - ${FORENSICS_HOME:-~/forensics}/cases/${CASE:-_none}:/evidence:ro
+      - ${FORENSICS_HOME:-~/forensics}/cases/${CASE:-_none}/raw:/output
+    working_dir: /evidence
+    network_mode: none
+
+  mft-tools:
+    build:
+      context: ./tools/mft-tools
+    image: ${IMAGE_MFT_TOOLS:-forensics-mft-tools:1.2.0.0}
+    volumes:
+      - ${FORENSICS_HOME:-~/forensics}/cases/${CASE:-_none}:/evidence:ro
+      - ${FORENSICS_HOME:-~/forensics}/cases/${CASE:-_none}/raw:/output
+    working_dir: /evidence
+    # No entrypoint in this Dockerfile — the image carries several tools
+    # (analyzeMFT.py, mftecmd), so the caller names the one they want.
+    network_mode: none

@@ -9,12 +9,12 @@
 # Auto-cleans stale mounts. After mounting, browse at $FORENSICS_HOME/mounts/mem/
 # ============================================================================
 # Evidence root (override with env var)
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 set -uo pipefail
 
 ACTION="${1:-}"
-MEMPROCFS="${MEMPROCFS_HOME:-$HOME/memprocfs}/memprocfs"
+MEMPROCFS="$MEMPROCFS_BIN"
 MOUNT_POINT="$FORENSICS_HOME/mounts/mem"
 FORENSICS_DIR="$FORENSICS_HOME"
 

@@ -33,7 +33,7 @@ Found a bug, inconsistency, or have a feature request? Open an issue on GitHub w
 The project uses two documentation surfaces:
 - **README.md** — Landing page for the repo (what it is, how to start)
 - **GitHub Pages (index.html)** — Interactive architecture reference with diagrams
-- **docs/** — Deep-dive reference docs (AUTOMATION.md, SETUP.md)
+- **docs/** — Deep-dive reference docs (AUTOMATION.md), INSTALL.md
 
 When updating documentation, check all three surfaces for consistency.
 

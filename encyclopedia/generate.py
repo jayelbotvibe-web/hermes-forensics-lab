@@ -1,16 +1,34 @@
 #!/usr/bin/env python3
 """
 encyclopedia-generate.py — Generate SKILL.md from structured YAML entries.
-Run: python3 encyclopedia/generate.py
+
+The output is the concatenation of two things:
+  1. the generated body, built from encyclopedia/entries/*.yaml
+  2. the hand-written appendices in encyclopedia/appendices/*.md, appended
+     verbatim in sorted filename order (see appendices/README.md)
+
+Run: python3 encyclopedia/generate.py           # write SKILL.md
+     python3 encyclopedia/generate.py --check   # verify only, write nothing
 """
-import yaml
-import os
+import argparse
+import difflib
+import re
 import sys
 from pathlib import Path
 
+import yaml
+
 ENTRIES_DIR = Path(__file__).parent / "entries"
+APPENDICES_DIR = Path(__file__).parent / "appendices"
 ALLOWLIST_FILE = Path(__file__).parent / "mitre-allowlist.txt"
-OUTPUT_PATH = Path(__file__).parent.parent / "skills" / "forensic-artifacts" / "SKILL.md"
+DEFAULT_OUTPUT_PATH = (
+    Path(__file__).parent.parent / "skills" / "forensic-artifacts" / "SKILL.md"
+)
+
+# A mitre_attack value may carry a human-readable annotation, e.g.
+# "T1571 (Non-Standard Port)". The annotation is rendered as-is but only the
+# bare technique ID is validated against the allowlist.
+MITRE_ID_RE = re.compile(r"^(\S+?)(?:\s+\([^()]*\))?$")
 
 CATEGORIES = ["Process", "Network", "Registry", "Filesystem", "MFT", "Memory"]
 CATEGORY_DESCRIPTIONS = {
@@ -37,7 +55,13 @@ def validate_mitre_ids(entries, allowlist):
     errors = []
     for entry in entries:
         for mid in entry.get("mitre_attack", []):
-            if mid not in allowlist:
+            match = MITRE_ID_RE.match(mid)
+            if not match:
+                errors.append(
+                    f"  MALFORMED MITRE ID: {mid} in entry '{entry['title']}'"
+                )
+                continue
+            if match.group(1) not in allowlist:
                 errors.append(
                     f"  INVALID MITRE ID: {mid} in entry '{entry['title']}'"
                 )
@@ -55,6 +79,28 @@ def load_entries():
         entry["source_file"] = yaml_file.name
         entries.append(entry)
     return entries
+
+
+def load_appendices():
+    """Hand-written markdown appended verbatim after the generated body.
+
+    Files are read in sorted filename order (numeric prefixes make that order
+    explicit). README.md documents the directory itself and is not content.
+    """
+    if not APPENDICES_DIR.is_dir():
+        return []
+    appendices = []
+    for md_file in sorted(APPENDICES_DIR.glob("*.md")):
+        if md_file.name.lower() == "readme.md":
+            continue
+        appendices.append((md_file, md_file.read_text()))
+    return appendices
+
+
+def assemble(body, appendices):
+    """Join the generated body and the appendices with one blank line between."""
+    parts = [body] + [text for _, text in appendices]
+    return "\n".join(p.rstrip("\n") + "\n" for p in parts)
 
 
 def generate_markdown(entries):
@@ -175,30 +221,101 @@ def generate_markdown(entries):
     return "\n".join(lines)
 
 
-def main():
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        prog="generate.py",
+        description=(
+            "Generate skills/forensic-artifacts/SKILL.md from "
+            "encyclopedia/entries/*.yaml plus the hand-written "
+            "encyclopedia/appendices/*.md."
+        ),
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Generate in memory and compare against the existing output file. "
+            "Prints a unified diff and exits 1 if they differ, exits 0 if "
+            "identical. Writes nothing."
+        ),
+    )
+    parser.add_argument(
+        "--output",
+        metavar="PATH",
+        type=Path,
+        default=DEFAULT_OUTPUT_PATH,
+        help=f"Destination path (default: {DEFAULT_OUTPUT_PATH}).",
+    )
+    # parse_args (not parse_known_args) rejects unknown arguments with exit 2.
+    return parser.parse_args(argv)
+
+
+def build(entries):
+    appendices = load_appendices()
+    return assemble(generate_markdown(entries), appendices), appendices
+
+
+def main(argv=None):
+    args = parse_args(argv)
+
     allowlist = load_allowlist()
     entries = load_entries()
 
     if not entries:
         print("ERROR: No YAML entries found in encyclopedia/entries/", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     errors = validate_mitre_ids(entries, allowlist)
     if errors:
         print("MITRE ATT&CK validation errors:", file=sys.stderr)
         for e in errors:
             print(e, file=sys.stderr)
-        sys.exit(1)
+        return 1
 
-    md = generate_markdown(entries)
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_PATH, "w") as f:
-        f.write(md)
+    md, appendices = build(entries)
+    categories = len(set(e["category"] for e in entries))
 
-    print(f"Generated {OUTPUT_PATH}")
-    print(f"  {len(entries)} entries across {len(set(e['category'] for e in entries))} categories")
-    print(f"  All MITRE ATT&CK IDs validated")
+    if args.check:
+        if not args.output.exists():
+            print(f"CHECK FAILED: {args.output} does not exist.", file=sys.stderr)
+            return 1
+        existing = args.output.read_text()
+        if existing == md:
+            print(f"OK: {args.output} is up to date.")
+            print(
+                f"  {len(entries)} entries, {categories} categories, "
+                f"{len(appendices)} appendices"
+            )
+            return 0
+        diff = difflib.unified_diff(
+            existing.splitlines(keepends=True),
+            md.splitlines(keepends=True),
+            fromfile=f"{args.output} (on disk)",
+            tofile=f"{args.output} (regenerated)",
+        )
+        sys.stdout.writelines(diff)
+        print(
+            f"\nCHECK FAILED: {args.output} is out of date. "
+            f"Run: python3 {Path(__file__).name}",
+            file=sys.stderr,
+        )
+        return 1
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(md)
+
+    print(f"Wrote {args.output}")
+    print(f"  {len(md.splitlines())} lines, {len(md)} bytes")
+    print(f"  {len(entries)} generated entries across {categories} categories")
+    print(f"  All MITRE ATT&CK IDs validated against {ALLOWLIST_FILE.name}")
+    if appendices:
+        print(f"  {len(appendices)} hand-written appendices appended verbatim:")
+        for path, text in appendices:
+            print(f"    - {path.name} ({len(text.splitlines())} lines)")
+    else:
+        print(f"  No appendices found in {APPENDICES_DIR}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

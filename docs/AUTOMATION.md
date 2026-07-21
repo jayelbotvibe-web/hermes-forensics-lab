@@ -1,6 +1,8 @@
 # Forensics Automation Scripts
 
-> **One command, system ready.** No more walking the runbook — these scripts collapse the entire bring-up, case initialization, and shutdown workflow into single commands.
+> **One command, system ready.** These scripts collapse bring-up, case initialization, and shutdown into single commands.
+>
+> **Scope:** this page covers *daily operation of an already-installed lab*. For first-time setup — Docker images, MemProcFS, the encrypted vault, and the SIFT VM — see [INSTALL.md](../INSTALL.md), which is a genuinely multi-step process.
 
 ---
 
@@ -19,7 +21,7 @@ CASE_ID=$(bash ~/forensics/scripts/forensics-case.sh "BelkaCTF 7 — Memory Dump
 bash ~/forensics/scripts/forensics-down.sh
 ```
 
-**That's it.** Three commands, no manual steps, no runbook, no thinking.
+**That's it.** Three commands replace the daily runbook — once the lab is installed. First-time setup is covered in [INSTALL.md](../INSTALL.md); `make doctor` reports what is still missing.
 
 ---
 
@@ -46,7 +48,7 @@ bash ~/forensics/scripts/forensics-down.sh
 
 [2/4] SIFT Workstation VM
   ✓ VM already running
-  ✓ SSH ready — up 6 minutes — IP: ${SIFT_HOST:-172.16.146.128}
+  ✓ SSH ready — up 6 minutes — IP: 192.168.1.50
 
 [3/4] Docker Runtime
   ✓ Docker running — 6 forensic images
@@ -261,7 +263,7 @@ Runs all 5 phases: Case Init → Download → Extract+Register → Baseline Vol3
 **Manual check:**
 ```bash
 vmrun list                                    # Is VM running?
-ssh sansforensics@${SIFT_HOST:-172.16.146.128} 'echo OK'    # Can we SSH?
+bash scripts/sift-exec.sh 'echo OK'                        # Can we SSH?
 bash ~/forensics/scripts/sift-exec.sh whoami  # Wrapper test
 ```
 
@@ -322,7 +324,7 @@ sudo systemctl start docker
 
 ### SIFT VM Networking (NAT)
 
-The SIFT VM runs on VMware NAT networking (`vmnet8`) at `${SIFT_HOST:-172.16.146.128}`. This is more reliable than bridged networking because:
+The SIFT VM address is configured as `SIFT_HOST` in your `forensics.conf`. VMware NAT networking (`vmnet8`) is more reliable than bridged because:
 - DHCP lease comes from VMware's internal server, never expires across sessions
 - No dependency on external network or WiFi AP
 - IP is stable across reboots

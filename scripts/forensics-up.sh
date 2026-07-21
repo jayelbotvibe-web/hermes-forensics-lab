@@ -14,24 +14,14 @@
 # After this, the forensics system is ready for any investigation.
 # ============================================================================
 # No 'set -e' — this is a bring-up script, it reports degradation, never aborts.
-# Evidence root (override with env var)
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
-
 set -uo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-NC='\033[0m'
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 FORENSICS_DIR="$FORENSICS_HOME"
-LUKS_IMG="${FORENSICS_IMG:-$FORENSICS_HOME.img}"
-LUKS_NAME="forensics_crypt"
-LUKS_KEYFILE="${FORENSICS_KEYFILE:-$HOME/.forensics-keyfile}"
-SIFT_VMX="${SIFT_VMX:-$HOME/vmware/SIFT/SIFT.vmx}"
-SIFT_HOST="${SIFT_HOST:-172.16.146.128}"
-SIFT_USER="sansforensics"
+LUKS_IMG="$FORENSICS_IMG"
+LUKS_NAME="$FORENSICS_LUKS_NAME"
+LUKS_KEYFILE="$FORENSICS_KEYFILE"
 SSH_WAIT_MAX=45     # iterations × 4s = 3 min
 SSH_RETRIES=2       # retry cycles if VM doesn't come up
 
@@ -47,7 +37,22 @@ echo ""
 echo -e "${CYAN}[1/4] LUKS Evidence Volume${NC}"
 
 LUKS_OPENED=false
-if mountpoint -q "$FORENSICS_DIR" 2>/dev/null; then
+if ! is_enabled "$FORENSICS_VAULT_ENABLED"; then
+    # Unencrypted storage — a deliberate choice for CTF/lab use.
+    mkdir -p "$FORENSICS_DIR"/{cases,tools,scripts,fixtures,logs} 2>/dev/null
+    echo -e "  ${YELLOW}⚠${NC}  Vault disabled — evidence is NOT encrypted at rest"
+    echo "     $FORENSICS_DIR"
+    LUKS_OPENED=true
+elif [ ! -f "$LUKS_IMG" ] && ! mountpoint -q "$FORENSICS_DIR" 2>/dev/null; then
+    echo -e "  ${RED}✗${NC} No evidence vault at $LUKS_IMG"
+    echo ""
+    echo -e "  ${YELLOW}Create one first:${NC}"
+    echo "     bash scripts/create-evidence-vault.sh --size 60G"
+    echo ""
+    echo "  Or set FORENSICS_VAULT_ENABLED=false in your forensics.conf to"
+    echo "  store evidence unencrypted."
+    exit 1
+elif mountpoint -q "$FORENSICS_DIR" 2>/dev/null; then
     echo -e "  ${GREEN}✓${NC} Already mounted at $FORENSICS_DIR"
     LUKS_OPENED=true
 elif sudo cryptsetup status "$LUKS_NAME" >/dev/null 2>&1; then
@@ -71,14 +76,26 @@ else
         fi
     fi
 
-    # If keyfile failed or doesn't exist, prompt user
+    # No keyfile, or it did not work — fall back to an interactive passphrase.
+    if ! $LUKS_OPENED; then
+        echo "  Opening LUKS (enter your vault passphrase)..."
+        if sudo cryptsetup open "$LUKS_IMG" "$LUKS_NAME"; then
+            sudo mount /dev/mapper/"$LUKS_NAME" "$FORENSICS_DIR" 2>/dev/null && {
+                echo -e "  ${GREEN}✓${NC} Opened and mounted"
+                LUKS_OPENED=true
+            } || echo -e "  ${RED}✗${NC} Mount failed after LUKS open"
+        fi
+    fi
+
     if ! $LUKS_OPENED; then
         echo ""
-        echo -e "  ${YELLOW}LUKS not mounted. To fix:${NC}"
-        echo "     echo -n '<password>' > ~/.forensics-keyfile && chmod 600 ~/.forensics-keyfile"
-        echo "     Then re-run this script."
-        echo ""
         echo -e "  ${RED}✗${NC} LUKS NOT MOUNTED — cannot proceed."
+        echo ""
+        echo -e "  ${YELLOW}To skip the passphrase prompt in future, enrol a keyfile:${NC}"
+        echo "     head -c 4096 /dev/urandom > $LUKS_KEYFILE && chmod 600 $LUKS_KEYFILE"
+        echo "     sudo cryptsetup luksAddKey $LUKS_IMG $LUKS_KEYFILE"
+        echo ""
+        echo "  Diagnose everything: bash scripts/forensics-doctor.sh"
         exit 1
     fi
 fi
@@ -94,20 +111,34 @@ fi
 echo ""
 echo -e "${CYAN}[2/4] SIFT Workstation VM${NC}"
 
-if vmrun list 2>/dev/null | grep -q "SIFT.vmx"; then
-    echo -e "  ${GREEN}✓${NC} VM already running"
+SSH_READY=false
+SIFT_SKIPPED=false
+
+if ! sift_configured; then
+    # Host-only is supported: Docker tools and MemProcFS still work.
+    echo -e "  ${YELLOW}⚠${NC}  No SIFT VM configured — host-only mode"
+    echo "     8 filesystem tools unavailable. To add a VM:"
+    echo "       bash scripts/provision-sift.sh <vm-ip>"
+    SIFT_SKIPPED=true
 else
-    echo "  Starting VM (nogui)..."
-    if vmrun -T ws start "$SIFT_VMX" nogui 2>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} VM started"
+    if [ -z "$SIFT_VMX" ]; then
+        echo -e "  ${CYAN}·${NC} No SIFT_VMX set — expecting the VM to be running already"
+    elif ! command -v vmrun >/dev/null 2>&1; then
+        echo -e "  ${YELLOW}⚠${NC}  vmrun not on PATH — cannot auto-start the VM"
+    elif vmrun list 2>/dev/null | grep -qF "$SIFT_VMX"; then
+        echo -e "  ${GREEN}✓${NC} VM already running"
     else
-        echo -e "  ${YELLOW}⚠${NC}  vmrun failed — is VMware Workstation installed?"
+        echo "  Starting VM (nogui)..."
+        if vmrun -T ws start "$SIFT_VMX" nogui 2>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} VM started"
+        else
+            echo -e "  ${YELLOW}⚠${NC}  vmrun could not start $SIFT_VMX"
+        fi
     fi
 fi
 
 # Wait for SSH — with retry logic
-SSH_READY=false
-for retry in $(seq 1 $SSH_RETRIES); do
+$SIFT_SKIPPED || for retry in $(seq 1 $SSH_RETRIES); do
     [ "$retry" -gt 1 ] && echo "  Retry $retry/$SSH_RETRIES..."
     echo -n "  Waiting for SSH"
     for _ in $(seq 1 $SSH_WAIT_MAX); do
@@ -121,22 +152,23 @@ for retry in $(seq 1 $SSH_RETRIES); do
     done
     echo ""
     # If first attempt failed, try restarting the VM
-    if [ "$retry" -lt "$SSH_RETRIES" ] && ! $SSH_READY; then
+    if [ "$retry" -lt "$SSH_RETRIES" ] && ! $SSH_READY && [ -n "$SIFT_VMX" ]; then
         echo -e "  ${YELLOW}⚠${NC}  SSH timeout — restarting VM..."
         vmrun -T ws stop "$SIFT_VMX" hard 2>/dev/null || true
         sleep 5
         vmrun -T ws start "$SIFT_VMX" nogui 2>/dev/null || true
     fi
 done
-echo ""
+$SIFT_SKIPPED || echo ""
 
 if $SSH_READY; then
     SIFT_UPTIME=$(ssh -o ConnectTimeout=5 -o BatchMode=yes "$SIFT_USER@$SIFT_HOST" 'uptime -p' 2>/dev/null || echo "unknown")
     SIFT_IP=$(ssh -o ConnectTimeout=5 -o BatchMode=yes "$SIFT_USER@$SIFT_HOST" 'hostname -I' 2>/dev/null || echo "unknown")
     echo -e "  ${GREEN}✓${NC} SSH ready — ${SIFT_UPTIME} — IP: ${SIFT_IP}"
-else
+elif ! $SIFT_SKIPPED; then
     echo -e "  ${RED}✗${NC} SIFT VM SSH unreachable after ${SSH_RETRIES} attempt(s)"
-    echo "  Run 'bash ~/forensics/scripts/sift-exec.sh whoami' to check manually"
+    echo "  Check manually:  bash scripts/sift-exec.sh whoami"
+    echo "  Diagnose:        bash scripts/forensics-doctor.sh"
 fi
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -162,13 +194,13 @@ echo ""
 echo -e "${CYAN}[4/4] Session Canary${NC}"
 echo ""
 
-CANARY_SCRIPT="$FORENSICS_DIR/scripts/session-canary.sh"
 CANARY_RC=1
-if [ -x "$CANARY_SCRIPT" ]; then
+if CANARY_SCRIPT="$(forensics_script session-canary.sh)"; then
     bash "$CANARY_SCRIPT"
     CANARY_RC=$?
 else
-    echo -e "  ${RED}✗${NC} Canary script not found at $CANARY_SCRIPT"
+    echo -e "  ${RED}✗${NC} session-canary.sh not found in $FORENSICS_REPO/scripts or $FORENSICS_HOME/scripts"
+    echo "     Re-sync the lab files: ./install.sh --profile-only"
 fi
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -176,10 +208,16 @@ fi
 # ══════════════════════════════════════════════════════════════════════════
 
 echo ""
-LUKS_OK=$(mountpoint -q "$FORENSICS_DIR" 2>/dev/null && echo true || echo false)
+if is_enabled "$FORENSICS_VAULT_ENABLED"; then
+    LUKS_OK=$(mountpoint -q "$FORENSICS_DIR" 2>/dev/null && echo true || echo false)
+else
+    LUKS_OK=$([ -d "$FORENSICS_DIR" ] && echo true || echo false)
+fi
 DOCKER_OK=$(docker info >/dev/null 2>&1 && echo true || echo false)
+# In host-only mode an absent VM is the configured state, not a failure.
+SIFT_OK=$($SIFT_SKIPPED && echo true || echo "$SSH_READY")
 
-if [ $CANARY_RC -eq 0 ] && $SSH_READY && $LUKS_OK && $DOCKER_OK; then
+if [ $CANARY_RC -eq 0 ] && $SIFT_OK && $LUKS_OK && $DOCKER_OK; then
     echo -e "${GREEN}╔══════════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║   ✓ FORENSICS SYSTEM READY                   ║${NC}"
     echo -e "${GREEN}╚══════════════════════════════════════════════╝${NC}"
@@ -190,10 +228,13 @@ else
     echo ""
     echo "  Component  Status"
     echo "  ─────────  ──────"
-    echo -n "  LUKS:      "; $LUKS_OK && echo -e "${GREEN}OK${NC}" || echo -e "${RED}FAIL${NC}"
-    echo -n "  SIFT VM:   "; $SSH_READY && echo -e "${GREEN}OK${NC}" || echo -e "${RED}FAIL${NC}"
+    echo -n "  Evidence:  "; $LUKS_OK && echo -e "${GREEN}OK${NC}" || echo -e "${RED}FAIL${NC}"
+    echo -n "  SIFT VM:   "; $SIFT_SKIPPED && echo -e "${YELLOW}host-only${NC}" \
+        || { $SSH_READY && echo -e "${GREEN}OK${NC}" || echo -e "${RED}FAIL${NC}"; }
     echo -n "  Docker:    "; $DOCKER_OK && echo -e "${GREEN}OK${NC}" || echo -e "${RED}FAIL${NC}"
     echo -n "  Canary:    "; [ $CANARY_RC -eq 0 ] && echo -e "${GREEN}OK${NC}" || echo -e "${RED}FAIL${NC}"
+    echo ""
+    echo -e "  ${DIM}For per-item fixes: bash scripts/forensics-doctor.sh${NC}"
 fi
 
 echo ""

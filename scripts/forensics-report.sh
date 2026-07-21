@@ -16,7 +16,7 @@
 #   - Print-friendly via @media print
 # ============================================================================
 # Evidence root (override with env var)
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 set -uo pipefail
 
@@ -88,7 +88,7 @@ else:
     <p style=\"font-size:10px;color:var(--text-faint);margin-top:8px\">{total} finding(s) reviewed. Advisory only — examiner confirms. Findings remain DRAFT.</p>''')
 " 2>/dev/null)
     else
-        CORR_SECTION='<p style="color:var(--text-faint)">No correlation data. Run: python3 /home/niel/forensics/scripts/forensics-verify.py <case_dir></p>'
+        CORR_SECTION="<p style=\"color:var(--text-faint)\">No correlation data. Run: python3 $FORENSICS_HOME/scripts/forensics-verify.py <case_dir></p>"
     fi
 
     # ── Count stats ─────────────────────────────────────────────────────

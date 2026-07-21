@@ -15,34 +15,34 @@ category: forensics
 
 ## Pre-flight
 1. Evidence must be registered in evidence.json
-2. Read /home/niel/forensics/tools/tool-catalog.yaml for sleuthkit version
-3. Verify SIFT VM is reachable: `bash /home/niel/forensics/scripts/sift-exec.sh "echo OK"`
+2. Read $FORENSICS_HOME/tools/tool-catalog.yaml for sleuthkit version
+3. Verify SIFT VM is reachable: `bash $FORENSICS_HOME/scripts/sift-exec.sh "echo OK"`
 
 ## Workflow
 
 ### Step 1: List filesystem
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "fls -r -m / /cases/CASE_ID/evidence/IMAGE_FILE"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "fls -r -m / /cases/CASE_ID/evidence/IMAGE_FILE"
 ```
 
 ### Step 2: Extract file by inode
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "icat /cases/CASE_ID/evidence/IMAGE_FILE INODE_NUMBER"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "icat /cases/CASE_ID/evidence/IMAGE_FILE INODE_NUMBER"
 ```
 
 ### Step 3: Get file metadata
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "istat /cases/CASE_ID/evidence/IMAGE_FILE INODE_NUMBER"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "istat /cases/CASE_ID/evidence/IMAGE_FILE INODE_NUMBER"
 ```
 
 ### Step 4: Generate body file for timeline
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "fls -r -m / /cases/CASE_ID/evidence/IMAGE_FILE > /cases/CASE_ID/raw/bodyfile.txt"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "fls -r -m / /cases/CASE_ID/evidence/IMAGE_FILE > /cases/CASE_ID/raw/bodyfile.txt"
 ```
 
 ### Step 5: Generate mactime timeline
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "mactime -b /cases/CASE_ID/raw/bodyfile.txt -d > /cases/CASE_ID/raw/timeline.csv"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "mactime -b /cases/CASE_ID/raw/bodyfile.txt -d > /cases/CASE_ID/raw/timeline.csv"
 ```
 
 ### Step 6: Create findings

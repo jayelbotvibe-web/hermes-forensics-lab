@@ -7,7 +7,7 @@
 # Confidence: HIGH | MEDIUM | LOW | TENTATIVE
 # ============================================================================
 # Evidence root (override with env var)
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 set -uo pipefail
 

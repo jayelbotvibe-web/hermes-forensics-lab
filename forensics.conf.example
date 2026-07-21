@@ -1,0 +1,77 @@
+# ============================================================================
+# Hermes Forensics Lab — configuration
+#
+# Copy this file to one of the following locations (first match wins):
+#
+#   1. $FORENSICS_CONF                          (explicit override)
+#   2. ~/.config/hermes-forensics/forensics.conf  (recommended)
+#   3. <repo>/forensics.conf                     (gitignored, fine for dev)
+#
+#     cp forensics.conf.example ~/.config/hermes-forensics/forensics.conf
+#
+# Every value below is also settable as an environment variable, which takes
+# precedence over this file. Run `./install.sh` to generate this file
+# interactively, or `make doctor` to check the values you have set.
+#
+# This is sourced by bash. Quote values containing spaces. No command
+# substitution — the loader rejects anything that is not a plain assignment.
+# ============================================================================
+
+
+# ── Evidence root ──────────────────────────────────────────────────────────
+# Where cases, fixtures, logs, and tool catalogs live. If you use the
+# encrypted vault (recommended), this is the LUKS mountpoint.
+FORENSICS_HOME="$HOME/forensics"
+
+
+# ── Encrypted evidence vault (LUKS) ────────────────────────────────────────
+# Evidence at rest is stored in a LUKS container. Create it with:
+#
+#     bash scripts/create-evidence-vault.sh --size 60G
+#
+# Set FORENSICS_VAULT_ENABLED=false to skip encryption entirely and keep
+# evidence on the plain filesystem (fine for CTFs, NOT for real casework).
+FORENSICS_VAULT_ENABLED=true
+FORENSICS_IMG="$HOME/forensics.img"
+FORENSICS_KEYFILE="$HOME/.forensics-keyfile"
+FORENSICS_LUKS_NAME="forensics_crypt"
+
+
+# ── SIFT Workstation VM ────────────────────────────────────────────────────
+# The Ubuntu VM running sleuthkit, foremost, plaso, regripper, etc.
+# Provision it with:  bash scripts/provision-sift.sh <ip>
+#
+# SIFT_HOST has no safe default — set it to your VM's actual address.
+# Set SIFT_ENABLED=false to run host-only (Docker tools still work; the
+# eight SIFT-native tools report as unavailable rather than degraded).
+SIFT_ENABLED=true
+SIFT_HOST=""
+SIFT_USER="sansforensics"
+SSH_IDENTITY="$HOME/.ssh/id_rsa"
+
+# Hypervisor integration — used by forensics-up.sh / forensics-down.sh to
+# start and stop the VM. Leave SIFT_VMX empty if you manage the VM yourself
+# or use KVM/libvirt; bring-up will then just wait for SSH.
+SIFT_VMX=""
+
+
+# ── MemProcFS (host-side memory forensics) ─────────────────────────────────
+# Installed by install.sh into MEMPROCFS_HOME.
+MEMPROCFS_HOME="$HOME/memprocfs"
+MEMPROCFS_BIN="$MEMPROCFS_HOME/memprocfs"
+MEMPROCFS_EXPECTED_VERSION="5.17.9"
+# Mountpoint used when mapping a memory image. Must be writable by you.
+MEMPROCFS_MOUNT="/mnt/mem"
+
+
+# ── Docker tool images ─────────────────────────────────────────────────────
+# Built by `make images`. Pinned tags — the canary checks these exact strings.
+IMAGE_VOLATILITY3="forensics-volatility3:2.7.0"
+IMAGE_PLASO="forensics-plaso:20240512"
+IMAGE_MFT_TOOLS="forensics-mft-tools:1.2.0.0"
+
+
+# ── Hermes agent profile ───────────────────────────────────────────────────
+# Where install.sh installs the agent profile. The lab's scripts and
+# encyclopedia are usable without Hermes; only the agent workflow needs it.
+HERMES_PROFILE_DIR="$HOME/.hermes/profiles/forensics"

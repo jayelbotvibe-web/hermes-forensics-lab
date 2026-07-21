@@ -15,19 +15,19 @@ always_load: false
 - Any time evidence changes hands
 
 ## Pre-flight
-- Read /home/niel/forensics/tools/tool-catalog.yaml for tool versions
+- Read $FORENSICS_HOME/tools/tool-catalog.yaml for tool versions
 - Evidence must be at rest before hashing
 
 ## Case Initialization
 
 ### Step 1: Create case directory
 ```
-mkdir -p /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/{evidence,raw,reports,audit}
+mkdir -p $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/{evidence,raw,reports,audit}
 ```
 Replace YYYY-MMDD-NNNN with date and sequential number.
 
 ### Step 2: Create CASE.yaml
-Write to /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/CASE.yaml:
+Write to $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/CASE.yaml:
 ```yaml
 case_id: INC-YYYY-MMDD-NNNN
 status: active
@@ -46,19 +46,19 @@ Append to audit/actions.jsonl:
 
 ### Step 1: Hash the evidence
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "hashdeep -c sha256 /cases/INC-YYYY-MMDD-NNNN/evidence/FILENAME"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "hashdeep -c sha256 /cases/INC-YYYY-MMDD-NNNN/evidence/FILENAME"
 ```
-If SIFT VM is unavailable, use: `sha256sum /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/evidence/FILENAME`
+If SIFT VM is unavailable, use: `sha256sum $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/evidence/FILENAME`
 
 ### Step 2: Copy evidence to case directory
 Copy the evidence file into case/evidence/
-Set read-only: `chmod 444 /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/evidence/FILENAME`
+Set read-only: `chmod 444 $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/evidence/FILENAME`
 
 ### Step 3: Verify copy hash matches original
 Compare hashes — must match exactly.
 
 ### Step 4: Register in evidence.json
-Write to /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/evidence.json:
+Write to $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/evidence.json:
 ```json
 [{
   "evidence_id": "EVID-001",
@@ -92,7 +92,7 @@ Update CASE.yaml status to 'closed'. Log to audit trail.
 ### Step 5: Verify audit chain integrity
 Before closing, verify the tamper-evident hash chain is intact:
 ```bash
-python3 /home/niel/forensics/scripts/forensics-verify-audit.py /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN
+python3 $FORENSICS_HOME/scripts/forensics-verify-audit.py $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN
 ```
 A broken chain at closure indicates tampering — do not close until resolved.
 

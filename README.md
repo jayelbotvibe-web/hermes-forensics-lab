@@ -4,13 +4,14 @@
 >
 > 12 forensic tools • 3 runtimes • 33-interpretation artifact encyclopedia • automated validation • cross-source correlation • human-in-the-loop
 
-This is a **reproducible personal DFIR lab** and artifact-interpretation skill library. The full stack assumes a pre-built SIFT Workstation VM at a known IP, SSH key auth, Docker, and a Hermes Agent install. The artifact encyclopedia and skill library work standalone — use them without the tool runtime if you only need interpretation guidance.
+This is a **reproducible DFIR lab** and artifact-interpretation skill library. It installs in three levels: the artifact encyclopedia and verification scripts work standalone with nothing installed; a host-only lab adds the Docker toolchain and MemProcFS in about twenty minutes; the full stack adds an encrypted evidence vault and a SIFT Workstation VM. Run `make doctor` at any point to see where you are and what to do next.
 
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
 [![Canary](https://img.shields.io/badge/canary-12_tools_+_8_env-brightgreen)](scripts/session-canary.sh)
+[![Install](https://img.shields.io/badge/install-3_levels-0ea5e9)](INSTALL.md)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
-[![Automation](https://img.shields.io/badge/automation-9_scripts-8b5cf6)](docs/AUTOMATION.md)
+[![Automation](https://img.shields.io/badge/automation-24_scripts-8b5cf6)](docs/AUTOMATION.md)
 [![Correlation](https://img.shields.io/badge/correlation-pass-34d399)](https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-timeline-report.html)
 [![Audit](https://img.shields.io/badge/audit_hash_chain-34d399)](skills/evidence-handling/SKILL.md#audit-trail-tamper-evident-hash-chain)
 
@@ -124,38 +125,41 @@ Every entry includes: what you see → interpretation → MITRE ATT&CK → confi
 
 ## Quick Start
 
-### 1. Clone
+Three levels, depending on how much you want. Full detail in [INSTALL.md](INSTALL.md).
+
+**Reference only** — the encyclopedia and verification scripts, no install:
+
 ```bash
 git clone https://github.com/jayelbotvibe-web/hermes-forensics-lab.git
 cd hermes-forensics-lab
+make test        # needs only Python 3.8+
 ```
 
-### 2. Build Docker images
+**Host-only lab** (~20 min) — adds volatility3, plaso, MFT tools, MemProcFS,
+and reporting. No VM, no encrypted vault:
+
 ```bash
-docker build -t forensics-volatility3:2.7.0 tools/volatility/
-docker build -t forensics-plaso:20240512 tools/plaso/
-docker build -t forensics-mft-tools:1.2.0.0 tools/mft-tools/
+./install.sh --minimal
+make doctor
 ```
 
-### 3. Install MemProcFS
+**Full lab** (~2 h) — adds the encrypted evidence vault and the eight
+SIFT-native filesystem tools:
+
 ```bash
-# Fetch the latest MemProcFS Linux release asset dynamically
-MEMPROCFS_URL=$(curl -s https://api.github.com/repos/ufrisk/MemProcFS/releases/latest \
-  | grep browser_download_url \
-  | grep -i 'linux' \
-  | head -n1 \
-  | cut -d '"' -f4)
-curl -L "$MEMPROCFS_URL" -o memprocfs.zip
-unzip memprocfs.zip -d memprocfs
-sudo apt install -y libfuse2t64 lz4 unzip
+./install.sh                                    # interactive
+bash scripts/create-evidence-vault.sh --size 60G
+bash scripts/provision-sift.sh <vm-ip>          # after building the VM
 ```
 
-### 4. Set up SIFT VM
-See [SETUP.md](SETUP.md) for full provisioning instructions.
+Building the SIFT VM is the one genuinely manual step — Ubuntu 22.04, 12 GB
+RAM, 80 GB disk, bridged networking. [INSTALL.md § 3b](INSTALL.md#3b-sift-workstation-vm)
+walks through it.
 
-### 5. Start the agent
+Stuck at any point:
+
 ```bash
-hermes -p forensics
+make doctor      # what is missing, and the command that fixes it
 ```
 
 ---
@@ -186,7 +190,7 @@ opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs sessi
 
 | # | Tool | Runtime | Version | Primary Use |
 |---|------|---------|---------|-------------|
-| 1 | **MemProcFS** | 💻 Host | 5.17.8 | Memory analysis (filesystem mount) |
+| 1 | **MemProcFS** | 💻 Host | 5.17.9 | Memory analysis (filesystem mount) |
 | 2 | volatility3 | 🐳 Docker | 2.7.0 | Memory analysis (Linux dumps) |
 | 3 | plaso | 🐳 Docker | 20240512 | Super timeline generation |
 | 4 | mft-tools | 🐳 Docker | 1.2.0.0 | MFT parsing (analyzeMFT) |
@@ -258,7 +262,7 @@ Output:
 === Forensics Session Canary ===
 [env:docker-daemon] PASS
 [env:luks] PASS (mounted)
-[env:sift-ssh] PASS (172.16.146.128)
+[env:sift-ssh] PASS (192.168.1.50)
 [env:dir-cases] PASS ... [env:dir-logs] PASS
 [docker:forensics-volatility3:2.7.0] PASS
 [docker:forensics-plaso:20240512] PASS
@@ -315,7 +319,7 @@ volatility3 remains as fallback for Linux dumps.
 ```
 hermes-forensics-lab/
 ├── README.md                          ← you are here
-├── SETUP.md                           ← SIFT VM provisioning guide
+├── INSTALL.md                         ← installation guide (3 levels)
 ├── docs/
 │   └── AUTOMATION.md                  ← automation scripts reference + troubleshooting
 ├── architecture.png                   ← system diagram

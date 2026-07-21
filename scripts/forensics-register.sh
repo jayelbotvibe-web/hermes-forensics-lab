@@ -18,7 +18,7 @@
 #       "3dc0d114859c0bde08d39155eaaa8f76392dd5121ca44ecb15652b3bf6049e35"
 # ============================================================================
 # Evidence root (override with env var)
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 set -uo pipefail
 
