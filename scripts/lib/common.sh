@@ -150,8 +150,16 @@ sift_configured() {
     is_enabled "$SIFT_ENABLED" && [ -n "$SIFT_HOST" ]
 }
 
+# SSH options, one token per line. Pass "interactive" to drop BatchMode, for
+# commands that legitimately need to prompt (sudo password, host key accept).
+#
+# Callers must never filter this output with grep: each -o and its value are
+# separate tokens, so removing a value line leaves a dangling -o and ssh dies
+# with 'no argument after keyword "-o"'. Ask for the variant you want instead.
 sift_ssh_opts() {
-    local opts=(-o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=accept-new)
+    local opts=(-o ConnectTimeout=10)
+    [ "${1:-}" = "interactive" ] || opts+=(-o BatchMode=yes)
+    opts+=(-o StrictHostKeyChecking=accept-new)
     [ -f "$SSH_IDENTITY" ] && opts+=(-i "$SSH_IDENTITY")
     printf '%s\n' "${opts[@]}"
 }

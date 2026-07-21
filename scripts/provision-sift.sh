@@ -146,7 +146,7 @@ fi
 
 # -t so sudo can prompt interactively if passwordless sudo is not configured.
 # shellcheck disable=SC2046
-ssh -t $(sift_ssh_opts | grep -v BatchMode | tr '\n' ' ') "$TARGET_USER@$TARGET_HOST" \
+ssh -t $(sift_ssh_opts interactive | tr '\n' ' ') "$TARGET_USER@$TARGET_HOST" \
     "$SUDO_PREFIX apt-get update -qq && \
      DEBIAN_FRONTEND=noninteractive $SUDO_PREFIX apt-get install -y -qq ${APT_PACKAGES[*]} && \
      pip3 install --quiet python-registry" \

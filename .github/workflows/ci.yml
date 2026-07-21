@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -26,14 +26,14 @@ jobs:
           echo "All shell scripts parse."
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
       - name: Validate YAML
         run: |
           pip install yamllint
-          yamllint -d relaxed tools/ .github/
+          yamllint -c .yamllint.yml tools/ .github/
 
       - name: Validate JSON
         run: |
@@ -52,10 +52,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # The lab used to be unusable by anyone but its author, because absolute
       # paths and one specific VM address were baked into the docs the agent
