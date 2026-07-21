@@ -144,11 +144,17 @@ else
     SUDO_PREFIX="sudo"
 fi
 
+# DEBIAN_FRONTEND must be set *inside* the sudo environment via `env`. Setting
+# it before `sudo` does nothing: sudo resets the environment by default
+# (env_reset), so the variable never reaches apt and packages that ask debconf
+# questions — tshark's "allow non-superusers to capture?" among them — block
+# forever on a prompt nobody can see.
+#
 # -t so sudo can prompt interactively if passwordless sudo is not configured.
 # shellcheck disable=SC2046
 ssh -t $(sift_ssh_opts interactive | tr '\n' ' ') "$TARGET_USER@$TARGET_HOST" \
-    "$SUDO_PREFIX apt-get update -qq && \
-     DEBIAN_FRONTEND=noninteractive $SUDO_PREFIX apt-get install -y -qq ${APT_PACKAGES[*]} && \
+    "$SUDO_PREFIX env DEBIAN_FRONTEND=noninteractive apt-get update -qq && \
+     $SUDO_PREFIX env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ${APT_PACKAGES[*]} && \
      pip3 install --quiet python-registry" \
     || log_warn "apt install reported errors — the probe below will show what is missing"
 
