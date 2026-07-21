@@ -3,12 +3,17 @@
 # Update here when numbers change — do not edit them inline in multiple files.
 
 tool_count: 12
-script_count: 9        # user-facing automation scripts (what README dir tree lists) — +1 forensics-verify-audit.py
-total_script_files: 26 # 18 .sh (incl. lib/common.sh) + 8 .py in scripts/
+script_count: 24       # automation scripts in scripts/ (17 .sh + 7 .py), excluding
+                       # test suites and lib/common.sh. Matches the README badge.
+                       # v4.4.0 added: forensics-doctor.sh, create-evidence-vault.sh,
+                       # provision-sift.sh (+ install.sh at repo root)
+total_script_files: 26 # 18 .sh (incl. lib/common.sh) + 8 .py in scripts/; +install.sh at root
 python_helpers: 7      # forensics-screenshots.py, forensics-artifacts.py, forensics-iocs.py, forensics-validate-confidence.py, forensics-verify.py, audit-append.py, forensics-verify-audit.py
 version: "4.4.0"
 sleuthkit_version: "4.11.1"
 artifact_kb_entries: 33
 runtimes: 3            # docker, host_fuse, sift_vm
-canary_checks: 20      # actual checks in session-canary.sh (12 tools + 8 env)
+canary_checks: 20      # full mode: 12 tools + 8 env. Host-only mode scores 4 tools + 8 env —
+                       # the 8 SIFT tools SKIP rather than counting as degraded.
 skills: 7
+install_levels: 3      # reference-only (~1 min), host-only (~20 min), full lab (~2 h)

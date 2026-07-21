@@ -9,8 +9,9 @@ This is a **reproducible DFIR lab** and artifact-interpretation skill library. I
 [![Hermes](https://img.shields.io/badge/Hermes-Agent-34d399)](https://github.com/NousResearch/hermes-agent)
 [![Tools](https://img.shields.io/badge/tools-12-22d3ee)](#tool-inventory)
 [![Canary](https://img.shields.io/badge/canary-12_tools_+_8_env-brightgreen)](scripts/session-canary.sh)
+[![Install](https://img.shields.io/badge/install-3_levels-0ea5e9)](INSTALL.md)
 [![Artifacts](https://img.shields.io/badge/artifact_KB-33_entries-f59e0b)](#-artifact-knowledge-base-new)
-[![Automation](https://img.shields.io/badge/automation-9_scripts-8b5cf6)](docs/AUTOMATION.md)
+[![Automation](https://img.shields.io/badge/automation-24_scripts-8b5cf6)](docs/AUTOMATION.md)
 [![Correlation](https://img.shields.io/badge/correlation-pass-34d399)](https://github.com/jayelbotvibe-web/hermes-forensics-lab/blob/master/reports/samples/belkactf7-timeline-report.html)
 [![Audit](https://img.shields.io/badge/audit_hash_chain-34d399)](skills/evidence-handling/SKILL.md#audit-trail-tamper-evident-hash-chain)
 
