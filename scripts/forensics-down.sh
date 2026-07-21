@@ -11,7 +11,7 @@
 #   3. Locks the LUKS evidence volume
 # ============================================================================
 # Evidence root (override with env var)
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 
 set -uo pipefail
 
@@ -22,8 +22,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 FORENSICS_DIR="$FORENSICS_HOME"
-LUKS_NAME="forensics_crypt"
-SIFT_VMX="${SIFT_VMX:-$HOME/vmware/SIFT/SIFT.vmx}"
+LUKS_NAME="$FORENSICS_LUKS_NAME"
 FORCE=false
 
 # ── Args ────────────────────────────────────────────────────────────────
@@ -93,13 +92,16 @@ fi
 echo ""
 echo -e "${CYAN}[2/3] SIFT Workstation VM${NC}"
 
-if vmrun list 2>/dev/null | grep -q "SIFT.vmx"; then
+if [ -z "$SIFT_VMX" ] || ! command -v vmrun >/dev/null 2>&1; then
+    # Either no VM is configured, or this host does not manage it.
+    echo -e "  ${CYAN}·${NC} Not managed here — leave the VM as it is"
+elif vmrun list 2>/dev/null | grep -qF "$SIFT_VMX"; then
     echo "  Sending shutdown signal..."
     vmrun -T ws stop "$SIFT_VMX" soft 2>/dev/null || true
     # Wait up to 30s for graceful shutdown
     STOPPED=false
     for _ in $(seq 1 15); do
-        vmrun list 2>/dev/null | grep -q "SIFT.vmx" || { STOPPED=true; break; }
+        vmrun list 2>/dev/null | grep -qF "$SIFT_VMX" || { STOPPED=true; break; }
         sleep 2
     done
     if $STOPPED; then
@@ -108,7 +110,7 @@ if vmrun list 2>/dev/null | grep -q "SIFT.vmx"; then
         echo -e "  ${YELLOW}⚠${NC}  VM didn't stop — forcing..."
         vmrun -T ws stop "$SIFT_VMX" hard 2>/dev/null || true
         sleep 3
-        if vmrun list 2>/dev/null | grep -q "SIFT.vmx"; then
+        if vmrun list 2>/dev/null | grep -qF "$SIFT_VMX"; then
             echo -e "  ${RED}✗${NC} VM still running — manual intervention needed"
         else
             echo -e "  ${GREEN}✓${NC} VM force-stopped"

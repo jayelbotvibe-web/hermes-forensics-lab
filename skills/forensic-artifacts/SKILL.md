@@ -491,7 +491,7 @@ Maps common forensic artifacts to interpretation, attacker behavior, and MITRE A
 - Finding Alternate Data Streams (ADS)
 
 ## Pre-flight
-1. Read /home/niel/forensics/tools/tool-catalog.yaml — note: analyzeMFT primary, MFTECmd pending
+1. Read $FORENSICS_HOME/tools/tool-catalog.yaml — note: analyzeMFT primary, MFTECmd pending
 2. Docker image: forensics-mft-tools:1.2.0.0
 
 ## Workflow
@@ -499,8 +499,8 @@ Maps common forensic artifacts to interpretation, attacker behavior, and MITRE A
 ### Step 1: Parse MFT
 ```bash
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID/evidence:/evidence:ro \
-  -v /home/niel/forensics/cases/CASE_ID/raw:/output \
+  -v $FORENSICS_HOME/cases/CASE_ID/evidence:/evidence:ro \
+  -v $FORENSICS_HOME/cases/CASE_ID/raw:/output \
   forensics-mft-tools:1.2.0.0 \
   python3 -m analyzemft -f /evidence/MFT_FILE -o /output/analyzemft.csv
 ```
@@ -547,14 +547,14 @@ For critical MFT findings:
 - User activity analysis (UserAssist, RecentDocs, typed URLs)
 
 ## Pre-flight
-1. Read /home/niel/forensics/tools/tool-catalog.yaml — RegRipper 3.0 via SIFT VM
+1. Read $FORENSICS_HOME/tools/tool-catalog.yaml — RegRipper 3.0 via SIFT VM
 2. Evidence must be registered in evidence.json
 
 ## Workflow
 
 ### Step 1: Run RegRipper against a hive
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "rip -r /cases/CASE_ID/evidence/HIVE_FILE -a > /cases/CASE_ID/raw/regripper.txt"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "rip -r /cases/CASE_ID/evidence/HIVE_FILE -a > /cases/CASE_ID/raw/regripper.txt"
 ```
 
 ### Step 2: Extract persistence mechanisms

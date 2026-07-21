@@ -7,7 +7,7 @@ TITLE="${1:-New forensic task}"
 EVIDENCE_PATH="${2:-}"
 PRIORITY="${3:-MEDIUM}"
 SENDER="${4:-pentest-agent}"
-FORENSICS_HOME="${FORENSICS_HOME:-$HOME/forensics}"
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
 HANDOFF_DIR="${FORENSICS_HOME}/cases"
 CASE_ID="INC-$(date +%Y-%m%d)-$(date +%H%M)"
 

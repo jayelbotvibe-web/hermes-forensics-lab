@@ -2,6 +2,62 @@
 
 All notable changes to the Hermes Forensics Lab.
 
+## [4.4.0] — 2026-07-21
+
+### Added
+- **`install.sh`** — one-command bootstrap with three levels: `--minimal` (host-only),
+  interactive (full), and `--dry-run`. Targeted re-runs via `--config-only`,
+  `--images-only`, `--deps-only`, `--memprocfs-only`, `--profile-only`.
+- **`scripts/create-evidence-vault.sh`** — creates the LUKS2 evidence container.
+  This was a hard prerequisite of `forensics-up.sh` that no script created and no
+  document described; a new user could not get past bring-up. Rolls back cleanly
+  on failure rather than leaving a half-built vault.
+- **`scripts/provision-sift.sh`** — provisions the SIFT VM from the host: installs
+  the SSH key, apt-installs the eight tools, configures the read-only sshfs mount,
+  and persists `SIFT_HOST`/`SIFT_USER` to the config. `--check` re-verifies.
+- **`scripts/forensics-doctor.sh`** — diagnoses every component and prints the exact
+  fix command for each gap. Exit 0 ready / 1 degraded / 2 blocked.
+- **`scripts/lib/common.sh`** — single config loader for all scripts. Resolution
+  order: environment → config file → built-in default. Parses rather than sources
+  the config file; lines with shell metacharacters are refused, not executed.
+- **`forensics.conf.example`** — every setting documented with its default.
+- **`Makefile`** and **`docker-compose.yml`** — `make install|doctor|test|up|down`;
+  compose builds the three images reproducibly and mounts evidence read-only.
+- **`INSTALL.md`** — replaces `SETUP.md`. Three install levels with honest time
+  costs (1 min / 20 min / 2 h), configuration reference, and troubleshooting.
+- **Host-only mode** — `SIFT_ENABLED=false` or an unset `SIFT_HOST` is now a
+  supported configuration. The canary reports the eight VM tools as `SKIP` and
+  scores 4/4 instead of misreporting 4/12 DEGRADED.
+- CI now runs both test suites, checks the encyclopedia is regenerable, and gates
+  against hardcoded home directories and VM addresses returning.
+
+### Fixed
+- **96 hardcoded `/home/niel/...` paths** across all six skill docs and `persona.md`
+  replaced with `$FORENSICS_HOME`, `$MEMPROCFS_BIN`, and `$HERMES_PROFILE_DIR`.
+  These are agent-facing instructions, so a second user's agent was being told to
+  read paths that did not exist.
+- **`SIFT_HOST` contradiction** — `SETUP.md` documented `192.168.88.14` while every
+  script defaulted to `172.16.146.128`. There is now no default: the address lives
+  in one config file, and an unset value means host-only rather than a phantom host.
+- **`encyclopedia/generate.py` silently destroyed documentation** — it regenerated
+  `SKILL.md` from YAML but did not reproduce the two hand-written appendices,
+  deleting 105 lines on every run. It also ignored `--help` and wrote immediately.
+  The appendices now live in `encyclopedia/appendices/` and are appended by the
+  generator; `--check` verifies without writing and unknown arguments are rejected.
+- `entries/network-unusual-port.yaml` had drifted from the committed `SKILL.md`
+  (`T1571` vs `T1571 (Non-Standard Port)`); MITRE values now carry optional
+  annotations, validated against the allowlist by bare ID.
+- `forensics-down.sh` referenced `$FORENSICS_HOME` without defining it — under
+  `set -u` the script aborted immediately.
+- `session-canary.sh` probed `/dev/mapper/forensics-vault` while the vault was
+  created as `forensics_crypt`, so the LUKS check could never pass.
+- `forensics-up.sh` advised writing your LUKS *password* into the keyfile, which
+  does not work — the keyfile is random key material. It now falls back to an
+  interactive passphrase prompt and explains how to enrol a keyfile properly.
+- `forensics-up.sh`/`forensics-down.sh` matched the VM by the literal string
+  `SIFT.vmx`, ignoring `$SIFT_VMX`; both now match the configured path and no
+  longer call `vmrun` when it is absent or unconfigured.
+
 ## [4.2.1] — 2026-07-12
 
 ### Added

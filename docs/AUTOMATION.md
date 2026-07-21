@@ -46,7 +46,7 @@ bash ~/forensics/scripts/forensics-down.sh
 
 [2/4] SIFT Workstation VM
   ✓ VM already running
-  ✓ SSH ready — up 6 minutes — IP: ${SIFT_HOST:-172.16.146.128}
+  ✓ SSH ready — up 6 minutes — IP: 192.168.1.50
 
 [3/4] Docker Runtime
   ✓ Docker running — 6 forensic images
@@ -261,7 +261,7 @@ Runs all 5 phases: Case Init → Download → Extract+Register → Baseline Vol3
 **Manual check:**
 ```bash
 vmrun list                                    # Is VM running?
-ssh sansforensics@${SIFT_HOST:-172.16.146.128} 'echo OK'    # Can we SSH?
+bash scripts/sift-exec.sh 'echo OK'                        # Can we SSH?
 bash ~/forensics/scripts/sift-exec.sh whoami  # Wrapper test
 ```
 
@@ -322,7 +322,7 @@ sudo systemctl start docker
 
 ### SIFT VM Networking (NAT)
 
-The SIFT VM runs on VMware NAT networking (`vmnet8`) at `${SIFT_HOST:-172.16.146.128}`. This is more reliable than bridged networking because:
+The SIFT VM address is configured as `SIFT_HOST` in your `forensics.conf`. VMware NAT networking (`vmnet8`) is more reliable than bridged because:
 - DHCP lease comes from VMware's internal server, never expires across sessions
 - No dependency on external network or WiFi AP
 - IP is stable across reboots

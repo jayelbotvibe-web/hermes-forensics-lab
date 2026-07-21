@@ -15,19 +15,19 @@ always_load: true
 ## Architecture Overview
 
 ```
-HOST (terminal.backend: local, HOME=/home/niel/.hermes/profiles/forensics/home)
+HOST (terminal.backend: local, HOME=$HERMES_PROFILE_DIR/home)
 ├── Docker images: volatility3, plaso, mft-tools — run with `docker run --rm`
-├── Host binary: MemProcFS v5.17.8 at /home/niel/memprocfs/memprocfs
-├── Evidence: /home/niel/forensics/cases/ (LUKS encrypted, 30GB)
-├── Fixtures: /home/niel/forensics/fixtures/
-├── Scripts: /home/niel/forensics/scripts/
-└── SIFT VM: 172.16.146.128 — SSH key auth — sansforensics user
+├── Host binary: MemProcFS v5.17.8 at $MEMPROCFS_BIN
+├── Evidence: $FORENSICS_HOME/cases/ (LUKS encrypted, 30GB)
+├── Fixtures: $FORENSICS_HOME/fixtures/
+├── Scripts: $FORENSICS_HOME/scripts/
+└── SIFT VM: $SIFT_HOST — SSH key auth — $SIFT_USER
         │
         ├── Evidence mounted at: ~/cases/ (SSHFS from host)
         └── Native tools: sleuthkit, foremost, dc3dd, regripper, hashdeep, tshark
 ```
 
-**CRITICAL:** All file paths must be ABSOLUTE (/home/niel/...). The profile sandboxes $HOME to /home/niel/.hermes/profiles/forensics/home. Never use ~/ or $HOME in paths.
+**CRITICAL:** All file paths must be ABSOLUTE (e.g. $FORENSICS_HOME/cases/CASE_ID/evidence/FILE). The profile sandboxes $HOME to $HERMES_PROFILE_DIR/home. Never use ~/ in paths.
 
 ---
 
@@ -36,23 +36,23 @@ HOST (terminal.backend: local, HOME=/home/niel/.hermes/profiles/forensics/home)
 ### Runtime 1: Host Docker
 | Tool | Image | Version | Command Pattern |
 |------|-------|---------|----------------|
-| volatility3 | forensics-volatility3:2.7.0 | 2.7.0 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-volatility3:2.7.0 -f /evidence/FILE PLUGIN` |
-| plaso | forensics-plaso:20240512 | 20240512 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-plaso:20240512 log2timeline.py --storage-file /output/timeline.plaso /evidence/FILE` |
-| mft-tools | forensics-mft-tools:1.2.0.0 | 1.2.0.0 | `docker run --rm -v /home/niel/forensics/cases/CASE_ID:/evidence:ro -v /home/niel/forensics/cases/CASE_ID/raw:/output forensics-mft-tools:1.2.0.0 python3 -m analyzemft -f /evidence/FILE -o /output/analyzemft.csv` |
+| volatility3 | forensics-volatility3:2.7.0 | 2.7.0 | `docker run --rm -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro -v $FORENSICS_HOME/cases/CASE_ID/raw:/output forensics-volatility3:2.7.0 -f /evidence/FILE PLUGIN` |
+| plaso | forensics-plaso:20240512 | 20240512 | `docker run --rm -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro -v $FORENSICS_HOME/cases/CASE_ID/raw:/output forensics-plaso:20240512 log2timeline.py --storage-file /output/timeline.plaso /evidence/FILE` |
+| mft-tools | forensics-mft-tools:1.2.0.0 | 1.2.0.0 | `docker run --rm -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro -v $FORENSICS_HOME/cases/CASE_ID/raw:/output forensics-mft-tools:1.2.0.0 python3 -m analyzemft -f /evidence/FILE -o /output/analyzemft.csv` |
 
 **IMPORTANT:** volatility3 Docker entrypoint is already `volatility`. Do NOT prefix commands with `vol`. Start directly with flags: `-f /evidence/dump.mem windows.info.Info`.
 
 ### Runtime 2: Host FUSE — MemProcFS
 | Tool | Binary | Version | Command Pattern |
 |------|--------|---------|----------------|
-| MemProcFS | /home/niel/memprocfs/memprocfs | 5.17.8 | `mkdir -p /mnt/mem && /home/niel/memprocfs/memprocfs -device DUMP_FILE -mount /mnt/mem -forensic 1` |
+| MemProcFS | $MEMPROCFS_BIN | 5.17.8 | `mkdir -p /mnt/mem && $MEMPROCFS_BIN -device DUMP_FILE -mount /mnt/mem -forensic 1` |
 
 Unmount: `fusermount -u /mnt/mem`
 Key paths after mount: /mnt/mem/sys/proc/ (processes), /mnt/mem/sys/net/ (network), /mnt/mem/forensic/findevil.txt (malware detection)
 Windows dumps only. For Linux dumps, use volatility3.
 
 ### Runtime 3: SIFT VM (SSH wrapper)
-Execute via: `bash /home/niel/forensics/scripts/sift-exec.sh "COMMAND"`
+Execute via: `bash $FORENSICS_HOME/scripts/sift-exec.sh "COMMAND"`
 
 | Tool | Version | Check Command |
 |------|---------|--------------|
@@ -66,8 +66,8 @@ Execute via: `bash /home/niel/forensics/scripts/sift-exec.sh "COMMAND"`
 | ewf-tools | (apt) | `ewfacquire --version` |
 | regripper | 3.0 | `which regripper` |
 
-Evidence is visible at: `/home/sansforensics/cases/` on the VM (SSHFS mount from host).
-Pass paths as: `/home/sansforensics/cases/CASE_ID/evidence/FILE`
+Evidence is visible at: `/home/$SIFT_USER/cases/` on the VM (SSHFS mount from host).
+Pass paths as: `/home/$SIFT_USER/cases/CASE_ID/evidence/FILE`
 
 ---
 
@@ -75,16 +75,16 @@ Pass paths as: `/home/sansforensics/cases/CASE_ID/evidence/FILE`
 
 | Purpose | Path |
 |---------|------|
-| Evidence root | /home/niel/forensics/cases/ |
-| Case template | /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/ |
-| Tool catalog | /home/niel/forensics/tools/tool-catalog.yaml |
-| Session canary | /home/niel/forensics/scripts/session-canary.sh |
-| SSH wrapper | /home/niel/forensics/scripts/sift-exec.sh |
-| Handoff | /home/niel/forensics/scripts/handoff.sh |
-| Validation fixtures | /home/niel/forensics/fixtures/ |
-| Pentest profile | /home/niel/.hermes/config.yaml |
-| Forensics profile | /home/niel/.hermes/profiles/forensics/config.yaml |
-| Forensics persona | /home/niel/.hermes/profiles/forensics/SOUL.md |
+| Evidence root | $FORENSICS_HOME/cases/ |
+| Case template | $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/ |
+| Tool catalog | $FORENSICS_HOME/tools/tool-catalog.yaml |
+| Session canary | $FORENSICS_HOME/scripts/session-canary.sh |
+| SSH wrapper | $FORENSICS_HOME/scripts/sift-exec.sh |
+| Handoff | $FORENSICS_HOME/scripts/handoff.sh |
+| Validation fixtures | $FORENSICS_HOME/fixtures/ |
+| Pentest profile | $HOME/.hermes/config.yaml |
+| Forensics profile | $HERMES_PROFILE_DIR/config.yaml |
+| Forensics persona | $HERMES_PROFILE_DIR/SOUL.md |
 
 ---
 
@@ -92,53 +92,53 @@ Pass paths as: `/home/sansforensics/cases/CASE_ID/evidence/FILE`
 
 **PREFERRED: One-command bring-up (use this, not manual steps):**
 ```bash
-bash /home/niel/forensics/scripts/forensics-up.sh
+bash $FORENSICS_HOME/scripts/forensics-up.sh
 ```
 This single command: opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs session canary → reports status. System ready in ~60 seconds. No manual steps, no thinking required.
 
 **If up.sh fails** (system not running), do minimal manual bring-up:
-1. Check LUKS: `mountpoint -q /home/niel/forensics` — if not mounted, open manually
-2. Check SIFT VM: `bash /home/niel/forensics/scripts/sift-exec.sh "echo OK"` — if not, start VM
+1. Check LUKS: `mountpoint -q $FORENSICS_HOME` — if not mounted, open manually
+2. Check SIFT VM: `bash $FORENSICS_HOME/scripts/sift-exec.sh "echo OK"` — if not, start VM
 3. Check Docker: `docker info >/dev/null 2>&1` — if not, `sudo systemctl start docker`
-4. **Run canary:** `bash /home/niel/forensics/scripts/session-canary.sh`
+4. **Run canary:** `bash $FORENSICS_HOME/scripts/session-canary.sh`
 
 ### New Case (one command):
 ```bash
-CASE_ID=$(bash /home/niel/forensics/scripts/forensics-case.sh "Description")
+CASE_ID=$(bash $FORENSICS_HOME/scripts/forensics-case.sh "Description")
 ```
 
 ### Shutdown (one command):
 ```bash
-bash /home/niel/forensics/scripts/forensics-down.sh
+bash $FORENSICS_HOME/scripts/forensics-down.sh
 ```
 
 ### Key Scripts Reference
 | Script | Purpose |
 |--------|---------|
-| `/home/niel/forensics/scripts/forensics-up.sh` | Full system bring-up |
-| `/home/niel/forensics/scripts/forensics-down.sh` | Clean shutdown |
-| `/home/niel/forensics/scripts/forensics-case.sh` | Rapid case init |
-| `/home/niel/forensics/scripts/forensics-register.sh` | Evidence registration (hash-verify-audit) |
-| `/home/niel/forensics/scripts/forensics-vol3.sh` | Volatility3 Docker wrapper |
-| `/home/niel/forensics/scripts/forensics-mount.sh` | MemProcFS mount/unmount |
-| `/home/niel/forensics/scripts/forensics-find.sh` | Findings recorder |
-| `/home/niel/forensics/scripts/forensics-report.sh` | Report generator (HTML + PDF) |
-| `/home/niel/forensics/scripts/forensics-pipeline.sh` | End-to-end pipeline |
-| `/home/niel/forensics/scripts/forensics-screenshots.py` | Evidence screenshots (terminal PNGs) |
-| `/home/niel/forensics/scripts/forensics-artifacts.py` | Artifacts appendix generator |
-| `/home/niel/forensics/scripts/session-canary.sh` | Tool validation (12 tools, 6 env) |
-| `/home/niel/forensics/scripts/sift-exec.sh` | SSH wrapper for SIFT VM |
+| `$FORENSICS_HOME/scripts/forensics-up.sh` | Full system bring-up |
+| `$FORENSICS_HOME/scripts/forensics-down.sh` | Clean shutdown |
+| `$FORENSICS_HOME/scripts/forensics-case.sh` | Rapid case init |
+| `$FORENSICS_HOME/scripts/forensics-register.sh` | Evidence registration (hash-verify-audit) |
+| `$FORENSICS_HOME/scripts/forensics-vol3.sh` | Volatility3 Docker wrapper |
+| `$FORENSICS_HOME/scripts/forensics-mount.sh` | MemProcFS mount/unmount |
+| `$FORENSICS_HOME/scripts/forensics-find.sh` | Findings recorder |
+| `$FORENSICS_HOME/scripts/forensics-report.sh` | Report generator (HTML + PDF) |
+| `$FORENSICS_HOME/scripts/forensics-pipeline.sh` | End-to-end pipeline |
+| `$FORENSICS_HOME/scripts/forensics-screenshots.py` | Evidence screenshots (terminal PNGs) |
+| `$FORENSICS_HOME/scripts/forensics-artifacts.py` | Artifacts appendix generator |
+| `$FORENSICS_HOME/scripts/session-canary.sh` | Tool validation (12 tools, 6 env) |
+| `$FORENSICS_HOME/scripts/sift-exec.sh` | SSH wrapper for SIFT VM |
 
 ### Evidence Integrity Workflow
 After running analysis tools, capture evidence screenshots before generating the report:
 ```bash
 # 1. Capture screenshots of all raw tool output
-python3 /home/niel/forensics/scripts/forensics-screenshots.py /home/niel/forensics/cases/CASE_ID
+python3 $FORENSICS_HOME/scripts/forensics-screenshots.py $FORENSICS_HOME/cases/CASE_ID
 # - case/raw/screenshots/artifact-01.png ... artifact-NN.png
 
 # 2. Generate report with appendix referencing screenshots
-bash /home/niel/forensics/scripts/forensics-report.sh CASE_ID --html
-bash /home/niel/forensics/scripts/forensics-report.sh CASE_ID --pdf
+bash $FORENSICS_HOME/scripts/forensics-report.sh CASE_ID --html
+bash $FORENSICS_HOME/scripts/forensics-report.sh CASE_ID --pdf
 ```
 
 ---
@@ -146,17 +146,17 @@ bash /home/niel/forensics/scripts/forensics-report.sh CASE_ID --pdf
 ## Evidence Handling Protocol
 
 ### Case Creation (Automated)
-Use the one-command script: `CASE_ID=$(bash /home/niel/forensics/scripts/forensics-case.sh "Description")`
+Use the one-command script: `CASE_ID=$(bash $FORENSICS_HOME/scripts/forensics-case.sh "Description")`
 
 Manual equivalent (if script unavailable):
-1. Create: `mkdir -p /home/niel/forensics/cases/INC-YYYY-MMDD-NNNN/{evidence,raw,reports,audit}`
+1. Create: `mkdir -p $FORENSICS_HOME/cases/INC-YYYY-MMDD-NNNN/{evidence,raw,reports,audit}`
 2. Write CASE.yaml with case_id, status=active, examiner=niel
 3. Log to audit/actions.jsonl
 
 ### Evidence Registration
-1. Hash: `sha256sum /home/niel/forensics/cases/CASE_ID/evidence/FILE`
+1. Hash: `sha256sum $FORENSICS_HOME/cases/CASE_ID/evidence/FILE`
 2. Copy to case/evidence/
-3. Set read-only: `chmod 444 /home/niel/forensics/cases/CASE_ID/evidence/FILE`
+3. Set read-only: `chmod 444 $FORENSICS_HOME/cases/CASE_ID/evidence/FILE`
 4. Register in evidence.json with evidence_id, sha256, source, tool
 5. Log to audit/actions.jsonl
 
@@ -198,7 +198,7 @@ Confidence definitions:
 
 ## Memory Forensics Strategy (MemProcFS-first)
 
-1. Mount: `/home/niel/memprocfs/memprocfs -device DUMP -mount /mnt/mem -forensic 1`
+1. Mount: `$MEMPROCFS_BIN -device DUMP -mount /mnt/mem -forensic 1`
 2. Browse: `ls /mnt/mem/sys/proc/` — all processes as directories
 3. Network: `cat /mnt/mem/sys/net/tcp.txt`
 4. Malware: `cat /mnt/mem/forensic/findevil.txt`
@@ -218,21 +218,21 @@ Delta >5% → flag for human review.
 
 Pentest agent creates a handoff:
 ```bash
-bash /home/niel/forensics/scripts/handoff.sh "Title" /path/to/evidence HIGH
+bash $FORENSICS_HOME/scripts/handoff.sh "Title" /path/to/evidence HIGH
 ```
 
-Forensics agent checks for pending handoffs on session start. Look for handoff.json in /home/niel/forensics/cases/INC-*/ directories.
+Forensics agent checks for pending handoffs on session start. Look for handoff.json in $FORENSICS_HOME/cases/INC-*/ directories.
 
 ---
 
 ## Known Quirks
 
-1. **HOME sandboxed** — all paths must be absolute (/home/niel/...). ~/ resolves wrong.
+1. **HOME sandboxed** — all paths must be absolute (e.g. $FORENSICS_HOME/...). ~/ resolves wrong.
 2. **volatility3 entrypoint** — Docker image entrypoint is `volatility`. No `vol` prefix needed in commands.
 3. **MFTECmd unavailable** — Zimmerman tools CDN changed. analyzeMFT is the primary MFT parser.
-4. **SIFT VM IP** — 172.16.146.128 (bridged networking). SSH key auth.
-5. **SSHFS mount** — evidence visible at /home/sansforensics/cases/ on VM. Read-only.
-6. **SIFT tool paths on VM** — pass as /home/sansforensics/cases/CASE_ID/evidence/FILE.
+4. **SIFT VM IP** — $SIFT_HOST (bridged networking). SSH key auth.
+5. **SSHFS mount** — evidence visible at /home/$SIFT_USER/cases/ on VM. Read-only.
+6. **SIFT tool paths on VM** — pass as /home/$SIFT_USER/cases/CASE_ID/evidence/FILE.
 7. **Session canary** — DEGRADED tools are triage-only. Do not use for evidentiary analysis.
 8. **Docker images** — never rebuild mid-investigation. If validation fails, flag it.
 # File Carving
@@ -243,7 +243,7 @@ Forensics agent checks for pending handoffs on session start. Look for handoff.j
 - Need to run both foremost AND photorec for completeness (different signature databases)
 
 ## Pre-flight
-1. Read /home/niel/forensics/tools/tool-catalog.yaml
+1. Read $FORENSICS_HOME/tools/tool-catalog.yaml
 2. Both foremost AND photorec must be run — they use different signature DBs
 3. Carving output goes to a subdirectory: /cases/CASE_ID/raw/carved/
 
@@ -251,17 +251,17 @@ Forensics agent checks for pending handoffs on session start. Look for handoff.j
 
 ### Step 1: Create output directory
 ```bash
-mkdir -p /home/niel/forensics/cases/CASE_ID/raw/carved/{foremost,photorec}
+mkdir -p $FORENSICS_HOME/cases/CASE_ID/raw/carved/{foremost,photorec}
 ```
 
 ### Step 2: Run foremost
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "foremost -i /cases/CASE_ID/evidence/DISK_IMAGE -o /cases/CASE_ID/raw/carved/foremost"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "foremost -i /cases/CASE_ID/evidence/DISK_IMAGE -o /cases/CASE_ID/raw/carved/foremost"
 ```
 
 ### Step 3: Run photorec
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "photorec /log /d /cases/CASE_ID/raw/carved/photorec /cases/CASE_ID/evidence/DISK_IMAGE"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "photorec /log /d /cases/CASE_ID/raw/carved/photorec /cases/CASE_ID/evidence/DISK_IMAGE"
 ```
 
 ### Step 4: Compare results
@@ -269,7 +269,7 @@ Both tools use different file signature databases — files found by one may not
 
 ### Step 5: Hash recovered files
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "hashdeep -c sha256 -r /cases/CASE_ID/raw/carved/"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "hashdeep -c sha256 -r /cases/CASE_ID/raw/carved/"
 ```
 
 ### Step 6: Create findings
@@ -292,26 +292,26 @@ For significant recovered files: filename, format, size, hash, and relevance to 
 - Converting between image formats (raw, E01, AFF)
 
 ## Pre-flight
-1. Identify source: `bash /home/niel/forensics/scripts/sift-exec.sh "lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL"`
-2. Verify free space: `df -h /home/niel/forensics/cases/`
-3. Read /home/niel/forensics/tools/tool-catalog.yaml for dc3dd known issues
-4. Confirm NOT mounted: `bash /home/niel/forensics/scripts/sift-exec.sh "mount | grep DEVICE_NAME"`
+1. Identify source: `bash $FORENSICS_HOME/scripts/sift-exec.sh "lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL"`
+2. Verify free space: `df -h $FORENSICS_HOME/cases/`
+3. Read $FORENSICS_HOME/tools/tool-catalog.yaml for dc3dd known issues
+4. Confirm NOT mounted: `bash $FORENSICS_HOME/scripts/sift-exec.sh "mount | grep DEVICE_NAME"`
 
 ## Workflow
 
 ### Step 1: Hash source (pre-image)
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "sudo hashdeep -c sha256 DEVICE > /cases/CASE_ID/raw/source-hash.txt"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "sudo hashdeep -c sha256 DEVICE > /cases/CASE_ID/raw/source-hash.txt"
 ```
 
 ### Step 2: Create image (dc3dd primary)
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "sudo dc3dd if=DEVICE of=/cases/CASE_ID/evidence/IMAGE_NAME.raw hash=sha256 log=/cases/CASE_ID/raw/dc3dd.log"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "sudo dc3dd if=DEVICE of=/cases/CASE_ID/evidence/IMAGE_NAME.raw hash=sha256 log=/cases/CASE_ID/raw/dc3dd.log"
 ```
 
 ### Step 3: If dc3dd fails, fallback to ddrescue
 ```bash
-bash /home/niel/forensics/scripts/sift-exec.sh "sudo ddrescue -f DEVICE /cases/CASE_ID/evidence/IMAGE_NAME.raw /cases/CASE_ID/raw/ddrescue.log"
+bash $FORENSICS_HOME/scripts/sift-exec.sh "sudo ddrescue -f DEVICE /cases/CASE_ID/evidence/IMAGE_NAME.raw /cases/CASE_ID/raw/ddrescue.log"
 ```
 
 ### Step 4: Verify image hash matches source
@@ -319,7 +319,7 @@ Compare source-hash.txt vs image hash.
 
 ### Step 5: Set read-only
 ```bash
-chmod 444 /home/niel/forensics/cases/CASE_ID/evidence/IMAGE_NAME.raw
+chmod 444 $FORENSICS_HOME/cases/CASE_ID/evidence/IMAGE_NAME.raw
 ```
 
 ### Step 6: Register in evidence.json

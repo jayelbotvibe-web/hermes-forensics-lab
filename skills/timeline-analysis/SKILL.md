@@ -22,8 +22,8 @@ category: forensics
 ### Step 1: Create super timeline
 ```bash
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID:/evidence:ro \
-  -v /home/niel/forensics/cases/CASE_ID/raw:/output \
+  -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro \
+  -v $FORENSICS_HOME/cases/CASE_ID/raw:/output \
   forensics-plaso:20240512 \
   log2timeline.py --storage-file /output/timeline.plaso /evidence/evidence/FILES
 ```
@@ -32,7 +32,7 @@ docker run --rm \
 ```bash
 # Export as CSV for analysis
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID/raw:/data \
+  -v $FORENSICS_HOME/cases/CASE_ID/raw:/data \
   forensics-plaso:20240512 \
   psort.py -o l2tcsv /data/timeline.plaso > /data/timeline.csv
 ```

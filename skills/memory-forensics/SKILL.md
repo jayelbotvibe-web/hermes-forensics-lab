@@ -14,7 +14,7 @@ category: forensics
 
 ## Pre-flight
 1. Run session canary
-2. Read /home/niel/forensics/tools/tool-catalog.yaml — check memprocfs + volatility3 entries
+2. Read $FORENSICS_HOME/tools/tool-catalog.yaml — check memprocfs + volatility3 entries
 3. Record dump hash
 
 ## Workflow (MemProcFS — Primary)
@@ -22,7 +22,7 @@ category: forensics
 ### Step 1: Mount the memory dump
 ```bash
 mkdir -p /mnt/mem
-/home/niel/memprocfs/memprocfs -device /home/niel/forensics/cases/CASE_ID/evidence/DUMP_FILE -mount /mnt/mem -forensic 1
+$MEMPROCFS_BIN -device $FORENSICS_HOME/cases/CASE_ID/evidence/DUMP_FILE -mount /mnt/mem -forensic 1
 ```
 This mounts the dump as a virtual filesystem. The agent can now browse it like a directory.
 
@@ -69,8 +69,8 @@ Use when: dump is Linux/macOS, or need specific plugin MemProcFS doesn't cover (
 ### System info
 ```bash
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID:/evidence:ro \
-  -v /home/niel/forensics/cases/CASE_ID/raw:/output \
+  -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro \
+  -v $FORENSICS_HOME/cases/CASE_ID/raw:/output \
   forensics-volatility3:2.7.0 \
   -f /evidence/DUMP_FILE windows.info.Info > /output/info.json
 ```
@@ -78,11 +78,11 @@ docker run --rm \
 ### Process list + hidden processes
 ```bash
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID:/evidence:ro \
+  -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro \
   forensics-volatility3:2.7.0 \
   -f /evidence/DUMP_FILE windows.pslist.PsList > /output/pslist.csv
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID:/evidence:ro \
+  -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro \
   forensics-volatility3:2.7.0 \
   -f /evidence/DUMP_FILE windows.psscan.PsScan > /output/psscan.csv
 ```
@@ -90,7 +90,7 @@ docker run --rm \
 ### Malware detection
 ```bash
 docker run --rm \
-  -v /home/niel/forensics/cases/CASE_ID:/evidence:ro \
+  -v $FORENSICS_HOME/cases/CASE_ID:/evidence:ro \
   forensics-volatility3:2.7.0 \
   -f /evidence/DUMP_FILE windows.malfind.Malfind > /output/malfind.json
 ```

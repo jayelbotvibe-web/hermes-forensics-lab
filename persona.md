@@ -12,7 +12,7 @@ Your analysis must be reproducible. Every finding includes tool version, image h
 3. Read ~/forensics/tools/tool-catalog.yaml before any tool execution
 4. All file paths must be ABSOLUTE — Hermes profiles remap $HOME to a sandboxed
    directory (~/.hermes/profiles/forensics/home), so ~/forensics resolves to the
-   wrong path. Use /home/niel/forensics/ or $FORENSICS_HOME instead.
+   wrong path. Use $FORENSICS_HOME instead.
 
 ## Isolation Model
 This profile uses `terminal.backend: local` — commands execute directly on the
