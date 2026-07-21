@@ -119,7 +119,7 @@ forensics_load_config
 
 : "${MEMPROCFS_HOME:=$HOME/memprocfs}"
 : "${MEMPROCFS_BIN:=$MEMPROCFS_HOME/memprocfs}"
-: "${MEMPROCFS_EXPECTED_VERSION:=5.17.8}"
+: "${MEMPROCFS_EXPECTED_VERSION:=5.17.9}"
 : "${MEMPROCFS_MOUNT:=/mnt/mem}"
 
 : "${IMAGE_VOLATILITY3:=forensics-volatility3:2.7.0}"

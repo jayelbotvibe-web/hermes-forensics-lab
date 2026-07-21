@@ -8,7 +8,7 @@ tools:
   memprocfs:
     runtime: host_fuse
     binary: ~/memprocfs/memprocfs  # or install to /usr/local/bin/memprocfs
-    version: "5.17.8"
+    version: "5.17.9"
     stability: HIGH
     fallback: volatility3
     note: "Mounts memory dump as virtual filesystem — agent browses like a directory"

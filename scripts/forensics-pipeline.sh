@@ -144,7 +144,7 @@ done
 cat > "$CASE_DIR/tool_versions.json" << EOF
 {
   "volatility3": {"version": "2.7.0", "image": "forensics-volatility3:2.7.0", "runtime": "docker", "validated": true},
-  "memprocfs": {"version": "5.17.8", "runtime": "host_fuse", "validated": true},
+  "memprocfs": {"version": "5.17.9", "runtime": "host_fuse", "validated": true},
   "plaso": {"version": "20240512", "image": "forensics-plaso:20240512", "runtime": "docker", "validated": true},
   "mft-tools": {"version": "1.2.0.0", "image": "forensics-mft-tools:1.2.0.0", "runtime": "docker", "validated": true}
 }

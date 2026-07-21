@@ -189,7 +189,7 @@ opens LUKS → starts SIFT VM → waits for SSH → checks Docker → runs sessi
 
 | # | Tool | Runtime | Version | Primary Use |
 |---|------|---------|---------|-------------|
-| 1 | **MemProcFS** | 💻 Host | 5.17.8 | Memory analysis (filesystem mount) |
+| 1 | **MemProcFS** | 💻 Host | 5.17.9 | Memory analysis (filesystem mount) |
 | 2 | volatility3 | 🐳 Docker | 2.7.0 | Memory analysis (Linux dumps) |
 | 3 | plaso | 🐳 Docker | 20240512 | Super timeline generation |
 | 4 | mft-tools | 🐳 Docker | 1.2.0.0 | MFT parsing (analyzeMFT) |

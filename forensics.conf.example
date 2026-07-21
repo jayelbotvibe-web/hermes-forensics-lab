@@ -59,7 +59,7 @@ SIFT_VMX=""
 # Installed by install.sh into MEMPROCFS_HOME.
 MEMPROCFS_HOME="$HOME/memprocfs"
 MEMPROCFS_BIN="$MEMPROCFS_HOME/memprocfs"
-MEMPROCFS_EXPECTED_VERSION="5.17.8"
+MEMPROCFS_EXPECTED_VERSION="5.17.9"
 # Mountpoint used when mapping a memory image. Must be writable by you.
 MEMPROCFS_MOUNT="/mnt/mem"
 

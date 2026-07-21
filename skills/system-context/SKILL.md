@@ -17,7 +17,7 @@ always_load: true
 ```
 HOST (terminal.backend: local, HOME=$HERMES_PROFILE_DIR/home)
 ├── Docker images: volatility3, plaso, mft-tools — run with `docker run --rm`
-├── Host binary: MemProcFS v5.17.8 at $MEMPROCFS_BIN
+├── Host binary: MemProcFS v5.17.9 at $MEMPROCFS_BIN
 ├── Evidence: $FORENSICS_HOME/cases/ (LUKS encrypted, 30GB)
 ├── Fixtures: $FORENSICS_HOME/fixtures/
 ├── Scripts: $FORENSICS_HOME/scripts/
@@ -45,7 +45,7 @@ HOST (terminal.backend: local, HOME=$HERMES_PROFILE_DIR/home)
 ### Runtime 2: Host FUSE — MemProcFS
 | Tool | Binary | Version | Command Pattern |
 |------|--------|---------|----------------|
-| MemProcFS | $MEMPROCFS_BIN | 5.17.8 | `mkdir -p /mnt/mem && $MEMPROCFS_BIN -device DUMP_FILE -mount /mnt/mem -forensic 1` |
+| MemProcFS | $MEMPROCFS_BIN | 5.17.9 | `mkdir -p /mnt/mem && $MEMPROCFS_BIN -device DUMP_FILE -mount /mnt/mem -forensic 1` |
 
 Unmount: `fusermount -u /mnt/mem`
 Key paths after mount: /mnt/mem/sys/proc/ (processes), /mnt/mem/sys/net/ (network), /mnt/mem/forensic/findevil.txt (malware detection)

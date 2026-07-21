@@ -1,6 +1,8 @@
 # Forensics Automation Scripts
 
-> **One command, system ready.** No more walking the runbook — these scripts collapse the entire bring-up, case initialization, and shutdown workflow into single commands.
+> **One command, system ready.** These scripts collapse bring-up, case initialization, and shutdown into single commands.
+>
+> **Scope:** this page covers *daily operation of an already-installed lab*. For first-time setup — Docker images, MemProcFS, the encrypted vault, and the SIFT VM — see [INSTALL.md](../INSTALL.md), which is a genuinely multi-step process.
 
 ---
 
@@ -19,7 +21,7 @@ CASE_ID=$(bash ~/forensics/scripts/forensics-case.sh "BelkaCTF 7 — Memory Dump
 bash ~/forensics/scripts/forensics-down.sh
 ```
 
-**That's it.** Three commands, no manual steps, no runbook, no thinking.
+**That's it.** Three commands replace the daily runbook — once the lab is installed. First-time setup is covered in [INSTALL.md](../INSTALL.md); `make doctor` reports what is still missing.
 
 ---
 
